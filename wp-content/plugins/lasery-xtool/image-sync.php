@@ -163,6 +163,14 @@ function lasery_xtool_sync_images() {
 	lasery_xtool_release_import_lock();
 }
 
+/** The image editor class: WordPress's GD editor with palette images converted (class-image-editor.php). */
+function lasery_xtool_image_editor_class() {
+	require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
+	require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
+	require_once __DIR__ . '/class-image-editor.php';
+	return 'Lasery_XTool_Image_Editor';
+}
+
 /** Validate the response before decoding; save only a resized WebP in WordPress media. */
 function lasery_xtool_import_image( $post_id, $url ) {
 	if ( ! lasery_xtool_is_source_image_url( $url ) ) {
@@ -211,7 +219,7 @@ function lasery_xtool_import_image( $post_id, $url ) {
 		unset( $body );
 		// GD decodes a single raster; Imagick may load every frame of a crafted
 		// multi-image file before WordPress selects the first one.
-		$single_frame_editor = static function () { return array( 'WP_Image_Editor_GD' ); };
+		$single_frame_editor = static function () { return array( lasery_xtool_image_editor_class() ); };
 		add_filter( 'wp_image_editors', $single_frame_editor );
 		try {
 			$editor = wp_get_image_editor( $source );
