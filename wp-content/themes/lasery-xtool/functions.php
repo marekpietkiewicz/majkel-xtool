@@ -3,10 +3,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-require_once get_template_directory() . '/cookie-consent.php';
-
+require_once __DIR__ . '/cookie-consent.php';
 require_once __DIR__ . '/privacy-defaults.php';
 require_once __DIR__ . '/customizer.php';
+require_once __DIR__ . '/template-tags.php';
 
 add_action('after_setup_theme', function () {
     load_theme_textdomain('lasery-xtool', get_template_directory() . '/languages');
@@ -17,14 +17,33 @@ add_action('after_setup_theme', function () {
 });
 
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], wp_get_theme()->get('Version'));
-    if (is_front_page()) {
-        wp_enqueue_script('lasery-xtool-carousel', get_template_directory_uri() . '/assets/carousel.js', [], wp_get_theme()->get('Version'), true);
+    $version = wp_get_theme()->get('Version');
+    $assets = get_template_directory_uri() . '/assets/';
+    $script = ['in_footer' => true, 'strategy' => 'defer'];
+    wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], $version);
+    $sliders = is_front_page() || is_singular('lasery_product');
+    if ($sliders) {
+        wp_enqueue_script('swiper', $assets . 'lib/swiper/swiper-bundle.min.js', [], '14.3.0', $script);
     }
+    wp_enqueue_script('lasery-xtool-site', $assets . 'site.js', $sliders ? ['swiper'] : [], $version, $script);
     if (is_singular('lasery_product')) {
-        wp_enqueue_script('lasery-xtool-gallery', get_template_directory_uri() . '/assets/gallery.js', [], wp_get_theme()->get('Version'), true);
+        wp_enqueue_script_module('lasery-xtool-lightbox', $assets . 'lightbox.js', [], $version);
     }
-});
+    // The theme renders no block content and no emoji images.
+    wp_dequeue_style('wp-block-library');
+    wp_dequeue_style('classic-theme-styles');
+}, 100);
+remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
+remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+remove_action('wp_head', 'print_emoji_detection_script', 7);
+remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
+
+add_action('wp_head', function () {
+    $fonts = get_template_directory_uri() . '/assets/fonts/';
+    foreach (['geologica-latin-wght-normal.woff2', 'manrope-latin-wght-normal.woff2'] as $file) {
+        printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($fonts . $file));
+    }
+}, 1);
 
 /** Use a URL parameter for interface language until translated products are available. */
 function lasery_xtool_interface_language() {
@@ -32,7 +51,7 @@ function lasery_xtool_interface_language() {
     if ('' === $language && isset($_POST['action'], $_POST['language']) && $_POST['action'] === 'lasery_xtool_order' && is_string($_POST['language'])) {
         $language = sanitize_key(wp_unslash($_POST['language']));
     }
-    return in_array($language, ['pl', 'en', 'de', 'ru', 'uk'], true) ? $language : 'pl';
+    return isset(lasery_xtool_languages()[$language]) ? $language : 'pl';
 }
 
 function lasery_xtool_language_url($url) {
@@ -67,3 +86,47 @@ add_filter('post_type_link', function ($url, $post) {
 add_filter('post_type_archive_link', function ($url, $post_type) {
     return $post_type === 'lasery_product' ? lasery_xtool_language_url($url) : $url;
 }, 10, 2);
+
+/** Description and language alternates for the pages visitors land on. */
+add_action('wp_head', function () {
+    $description = '';
+    $url = '';
+    if (is_front_page()) {
+        $description = lasery_xtool_text('hero_description', __('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool'));
+        $url = home_url('/');
+    } elseif (is_singular('lasery_product')) {
+        $description = lasery_xtool_display_summary(get_queried_object_id());
+        $url = get_permalink(get_queried_object_id());
+    } elseif (is_post_type_archive('lasery_product')) {
+        $url = get_post_type_archive_link('lasery_product');
+    }
+    if ($description !== '') {
+        printf('<meta name="description" content="%s">' . "\n", esc_attr(wp_html_excerpt($description, 160, '…')));
+    }
+    if (is_string($url) && $url !== '') {
+        $url = remove_query_arg('lang', $url);
+        foreach (array_keys(lasery_xtool_languages()) as $language) {
+            printf('<link rel="alternate" hreflang="%s" href="%s">' . "\n", esc_attr($language), esc_url(add_query_arg('lang', $language, $url)));
+        }
+        printf('<link rel="alternate" hreflang="x-default" href="%s">' . "\n", esc_url($url));
+    }
+});
+
+// Listings show source prices, so the page cache keeps them for at most an hour.
+add_action('template_redirect', function () {
+    if (is_front_page() || is_post_type_archive('lasery_product')) {
+        do_action('litespeed_control_set_ttl', HOUR_IN_SECONDS);
+    }
+});
+
+add_action('pre_get_posts', function ($query) {
+    if (is_admin() || !$query->is_main_query() || !$query->is_post_type_archive('lasery_product')) {
+        return;
+    }
+    $query->set('posts_per_page', 48);
+    $query->set('orderby', ['menu_order' => 'ASC', 'date' => 'ASC', 'ID' => 'ASC']);
+    $kind = lasery_xtool_requested_kind();
+    if ($kind !== '' && function_exists('lasery_xtool_kind_tax_query')) {
+        $query->set('tax_query', lasery_xtool_kind_tax_query($kind));
+    }
+});

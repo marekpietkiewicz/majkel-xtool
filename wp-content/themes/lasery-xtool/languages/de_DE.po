@@ -2,126 +2,224 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\nLanguage: de_DE\n"
 
-msgid "Przejdź do treści"
-msgstr "Zum Inhalt springen"
+msgid "%1$s – zdjęcie %2$d"
+msgstr "%1$s – Foto %2$d"
 
-msgid "Menu główne"
-msgstr "Hauptmenü"
+msgid "AKCESORIA"
+msgstr "ZUBEHÖR"
 
-msgid "Język strony"
-msgstr "Seitensprache"
+msgid "Akcesoria"
+msgstr "Zubehör"
 
-msgid "Produkty"
-msgstr "Produkte"
+msgid "Akcesoria xTool"
+msgstr "xTool-Zubehör"
 
-msgid "Demo"
-msgstr "Demo"
-
-msgid "Kontakt"
-msgstr "Kontakt"
-
-msgid "Zapytaj o demo"
-msgstr "Demo anfragen"
-
-msgid "LASERY I URZĄDZENIA XTOOL"
-msgstr "XTOOL LASER UND GERÄTE"
-
-msgid "Twórz więcej. Z xTool."
-msgstr "Mehr gestalten. Mit xTool."
-
-msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
-msgstr "Entdecken Sie Geräte zum Gravieren und Schneiden. Wählen Sie ein Modell oder fragen Sie eine Demo an."
-
-msgid "Zobacz produkty"
-msgstr "Produkte ansehen"
-
-msgid "OD POMYSŁU DO REALIZACJI"
-msgstr "VON DER IDEE ZUR UMSETZUNG"
-
-msgid "KATALOG XTOOL"
-msgstr "XTOOL KATALOG"
-
-msgid "Znajdź urządzenie dla siebie."
-msgstr "Finden Sie das passende Gerät."
-
-msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
-msgstr "Entdecken Sie die verfügbaren Geräte und wählen Sie eine Lösung für Ihre Projekte."
-
-msgid "Zobacz cały katalog"
-msgstr "Gesamten Katalog ansehen"
-
-msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
-msgstr "Der Produktkatalog wird vorbereitet. Kontaktieren Sie uns für Fragen zu den Geräten."
-
-msgid "POZNAJ XTOOL"
-msgstr "XTOOL ENTDECKEN"
-
-msgid "Chcesz zobaczyć urządzenie w akcji?"
-msgstr "Möchten Sie ein Gerät in Aktion sehen?"
-
-msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
-msgstr "Wählen Sie auf der xTool-Demoseite einen passenden Termin oder öffnen Sie diese in einem neuen Tab."
-
-msgid "Otwórz rezerwację demo"
-msgstr "Demo-Buchung öffnen"
-
-msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
-msgstr "Das Formular „Book a Service“ befindet sich unter dem Profil auf der xTool-Seite. Scrollen Sie innerhalb des Rahmens, um es zu sehen."
-
-msgid "Rezerwacja demonstracji xTool u Michała"
-msgstr "xTool-Demonstration bei Michał buchen"
-
-msgid "Wyniki wyszukiwania: %s"
-msgstr "Suchergebnisse: %s"
+msgid "Akcesorium"
+msgstr "Zubehör"
 
 msgid "Brak treści do wyświetlenia."
 msgstr "Es gibt keine Inhalte zum Anzeigen."
 
-msgid "xTool"
-msgstr "xTool"
+msgid "Cena na zapytanie"
+msgstr "Preis auf Anfrage"
 
-msgid "PRODUKT XTOOL"
-msgstr "XTOOL PRODUKT"
+msgid "Cena orientacyjna z oficjalnego sklepu xTool. Przed płatnością potwierdzimy ostateczną kwotę i koszt dostawy."
+msgstr "Unverbindlicher Preis aus dem offiziellen xTool-Shop. Vor der Zahlung bestätigen wir den Endbetrag und die Lieferkosten."
 
-msgid "Zobacz szczegóły"
-msgstr "Details ansehen"
+msgid "Chcesz zobaczyć urządzenie w akcji?"
+msgstr "Möchten Sie ein Gerät in Aktion sehen?"
 
-msgid "Zamów"
-msgstr "Bestellen"
+msgid "Demo"
+msgstr "Demo"
 
-msgid "Produkty xTool i kontakt w sprawie demo."
-msgstr "xTool-Produkte und Demo-Anfragen."
+msgid "Demo na żywo"
+msgstr "Live-Demo"
 
-msgid "MASZ PYTANIA?"
-msgstr "SIE HABEN FRAGEN?"
+msgid "Dlaczego warto"
+msgstr "Warum wir"
 
-msgid "MAJKEL MICHAŁ MAGALSKI"
-msgstr "MAJKEL MICHAŁ MAGALSKI"
+msgid "Doradzimy model i akcesoria do Twoich materiałów i projektów."
+msgstr "Wir helfen Ihnen, Modell und Zubehör für Ihre Materialien und Projekte zu wählen."
 
-msgid "Produkty xTool"
-msgstr "xTool Produkte"
-msgid "Wyróżnione produkty"
-msgstr "Ausgewählte Produkte"
+msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
+msgstr "Das Formular „Book a Service“ befindet sich unter dem Profil auf der xTool-Seite. Scrollen Sie innerhalb des Rahmens, um es zu sehen."
 
-msgid "Poprzedni produkt"
-msgstr "Vorheriges Produkt"
+msgid "Informacje"
+msgstr "Informationen"
+
+msgid "Język strony: %s"
+msgstr "Seitensprache: %s"
+
+msgid "KATALOG XTOOL"
+msgstr "XTOOL KATALOG"
+
+msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
+msgstr "Der Produktkatalog wird vorbereitet. Kontaktieren Sie uns für Fragen zu den Geräten."
+
+msgid "Kontakt"
+msgstr "Kontakt"
+
+msgid "LASERY I URZĄDZENIA XTOOL"
+msgstr "XTOOL LASER UND GERÄTE"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Menu główne"
+msgstr "Hauptmenü"
+
+msgid "Moduły laserowe, stoły robocze i dodatki do urządzeń xTool."
+msgstr "Lasermodule, Arbeitsflächen und Erweiterungen für xTool-Geräte."
+
+msgid "Najważniejsze cechy"
+msgstr "Wichtigste Merkmale"
+
+msgid "Następne zdjęcie"
+msgstr "Nächstes Bild"
 
 msgid "Następny produkt"
 msgstr "Nächstes Produkt"
 
-msgid "Zdjęcia produktu"
-msgstr "Produktbilder"
-
-msgid "Zdjęcie produktu %d"
-msgstr "Produktbild %d"
-msgid "Wstrzymaj"
-msgstr "Pause"
-
 msgid "Odtwórz"
 msgstr "Abspielen"
+
+msgid "Oryginalne urządzenia xTool"
+msgstr "Original xTool-Geräte"
+
+msgid "Oryginalne urządzenia z oficjalnego sklepu xTool"
+msgstr "Originalprodukte aus dem offiziellen xTool-Shop"
+
+msgid "Otwórz rezerwację demo"
+msgstr "Demo-Buchung öffnen"
+
+msgid "POZNAJ XTOOL"
+msgstr "XTOOL ENTDECKEN"
+
+msgid "Pomoc w wyborze"
+msgstr "Beratung bei der Auswahl"
+
+msgid "Poprzedni produkt"
+msgstr "Vorheriges Produkt"
 
 msgid "Poprzednie zdjęcie"
 msgstr "Vorheriges Bild"
 
-msgid "Następne zdjęcie"
-msgstr "Nächstes Bild"
+msgid "Powiększ zdjęcie %d"
+msgstr "Foto %d vergrößern"
+
+msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
+msgstr "Entdecken Sie die verfügbaren Geräte und wählen Sie eine Lösung für Ihre Projekte."
+
+msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
+msgstr "Entdecken Sie Geräte zum Gravieren und Schneiden. Wählen Sie ein Modell oder fragen Sie eine Demo an."
+
+msgid "Połącz się online z naszym ekspertem."
+msgstr "Verbinden Sie sich online mit unserem Experten."
+
+msgid "Produkty xTool"
+msgstr "xTool Produkte"
+
+msgid "Przejdź do produktu {{index}}"
+msgstr "Zu Produkt {{index}}"
+
+msgid "Przejdź do treści"
+msgstr "Zum Inhalt springen"
+
+msgid "Płacisz dopiero po potwierdzeniu ceny i dostawy"
+msgstr "Sie zahlen erst nach Bestätigung von Preis und Lieferung"
+
+msgid "Rezerwacja demonstracji xTool u Michała"
+msgstr "xTool-Demonstration bei Michał buchen"
+
+msgid "Rodzaj produktów"
+msgstr "Produktart"
+
+msgid "Rozbuduj swoje urządzenie."
+msgstr "Erweitern Sie Ihr Gerät."
+
+msgid "Strona główna"
+msgstr "Startseite"
+
+msgid "Twórz więcej. Z xTool."
+msgstr "Mehr gestalten. Mit xTool."
+
+msgid "Urządzenia"
+msgstr "Geräte"
+
+msgid "Urządzenia xTool"
+msgstr "xTool-Geräte"
+
+msgid "Urządzenia xTool do grawerowania i cięcia laserowego. Pokażemy je na demo i pomożemy w zamówieniu."
+msgstr "xTool-Geräte zum Lasergravieren und -schneiden. Wir zeigen sie in einer Demo und helfen bei der Bestellung."
+
+msgid "Urządzenie"
+msgstr "Gerät"
+
+msgid "Wstrzymaj"
+msgstr "Pause"
+
+msgid "Wszystkie"
+msgstr "Alle"
+
+msgid "Wszystkie produkty"
+msgstr "Alle Produkte"
+
+msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
+msgstr "Wählen Sie auf der xTool-Demoseite einen passenden Termin oder öffnen Sie diese in einem neuen Tab."
+
+msgid "Wybierz termin i urządzenie w kalendarzu xTool."
+msgstr "Wählen Sie Termin und Gerät im xTool-Kalender."
+
+msgid "Wyniki wyszukiwania: %s"
+msgstr "Suchergebnisse: %s"
+
+msgid "Wyróżnione produkty"
+msgstr "Ausgewählte Produkte"
+
+msgid "Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności."
+msgstr "Senden Sie das Formular – wir bestätigen den Preis und senden einen Zahlungslink."
+
+msgid "Zamów"
+msgstr "Bestellen"
+
+msgid "Zamówienia realizujemy w oficjalnym sklepie xTool."
+msgstr "Bestellungen geben wir im offiziellen xTool-Shop auf."
+
+msgid "Zamówienie bez konta"
+msgstr "Bestellung ohne Konto"
+
+msgid "Zamówienie bez zakładania konta"
+msgstr "Bestellung ohne Kundenkonto"
+
+msgid "Zapytaj o demo"
+msgstr "Demo anfragen"
+
+msgid "Zdjęcie produktu %d"
+msgstr "Produktbild %d"
+
+msgid "Zdjęcie produktu {{index}}"
+msgstr "Produktfoto {{index}}"
+
+msgid "Znajdź urządzenie dla siebie."
+msgstr "Finden Sie das passende Gerät."
+
+msgid "Zobacz cały katalog"
+msgstr "Gesamten Katalog ansehen"
+
+msgid "Zobacz laser w akcji i zadaj pytania."
+msgstr "Sehen Sie den Laser in Aktion und stellen Sie Fragen."
+
+msgid "Zobacz szczegóły"
+msgstr "Details ansehen"
+
+msgid "Zobacz urządzenie w akcji podczas spotkania online i zadaj pytania."
+msgstr "Sehen Sie das Gerät in einem Online-Termin in Aktion und stellen Sie Fragen."
+
+msgid "od %s"
+msgstr "ab %s"
+
+msgid "xTool i nazwy produktów są znakami towarowymi ich właścicieli."
+msgstr "xTool und Produktnamen sind Marken ihrer jeweiligen Inhaber."
+
+msgid "Ścieżka nawigacji"
+msgstr "Brotkrumen-Navigation"

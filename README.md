@@ -4,7 +4,17 @@ Projekt witryny o produktach xTool na WordPressie i hostingu Hostido. Motyw prez
 
 Kod znajduje się w `wp-content/themes/lasery-xtool` i `wp-content/plugins/lasery-xtool`. [Instrukcja importu](wp-content/plugins/lasery-xtool/README.md) opisuje aktualny zakres i ograniczenia wtyczki.
 
-Zdjęcie w pierwszej sekcji pochodzi z materiałów xTool: [źródło w CDN Shopify](https://cdn.shopify.com/s/files/1/0467/7985/9095/files/mk-c1_eu_pc_pc-x1_3180-1913.webp?v=1792481580).
+## Wygląd i biblioteki
+
+Motyw jest projektowany od widoku mobilnego, w jasnej stylistyce zbliżonej do xtool.eu. Zdjęcia produktów na białym tle są wtapiane w jasne tła (`mix-blend-mode: multiply`), dlatego element ze zdjęciem i jego tło muszą być w tym samym kontekście warstw (np. tło na slajdzie Swipera, a nie na sekcji).
+
+- [Swiper 14.3.0](https://swiperjs.com) (MIT) — karuzela w hero (mysz, dotyk, klawiatura, autoplay z pauzą), karuzele akcesoriów i galeria produktu. Plik JS w `assets/lib/swiper`; potrzebne reguły CSS są w `style.css` w płaskiej składni, bo arkusz Swipera 14 wymaga zagnieżdżania CSS, którego nie obsługują starsze Safari.
+- [PhotoSwipe 5.4.4](https://photoswipe.com) (MIT) — powiększanie zdjęć w galerii, ładowany jako moduł JS tylko na stronach produktów.
+- Kroje Geologica (nagłówki) i Manrope (tekst), SIL OFL 1.1, hostowane lokalnie w `assets/fonts` (łaciński, łaciński rozszerzony i cyrylica). Nie są pobierane z Google Fonts.
+
+Biblioteki aktualizuje się przez podmianę plików w `assets/lib` i numeru wersji w `functions.php`.
+
+Treści strony głównej (hero, zalety, akcesoria, kroki demo, stopka) i dane firmy edytuje się w **Wygląd → Personalizacja → Treść strony xTool**.
 
 ## Stan środowiska
 

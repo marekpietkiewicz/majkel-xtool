@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Lasery xTool — katalog
  * Description: Szkice produktów, ręczny import pliku JSON i pobieranie z xTool.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Text Domain: lasery-xtool
  */
 
@@ -26,9 +26,11 @@ function lasery_xtool_register_product_type() {
 			),
 			'public'       => true,
 			'has_archive'  => true,
+			'rewrite'      => array( 'slug' => 'produkty' ),
 			'show_ui'      => true,
 			'show_in_menu' => true,
-			'supports'     => array( 'title', 'editor', 'thumbnail' ),
+			// The order field sets the product order on the website.
+			'supports'     => array( 'title', 'editor', 'thumbnail', 'page-attributes' ),
 		)
 	);
 }
@@ -36,6 +38,7 @@ function lasery_xtool_register_product_type() {
 register_activation_hook( __FILE__, 'lasery_xtool_activate' );
 function lasery_xtool_activate() {
 	lasery_xtool_register_product_type();
+	lasery_xtool_register_kind_taxonomy();
 	flush_rewrite_rules();
 }
 
@@ -47,6 +50,7 @@ function lasery_xtool_deactivate() {
 	flush_rewrite_rules();
 }
 
+require_once __DIR__ . '/product-kind.php';
 require_once __DIR__ . '/order-form.php';
 require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';
