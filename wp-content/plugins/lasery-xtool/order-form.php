@@ -24,6 +24,17 @@ function lasery_xtool_order_recipient() {
 	return is_string( $recipient ) && is_email( $recipient ) ? $recipient : '';
 }
 
+function lasery_xtool_mail_from_name() {
+	$name = get_option( 'lasery_xtool_mail_from_name', '' );
+	return is_string( $name ) && '' !== trim( $name ) ? $name : 'LaseryXTOOL.pl';
+}
+
+// Site emails show the shop name instead of WordPress's default sender name.
+add_filter( 'wp_mail_from_name', 'lasery_xtool_filter_mail_from_name' );
+function lasery_xtool_filter_mail_from_name( $name ) {
+	return 'WordPress' === $name ? lasery_xtool_mail_from_name() : $name;
+}
+
 add_action( 'admin_init', 'lasery_xtool_register_order_settings' );
 function lasery_xtool_register_order_settings() {
 	register_setting( 'lasery_xtool_order_settings', 'lasery_xtool_order_recipient', array(
@@ -31,6 +42,16 @@ function lasery_xtool_register_order_settings() {
 		'sanitize_callback' => 'lasery_xtool_sanitize_order_recipient',
 		'default' => '',
 	) );
+	register_setting( 'lasery_xtool_order_settings', 'lasery_xtool_mail_from_name', array(
+		'type' => 'string',
+		'sanitize_callback' => 'lasery_xtool_sanitize_mail_from_name',
+		'default' => '',
+	) );
+}
+
+function lasery_xtool_sanitize_mail_from_name( $name ) {
+	// Header-safe: a single line without characters that would need quoting.
+	return is_string( $name ) ? trim( preg_replace( '/\s+/', ' ', str_replace( array( '"', '<', '>', ',', ';' ), '', sanitize_text_field( $name ) ) ) ) : '';
 }
 
 function lasery_xtool_sanitize_order_recipient( $recipient ) {
@@ -54,24 +75,44 @@ function lasery_xtool_order_settings_page() {
 	?>
 	<div class="wrap"><h1>Ustawienia zamówień</h1>
 	<?php settings_errors( 'lasery_xtool_order_recipient' ); ?>
-	<p>Ustaw adres odbiorcy zamówień. Podczas testów użyj własnej skrzynki, a przed publikacją wpisz właściwy adres obsługi zamówień.</p>
+	<p>Ustaw adres odbiorcy zamówień i nazwę nadawcy wiadomości. Podczas testów użyj własnej skrzynki, a przed publikacją wpisz właściwy adres obsługi zamówień.</p>
 	<form action="options.php" method="post">
 		<?php settings_fields( 'lasery_xtool_order_settings' ); ?>
 		<p><label for="lasery-order-recipient">Adres odbiorcy zamówień</label></p>
 		<input id="lasery-order-recipient" name="lasery_xtool_order_recipient" type="email" class="regular-text" required value="<?php echo esc_attr( lasery_xtool_order_recipient() ); ?>">
+		<p><label for="lasery-mail-from-name">Nazwa nadawcy wiadomości</label></p>
+		<input id="lasery-mail-from-name" name="lasery_xtool_mail_from_name" type="text" class="regular-text" maxlength="60" placeholder="LaseryXTOOL.pl" value="<?php echo esc_attr( get_option( 'lasery_xtool_mail_from_name', '' ) ); ?>">
+		<p class="description">Widoczna w skrzynce klienta i właściciela zamiast „WordPress”. Puste pole oznacza „LaseryXTOOL.pl”.</p>
 		<?php submit_button(); ?>
 	</form></div>
 	<?php
 }
 
-/** The price is entered manually and is only an estimate. */
-function lasery_xtool_order_price( $post_id ) {
+/** The price is entered manually and is only an estimate. Returns [amount, currency] or null. */
+function lasery_xtool_order_price_amount( $post_id ) {
 	$price = get_post_meta( $post_id, '_lasery_order_price', true );
 	$currency = get_post_meta( $post_id, '_lasery_order_currency', true );
 	if ( ! is_string( $price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $price ) || (float) $price <= 0 || ! in_array( $currency, array( 'PLN', 'EUR', 'USD' ), true ) ) {
-		return '';
+		return null;
 	}
-	return $price . ' ' . $currency;
+	return array( $price, $currency );
+}
+
+function lasery_xtool_order_price( $post_id ) {
+	$amount = lasery_xtool_order_price_amount( $post_id );
+	return $amount ? $amount[0] . ' ' . $amount[1] : '';
+}
+
+/** Format a price for visitors, e.g. "3 427,33 €" in Polish. */
+function lasery_xtool_format_price( $amount, $currency, $language ) {
+	$locales = array( 'pl' => 'pl_PL', 'en' => 'en_IE', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk_UA' );
+	if ( class_exists( 'NumberFormatter' ) && isset( $locales[ $language ] ) ) {
+		$formatted = ( new NumberFormatter( $locales[ $language ], NumberFormatter::CURRENCY ) )->formatCurrency( (float) $amount, $currency );
+		if ( is_string( $formatted ) ) {
+			return $formatted;
+		}
+	}
+	return number_format_i18n( (float) $amount, 2 ) . ' ' . $currency;
 }
 
 add_action( 'add_meta_boxes_' . LASERY_XTOOL_PRODUCT_TYPE, 'lasery_xtool_order_price_box_register' );
@@ -138,33 +179,38 @@ function lasery_xtool_order_texts( $language ) {
 	$texts = array(
 		'pl' => array(
 			'title' => 'Zamów produkt', 'intro' => 'Prześlij nam dane zamówienia. Skontaktujemy się z Tobą, aby potwierdzić szczegóły i przekazać link do płatności.',
-			'first_name' => 'Imię', 'last_name' => 'Nazwisko', 'email' => 'Adres e-mail', 'phone' => 'Telefon (opcjonalnie)', 'address1' => 'Ulica i numer', 'address2' => 'Dodatkowy adres (opcjonalnie)', 'city' => 'Miasto', 'zip' => 'Kod pocztowy', 'country' => 'Kraj dostawy', 'select_country' => 'Wybierz kraj', 'variant' => 'Wariant lub konfiguracja', 'select_variant' => 'Wybierz wariant', 'unavailable' => 'Obecnie brak dostępnych wariantów.', 'stale' => 'Dane oferty wymagają aktualizacji. Skontaktuj się z nami.', 'changed' => 'Dane oferty zmieniły się. Odśwież stronę i wybierz wariant ponownie.', 'quantity' => 'Liczba sztuk', 'invoice' => 'Dane do faktury (opcjonalnie)', 'notes' => 'Dodatkowe informacje (opcjonalnie)', 'submit' => 'Wyślij zamówienie',
+			'first_name' => 'Imię', 'last_name' => 'Nazwisko', 'email' => 'Adres e-mail', 'phone' => 'Telefon (opcjonalnie)', 'address1' => 'Ulica i numer', 'address2' => 'Dodatkowy adres (opcjonalnie)', 'city' => 'Miasto', 'zip' => 'Kod pocztowy', 'country' => 'Kraj dostawy', 'select_country' => 'Wybierz kraj', 'variant' => 'Wariant lub konfiguracja', 'unavailable' => 'Obecnie brak dostępnych wariantów.', 'stale' => 'Dane oferty wymagają aktualizacji. Skontaktuj się z nami.', 'changed' => 'Dane oferty zmieniły się. Odśwież stronę i wybierz wariant ponownie.', 'quantity' => 'Liczba sztuk', 'invoice' => 'Dane do faktury (opcjonalnie)', 'notes' => 'Dodatkowe informacje (opcjonalnie)', 'submit' => 'Wyślij zamówienie',
 			'privacy_link' => 'Polityka prywatności', 'privacy' => 'Dane wykorzystamy do obsługi zamówienia. Link do formularza xTool zawierający Twoje dane może zostać zapisany w historii przeglądarki i logach.', 'sent' => 'Dziękujemy! Twoje zgłoszenie zostało wysłane. Skontaktujemy się z Tobą w sprawie szczegółów i linku do płatności.', 'sent_no_receipt' => 'Zgłoszenie zostało wysłane, ale nie udało się wysłać potwierdzenia na Twój adres. Nie wysyłaj zamówienia ponownie; w razie pytań napisz na Michal@laseryxtool.pl.', 'failed' => 'Nie udało się wysłać zgłoszenia. Spróbuj ponownie lub napisz na Michal@laseryxtool.pl.', 'invalid' => 'Sprawdź dane formularza i spróbuj ponownie.', 'busy' => 'Odczekaj chwilę przed ponownym wysłaniem zgłoszenia.',
 			'owner_subject' => 'Nowe zamówienie: %s', 'customer_subject' => 'Otrzymaliśmy zgłoszenie: %s', 'customer_body' => 'Dziękujemy za przesłanie zgłoszenia. Skontaktujemy się z Tobą, aby potwierdzić szczegóły zamówienia i przekazać link do płatności.', 'product' => 'Produkt', 'details' => 'Szczegóły zamówienia', 'price' => 'Cena orientacyjna', 'no_price' => 'Cena do potwierdzenia', 'price_note' => 'Ostateczna cena, VAT i koszt dostawy mogą się różnić.',
+			'summary' => 'Podsumowanie', 'contact' => 'Dane kontaktowe', 'address' => 'Adres dostawy', 'extras' => 'Faktura i uwagi', 'summary_empty' => 'Wybierz wariant powyżej', 'next_steps' => 'Po wysłaniu formularza potwierdzimy dostępność i cenę, a następnie wyślemy link do płatności.',
 		),
 		'en' => array(
 			'title' => 'Order this product', 'intro' => 'Send us your order details. We will contact you to confirm the details and provide a payment link.',
-			'first_name' => 'First name', 'last_name' => 'Last name', 'email' => 'Email address', 'phone' => 'Phone number (optional)', 'address1' => 'Street address', 'address2' => 'Additional address (optional)', 'city' => 'City', 'zip' => 'Postal code', 'country' => 'Delivery country', 'select_country' => 'Choose a country', 'variant' => 'Variant or configuration', 'select_variant' => 'Choose a variant', 'unavailable' => 'No variants are currently available.', 'stale' => 'The offer needs updating. Please contact us.', 'changed' => 'The offer has changed. Refresh the page and select a variant again.', 'quantity' => 'Quantity', 'invoice' => 'Billing details (optional)', 'notes' => 'Additional information (optional)', 'submit' => 'Send order request',
+			'first_name' => 'First name', 'last_name' => 'Last name', 'email' => 'Email address', 'phone' => 'Phone number (optional)', 'address1' => 'Street address', 'address2' => 'Additional address (optional)', 'city' => 'City', 'zip' => 'Postal code', 'country' => 'Delivery country', 'select_country' => 'Choose a country', 'variant' => 'Variant or configuration', 'unavailable' => 'No variants are currently available.', 'stale' => 'The offer needs updating. Please contact us.', 'changed' => 'The offer has changed. Refresh the page and select a variant again.', 'quantity' => 'Quantity', 'invoice' => 'Billing details (optional)', 'notes' => 'Additional information (optional)', 'submit' => 'Send order request',
 			'privacy_link' => 'Privacy policy', 'privacy' => 'We use your details to handle your order. A link to the xTool checkout containing your data may be stored in browser history and logs.', 'sent' => 'Thank you! Your request has been sent. We will contact you about the details and payment link.', 'sent_no_receipt' => 'Your request was sent, but we could not send your confirmation email. Please do not resubmit; contact Michal@laseryxtool.pl with any questions.', 'failed' => 'Your request could not be sent. Please try again or email Michal@laseryxtool.pl.', 'invalid' => 'Please check the form and try again.', 'busy' => 'Please wait a moment before sending another request.',
 			'owner_subject' => 'New order request: %s', 'customer_subject' => 'We received your request: %s', 'customer_body' => 'Thank you for your request. We will contact you to confirm the order details and provide a payment link.', 'product' => 'Product', 'details' => 'Order details', 'price' => 'Estimated price', 'no_price' => 'Price to be confirmed', 'price_note' => 'The final price, VAT and delivery costs may differ.',
+			'summary' => 'Summary', 'contact' => 'Contact details', 'address' => 'Delivery address', 'extras' => 'Invoice and notes', 'summary_empty' => 'Choose a variant above', 'next_steps' => 'After you send the form, we will confirm availability and price, then send you a payment link.',
 		),
 		'de' => array(
 			'title' => 'Produkt bestellen', 'intro' => 'Senden Sie uns Ihre Bestelldaten. Wir kontaktieren Sie, um die Einzelheiten zu bestätigen und Ihnen einen Zahlungslink zu senden.',
-			'first_name' => 'Vorname', 'last_name' => 'Nachname', 'email' => 'E-Mail-Adresse', 'phone' => 'Telefonnummer (optional)', 'address1' => 'Straße und Hausnummer', 'address2' => 'Adresszusatz (optional)', 'city' => 'Ort', 'zip' => 'Postleitzahl', 'country' => 'Lieferland', 'select_country' => 'Land auswählen', 'variant' => 'Variante oder Konfiguration', 'select_variant' => 'Variante auswählen', 'unavailable' => 'Derzeit sind keine Varianten verfügbar.', 'stale' => 'Die Angebotsdaten müssen aktualisiert werden. Bitte kontaktieren Sie uns.', 'changed' => 'Das Angebot hat sich geändert. Laden Sie die Seite neu und wählen Sie die Variante erneut.', 'quantity' => 'Anzahl', 'invoice' => 'Rechnungsdaten (optional)', 'notes' => 'Weitere Informationen (optional)', 'submit' => 'Bestellanfrage senden',
+			'first_name' => 'Vorname', 'last_name' => 'Nachname', 'email' => 'E-Mail-Adresse', 'phone' => 'Telefonnummer (optional)', 'address1' => 'Straße und Hausnummer', 'address2' => 'Adresszusatz (optional)', 'city' => 'Ort', 'zip' => 'Postleitzahl', 'country' => 'Lieferland', 'select_country' => 'Land auswählen', 'variant' => 'Variante oder Konfiguration', 'unavailable' => 'Derzeit sind keine Varianten verfügbar.', 'stale' => 'Die Angebotsdaten müssen aktualisiert werden. Bitte kontaktieren Sie uns.', 'changed' => 'Das Angebot hat sich geändert. Laden Sie die Seite neu und wählen Sie die Variante erneut.', 'quantity' => 'Anzahl', 'invoice' => 'Rechnungsdaten (optional)', 'notes' => 'Weitere Informationen (optional)', 'submit' => 'Bestellanfrage senden',
 			'privacy_link' => 'Datenschutzerklärung', 'privacy' => 'Wir verwenden Ihre Daten zur Bearbeitung Ihrer Bestellung. Ein Link zum xTool-Checkout mit Ihren Daten kann im Browserverlauf und in Protokollen gespeichert werden.', 'sent' => 'Vielen Dank! Ihre Anfrage wurde gesendet. Wir kontaktieren Sie wegen der Einzelheiten und des Zahlungslinks.', 'sent_no_receipt' => 'Ihre Anfrage wurde gesendet, aber die Bestätigungs-E-Mail konnte nicht versendet werden. Bitte senden Sie die Anfrage nicht erneut; bei Fragen schreiben Sie an Michal@laseryxtool.pl.', 'failed' => 'Ihre Anfrage konnte nicht gesendet werden. Versuchen Sie es erneut oder schreiben Sie an Michal@laseryxtool.pl.', 'invalid' => 'Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.', 'busy' => 'Bitte warten Sie einen Moment, bevor Sie eine weitere Anfrage senden.',
 			'owner_subject' => 'Neue Bestellanfrage: %s', 'customer_subject' => 'Wir haben Ihre Anfrage erhalten: %s', 'customer_body' => 'Vielen Dank für Ihre Anfrage. Wir kontaktieren Sie, um die Bestelldetails zu bestätigen und Ihnen einen Zahlungslink zu senden.', 'product' => 'Produkt', 'details' => 'Bestelldetails', 'price' => 'Unverbindlicher Preis', 'no_price' => 'Preis wird bestätigt', 'price_note' => 'Endpreis, MwSt. und Lieferkosten können abweichen.',
+			'summary' => 'Zusammenfassung', 'contact' => 'Kontaktdaten', 'address' => 'Lieferadresse', 'extras' => 'Rechnung und Hinweise', 'summary_empty' => 'Wählen Sie oben eine Variante', 'next_steps' => 'Nach dem Absenden bestätigen wir Verfügbarkeit und Preis und senden Ihnen anschließend einen Zahlungslink.',
 		),
 		'ru' => array(
 			'title' => 'Заказать товар', 'intro' => 'Отправьте нам данные заказа. Мы свяжемся с вами, чтобы подтвердить детали и предоставить ссылку для оплаты.',
-			'first_name' => 'Имя', 'last_name' => 'Фамилия', 'email' => 'Адрес электронной почты', 'phone' => 'Телефон (необязательно)', 'address1' => 'Улица и номер дома', 'address2' => 'Дополнительный адрес (необязательно)', 'city' => 'Город', 'zip' => 'Почтовый индекс', 'country' => 'Страна доставки', 'select_country' => 'Выберите страну', 'variant' => 'Вариант или конфигурация', 'select_variant' => 'Выберите вариант', 'unavailable' => 'Сейчас нет доступных вариантов.', 'stale' => 'Данные предложения требуют обновления. Свяжитесь с нами.', 'changed' => 'Предложение изменилось. Обновите страницу и выберите вариант снова.', 'quantity' => 'Количество', 'invoice' => 'Данные для счёта (необязательно)', 'notes' => 'Дополнительная информация (необязательно)', 'submit' => 'Отправить заявку',
+			'first_name' => 'Имя', 'last_name' => 'Фамилия', 'email' => 'Адрес электронной почты', 'phone' => 'Телефон (необязательно)', 'address1' => 'Улица и номер дома', 'address2' => 'Дополнительный адрес (необязательно)', 'city' => 'Город', 'zip' => 'Почтовый индекс', 'country' => 'Страна доставки', 'select_country' => 'Выберите страну', 'variant' => 'Вариант или конфигурация', 'unavailable' => 'Сейчас нет доступных вариантов.', 'stale' => 'Данные предложения требуют обновления. Свяжитесь с нами.', 'changed' => 'Предложение изменилось. Обновите страницу и выберите вариант снова.', 'quantity' => 'Количество', 'invoice' => 'Данные для счёта (необязательно)', 'notes' => 'Дополнительная информация (необязательно)', 'submit' => 'Отправить заявку',
 			'privacy_link' => 'Политика конфиденциальности', 'privacy' => 'Мы используем данные для обработки заказа. Ссылка на оформление xTool с вашими данными может сохраняться в истории браузера и журналах.', 'sent' => 'Спасибо! Ваша заявка отправлена. Мы свяжемся с вами по поводу деталей и ссылки для оплаты.', 'sent_no_receipt' => 'Заявка отправлена, но письмо с подтверждением отправить не удалось. Не отправляйте заявку повторно; по вопросам пишите на Michal@laseryxtool.pl.', 'failed' => 'Не удалось отправить заявку. Попробуйте ещё раз или напишите на Michal@laseryxtool.pl.', 'invalid' => 'Проверьте данные формы и попробуйте ещё раз.', 'busy' => 'Подождите немного перед повторной отправкой заявки.',
 			'owner_subject' => 'Новая заявка на заказ: %s', 'customer_subject' => 'Мы получили вашу заявку: %s', 'customer_body' => 'Спасибо за заявку. Мы свяжемся с вами, чтобы подтвердить детали заказа и предоставить ссылку для оплаты.', 'product' => 'Товар', 'details' => 'Данные заказа', 'price' => 'Ориентировочная цена', 'no_price' => 'Цена уточняется', 'price_note' => 'Окончательная цена, НДС и стоимость доставки могут отличаться.',
+			'summary' => 'Итог', 'contact' => 'Контактные данные', 'address' => 'Адрес доставки', 'extras' => 'Счёт и комментарии', 'summary_empty' => 'Выберите вариант выше', 'next_steps' => 'После отправки формы мы подтвердим наличие и цену, а затем пришлём ссылку для оплаты.',
 		),
 		'uk' => array(
 			'title' => 'Замовити товар', 'intro' => 'Надішліть нам дані замовлення. Ми зв’яжемося з вами, щоб підтвердити деталі та надати посилання для оплати.',
-			'first_name' => 'Ім’я', 'last_name' => 'Прізвище', 'email' => 'Адреса електронної пошти', 'phone' => 'Телефон (необов’язково)', 'address1' => 'Вулиця і номер будинку', 'address2' => 'Додаткова адреса (необов’язково)', 'city' => 'Місто', 'zip' => 'Поштовий індекс', 'country' => 'Країна доставки', 'select_country' => 'Оберіть країну', 'variant' => 'Варіант або конфігурація', 'select_variant' => 'Оберіть варіант', 'unavailable' => 'Зараз немає доступних варіантів.', 'stale' => 'Дані пропозиції потребують оновлення. Зв’яжіться з нами.', 'changed' => 'Пропозиція змінилася. Оновіть сторінку та оберіть варіант знову.', 'quantity' => 'Кількість', 'invoice' => 'Дані для рахунку (необов’язково)', 'notes' => 'Додаткова інформація (необов’язково)', 'submit' => 'Надіслати заявку',
+			'first_name' => 'Ім’я', 'last_name' => 'Прізвище', 'email' => 'Адреса електронної пошти', 'phone' => 'Телефон (необов’язково)', 'address1' => 'Вулиця і номер будинку', 'address2' => 'Додаткова адреса (необов’язково)', 'city' => 'Місто', 'zip' => 'Поштовий індекс', 'country' => 'Країна доставки', 'select_country' => 'Оберіть країну', 'variant' => 'Варіант або конфігурація', 'unavailable' => 'Зараз немає доступних варіантів.', 'stale' => 'Дані пропозиції потребують оновлення. Зв’яжіться з нами.', 'changed' => 'Пропозиція змінилася. Оновіть сторінку та оберіть варіант знову.', 'quantity' => 'Кількість', 'invoice' => 'Дані для рахунку (необов’язково)', 'notes' => 'Додаткова інформація (необов’язково)', 'submit' => 'Надіслати заявку',
 			'privacy_link' => 'Політика конфіденційності', 'privacy' => 'Ми використовуємо дані для обробки замовлення. Посилання на оформлення xTool з вашими даними може зберігатися в історії браузера та журналах.', 'sent' => 'Дякуємо! Вашу заявку надіслано. Ми зв’яжемося з вами щодо деталей і посилання для оплати.', 'sent_no_receipt' => 'Заявку надіслано, але лист із підтвердженням надіслати не вдалося. Не надсилайте заявку повторно; із запитаннями пишіть на Michal@laseryxtool.pl.', 'failed' => 'Не вдалося надіслати заявку. Спробуйте ще раз або напишіть на Michal@laseryxtool.pl.', 'invalid' => 'Перевірте дані форми та спробуйте ще раз.', 'busy' => 'Зачекайте трохи перед повторним надсиланням заявки.',
 			'owner_subject' => 'Нова заявка на замовлення: %s', 'customer_subject' => 'Ми отримали вашу заявку: %s', 'customer_body' => 'Дякуємо за заявку. Ми зв’яжемося з вами, щоб підтвердити деталі замовлення та надати посилання для оплати.', 'product' => 'Товар', 'details' => 'Дані замовлення', 'price' => 'Орієнтовна ціна', 'no_price' => 'Ціна уточнюється', 'price_note' => 'Остаточна ціна, ПДВ і вартість доставки можуть відрізнятися.',
+			'summary' => 'Підсумок', 'contact' => 'Контактні дані', 'address' => 'Адреса доставки', 'extras' => 'Рахунок і примітки', 'summary_empty' => 'Оберіть варіант вище', 'next_steps' => 'Після надсилання форми ми підтвердимо наявність і ціну, а потім надішлемо посилання для оплати.',
 		),
 	);
 	$text = isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
@@ -204,13 +250,52 @@ function lasery_xtool_order_variants( $post_id ) {
 	return is_array( $variants ) ? $variants : array();
 }
 
-function lasery_xtool_source_variant_price( $post_id, $variant ) {
+function lasery_xtool_uses_source_variants( $post_id ) {
+	return metadata_exists( 'post', $post_id, LASERY_XTOOL_SOURCE_ID ) || (bool) lasery_xtool_order_variants( $post_id );
+}
+
+function lasery_xtool_available_variants( $post_id ) {
+	return array_values(
+		array_filter(
+			lasery_xtool_order_variants( $post_id ),
+			function ( $variant ) {
+				return is_array( $variant ) && isset( $variant['id'], $variant['title'], $variant['available'] ) && is_string( $variant['id'] ) && is_string( $variant['title'] ) && true === $variant['available'];
+			}
+		)
+	);
+}
+
+/** Returns [amount, currency] of a source variant, or null. */
+function lasery_xtool_variant_amount( $post_id, $variant ) {
 	$currency = get_post_meta( $post_id, '_lasery_source_currency', true );
 	$price = isset( $variant['price'] ) ? $variant['price'] : null;
 	if ( ! is_string( $currency ) || ! preg_match( '/^[A-Z]{3}$/D', $currency ) || ! is_string( $price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $price ) ) {
-		return '';
+		return null;
 	}
-	return $price . ' ' . $currency;
+	return array( $price, $currency );
+}
+
+function lasery_xtool_source_variant_price( $post_id, $variant ) {
+	$amount = lasery_xtool_variant_amount( $post_id, $variant );
+	return $amount ? $amount[0] . ' ' . $amount[1] : '';
+}
+
+/** The lowest offer shown to visitors: fresh available variants or the manual estimate. */
+function lasery_xtool_lowest_price( $post_id ) {
+	if ( ! lasery_xtool_uses_source_variants( $post_id ) ) {
+		return lasery_xtool_order_price_amount( $post_id );
+	}
+	if ( ! lasery_xtool_source_is_fresh( $post_id ) ) {
+		return null;
+	}
+	$lowest = null;
+	foreach ( lasery_xtool_available_variants( $post_id ) as $variant ) {
+		$amount = lasery_xtool_variant_amount( $post_id, $variant );
+		if ( $amount && ( null === $lowest || (float) $amount[0] < (float) $lowest[0] ) ) {
+			$lowest = $amount;
+		}
+	}
+	return $lowest;
 }
 
 function lasery_xtool_source_is_fresh( $post_id ) {
@@ -228,61 +313,107 @@ function lasery_xtool_render_order_form( $post_id ) {
 	}
 	$language = lasery_xtool_order_language();
 	$text = lasery_xtool_order_texts( $language );
-	$price = lasery_xtool_order_price( $post_id );
 	$variants = lasery_xtool_order_variants( $post_id );
-	$uses_source_variants = metadata_exists( 'post', $post_id, LASERY_XTOOL_SOURCE_ID ) || (bool) $variants;
+	$uses_source_variants = lasery_xtool_uses_source_variants( $post_id );
 	$fresh = lasery_xtool_source_is_fresh( $post_id );
-	$available_variants = array_filter( $variants, function ( $variant ) { return is_array( $variant ) && isset( $variant['id'], $variant['title'], $variant['available'] ) && is_string( $variant['id'] ) && is_string( $variant['title'] ) && true === $variant['available']; } );
+	$available_variants = $fresh ? lasery_xtool_available_variants( $post_id ) : array();
+	$manual_price = $uses_source_variants ? null : lasery_xtool_order_price_amount( $post_id );
 	$result = isset( $_GET['order_result'] ) && is_string( $_GET['order_result'] ) ? sanitize_key( wp_unslash( $_GET['order_result'] ) ) : '';
+	$title = lasery_xtool_order_product_title( $post_id, $language );
+	$selected = 1 === count( $available_variants ) ? $available_variants[0] : null;
+	$selected_amount = $selected ? lasery_xtool_variant_amount( $post_id, $selected ) : $manual_price;
 	?>
 	<section class="order-form" id="zamow" aria-labelledby="order-form-title">
-		<h2 id="order-form-title"><?php echo esc_html( $text['title'] ); ?></h2>
-		<p><?php echo esc_html( $text['intro'] ); ?></p>
-		<p><?php if ( ! $uses_source_variants ) : ?><strong><?php echo esc_html( $price ? $text['price'] . ': ' . $price : $text['no_price'] ); ?></strong><br><?php endif; ?><?php echo esc_html( $text['price_note'] ); ?></p>
+		<header class="order-form-header">
+			<h2 id="order-form-title"><?php echo esc_html( $text['title'] ); ?></h2>
+			<p><?php echo esc_html( $text['intro'] ); ?></p>
+		</header>
 		<?php if ( in_array( $result, array( 'sent', 'sent_no_receipt', 'failed', 'invalid', 'busy', 'changed' ), true ) ) : ?>
-			<p class="order-form-notice" role="status"><?php echo esc_html( $text[ $result ] ); ?></p>
+			<p class="order-form-notice order-form-notice--<?php echo esc_attr( in_array( $result, array( 'sent', 'sent_no_receipt' ), true ) ? 'success' : 'error' ); ?>" role="status"><?php echo esc_html( $text[ $result ] ); ?></p>
 		<?php endif; ?>
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-order-form>
 			<input type="hidden" name="action" value="lasery_xtool_order">
 			<input type="hidden" name="product_id" value="<?php echo esc_attr( $post_id ); ?>">
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 			<?php if ( $uses_source_variants ) : ?><input type="hidden" name="snapshot" value="<?php echo esc_attr( lasery_xtool_variant_snapshot( $post_id, $variants ) ); ?>"><?php endif; ?>
 			<?php wp_nonce_field( 'lasery_xtool_order_' . $post_id ); ?>
 			<div class="order-form-trap" aria-hidden="true"><label for="order-website">Website</label><input id="order-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-			<p><label for="order-first-name"><?php echo esc_html( $text['first_name'] ); ?></label><input id="order-first-name" name="first_name" type="text" maxlength="150" autocomplete="given-name" required></p>
-			<p><label for="order-last-name"><?php echo esc_html( $text['last_name'] ); ?></label><input id="order-last-name" name="last_name" type="text" maxlength="150" autocomplete="family-name" required></p>
-			<p><label for="order-email"><?php echo esc_html( $text['email'] ); ?></label><input id="order-email" name="email" type="email" maxlength="254" autocomplete="email" required></p>
-			<p><label for="order-phone"><?php echo esc_html( $text['phone'] ); ?></label><input id="order-phone" name="phone" type="tel" maxlength="50" autocomplete="tel"></p>
-			<p><label for="order-address1"><?php echo esc_html( $text['address1'] ); ?></label><input id="order-address1" name="address1" type="text" maxlength="250" autocomplete="address-line1" required></p>
-			<p><label for="order-address2"><?php echo esc_html( $text['address2'] ); ?></label><input id="order-address2" name="address2" type="text" maxlength="250" autocomplete="address-line2"></p>
-			<p><label for="order-city"><?php echo esc_html( $text['city'] ); ?></label><input id="order-city" name="city" type="text" maxlength="150" autocomplete="address-level2" required></p>
-			<p><label for="order-zip"><?php echo esc_html( $text['zip'] ); ?></label><input id="order-zip" name="zip" type="text" maxlength="30" autocomplete="postal-code" required></p>
-			<p><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
-				<select id="order-country" name="country" autocomplete="country" required>
-					<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
-					<?php foreach ( lasery_xtool_shipping_countries() as $code => $fallback ) : ?>
-						<?php $label = class_exists( 'Locale' ) ? Locale::getDisplayRegion( 'und_' . $code, $language ) : ''; ?>
-						<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( is_string( $label ) && '' !== $label ? $label : $fallback ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
-			<p><label for="order-variant"><?php echo esc_html( $text['variant'] ); ?></label>
-			<?php if ( $uses_source_variants ) : ?>
-				<select id="order-variant" name="variant" required <?php disabled( ! $fresh || empty( $available_variants ) ); ?>>
-					<option value=""><?php echo esc_html( ! $available_variants ? $text['unavailable'] : ( ! $fresh ? $text['stale'] : $text['select_variant'] ) ); ?></option>
-					<?php foreach ( $fresh ? $available_variants : array() as $variant ) : ?>
-						<?php $variant_price = lasery_xtool_source_variant_price( $post_id, $variant ); ?>
-						<option value="<?php echo esc_attr( $variant['id'] ); ?>"><?php echo esc_html( $variant['title'] . ' — ' . ( $variant_price ? $text['price'] . ': ' . $variant_price : $text['no_price'] ) ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			<?php else : ?>
-				<input id="order-variant" name="variant" type="text" maxlength="250" required>
-			<?php endif; ?></p>
-			<p><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><input id="order-quantity" name="quantity" type="number" min="1" max="100" value="1" required></p>
-			<p><label for="order-invoice"><?php echo esc_html( $text['invoice'] ); ?></label><textarea id="order-invoice" name="invoice" maxlength="1000"></textarea></p>
-			<p><label for="order-notes"><?php echo esc_html( $text['notes'] ); ?></label><textarea id="order-notes" name="notes" maxlength="1000"></textarea></p>
-			<p><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><?php $privacy_url = add_query_arg( 'lang', $language, $privacy_url ); ?><a href="<?php echo esc_url( $privacy_url ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
-			<button type="submit" class="button button-dark" <?php disabled( $uses_source_variants && ( ! $fresh || ! $available_variants ) ); ?>><?php echo esc_html( $text['submit'] ); ?></button>
+			<div class="order-form-steps">
+				<fieldset class="order-step">
+					<legend><span class="order-step-number" aria-hidden="true">1</span><?php echo esc_html( $text['variant'] ); ?></legend>
+					<?php if ( ! $uses_source_variants ) : ?>
+						<p class="field"><label class="visually-hidden" for="order-variant"><?php echo esc_html( $text['variant'] ); ?></label><input id="order-variant" name="variant" type="text" maxlength="250" required></p>
+					<?php elseif ( $available_variants ) : ?>
+						<div class="variant-options">
+							<?php foreach ( $available_variants as $variant ) : ?>
+								<?php $amount = lasery_xtool_variant_amount( $post_id, $variant ); ?>
+								<?php $variant_price = $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $text['no_price']; ?>
+								<label class="variant-option">
+									<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required data-price="<?php echo esc_attr( $variant_price ); ?>" <?php checked( $selected === $variant ); ?>>
+									<span class="variant-option-title"><?php echo esc_html( str_replace( ' / ', ' · ', $variant['title'] ) ); ?></span>
+									<span class="variant-option-price"><?php echo esc_html( $variant_price ); ?></span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					<?php else : ?>
+						<p class="order-form-notice order-form-notice--error"><?php echo esc_html( $variants && ! $fresh ? $text['stale'] : $text['unavailable'] ); ?></p>
+					<?php endif; ?>
+					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><input id="order-quantity" name="quantity" type="number" min="1" max="100" value="1" required></p>
+				</fieldset>
+				<fieldset class="order-step">
+					<legend><span class="order-step-number" aria-hidden="true">2</span><?php echo esc_html( $text['contact'] ); ?></legend>
+					<div class="field-grid">
+						<p class="field"><label for="order-first-name"><?php echo esc_html( $text['first_name'] ); ?></label><input id="order-first-name" name="first_name" type="text" maxlength="150" autocomplete="given-name" required></p>
+						<p class="field"><label for="order-last-name"><?php echo esc_html( $text['last_name'] ); ?></label><input id="order-last-name" name="last_name" type="text" maxlength="150" autocomplete="family-name" required></p>
+						<p class="field"><label for="order-email"><?php echo esc_html( $text['email'] ); ?></label><input id="order-email" name="email" type="email" maxlength="254" autocomplete="email" required></p>
+						<p class="field"><label for="order-phone"><?php echo esc_html( $text['phone'] ); ?></label><input id="order-phone" name="phone" type="tel" maxlength="50" autocomplete="tel"></p>
+					</div>
+				</fieldset>
+				<fieldset class="order-step">
+					<legend><span class="order-step-number" aria-hidden="true">3</span><?php echo esc_html( $text['address'] ); ?></legend>
+					<div class="field-grid">
+						<p class="field field-full"><label for="order-address1"><?php echo esc_html( $text['address1'] ); ?></label><input id="order-address1" name="address1" type="text" maxlength="250" autocomplete="address-line1" required></p>
+						<p class="field field-full"><label for="order-address2"><?php echo esc_html( $text['address2'] ); ?></label><input id="order-address2" name="address2" type="text" maxlength="250" autocomplete="address-line2"></p>
+						<p class="field"><label for="order-zip"><?php echo esc_html( $text['zip'] ); ?></label><input id="order-zip" name="zip" type="text" maxlength="30" autocomplete="postal-code" required></p>
+						<p class="field"><label for="order-city"><?php echo esc_html( $text['city'] ); ?></label><input id="order-city" name="city" type="text" maxlength="150" autocomplete="address-level2" required></p>
+						<p class="field field-full"><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
+							<select id="order-country" name="country" autocomplete="country" required>
+								<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
+								<?php foreach ( lasery_xtool_shipping_countries() as $code => $fallback ) : ?>
+									<?php $label = class_exists( 'Locale' ) ? Locale::getDisplayRegion( 'und_' . $code, $language ) : ''; ?>
+									<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( is_string( $label ) && '' !== $label ? $label : $fallback ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</p>
+					</div>
+				</fieldset>
+				<fieldset class="order-step">
+					<legend><span class="order-step-number" aria-hidden="true">4</span><?php echo esc_html( $text['extras'] ); ?></legend>
+					<div class="field-grid">
+						<p class="field field-full"><label for="order-invoice"><?php echo esc_html( $text['invoice'] ); ?></label><textarea id="order-invoice" name="invoice" maxlength="1000" rows="3"></textarea></p>
+						<p class="field field-full"><label for="order-notes"><?php echo esc_html( $text['notes'] ); ?></label><textarea id="order-notes" name="notes" maxlength="1000" rows="3"></textarea></p>
+					</div>
+				</fieldset>
+			</div>
+			<aside class="order-summary" aria-labelledby="order-summary-title">
+				<h3 id="order-summary-title"><?php echo esc_html( $text['summary'] ); ?></h3>
+				<div class="order-summary-product">
+					<?php echo get_the_post_thumbnail( $post_id, 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?>
+					<p><?php echo esc_html( $title ); ?></p>
+				</div>
+				<dl class="order-summary-list">
+					<?php if ( $uses_source_variants ) : ?>
+						<dt><?php echo esc_html( $text['variant'] ); ?></dt>
+						<dd data-order-summary-variant><?php echo esc_html( $selected ? str_replace( ' / ', ' · ', $selected['title'] ) : $text['summary_empty'] ); ?></dd>
+					<?php endif; ?>
+					<dt><?php echo esc_html( $text['price'] ); ?></dt>
+					<dd class="order-summary-price" data-order-summary-price><?php echo esc_html( $selected_amount ? lasery_xtool_format_price( $selected_amount[0], $selected_amount[1], $language ) : ( $uses_source_variants && $available_variants ? '—' : $text['no_price'] ) ); ?></dd>
+				</dl>
+				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
+				<button type="submit" class="btn btn-primary btn-block" <?php disabled( $uses_source_variants && ! $available_variants ); ?>><?php echo esc_html( $text['submit'] ); ?></button>
+				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
+				<p class="order-summary-privacy"><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><?php $privacy_url = add_query_arg( 'lang', $language, $privacy_url ); ?><a href="<?php echo esc_url( $privacy_url ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
+			</aside>
 		</form>
 	</section>
 	<?php
@@ -385,7 +516,7 @@ function lasery_xtool_handle_order() {
 	}
 	$variants = lasery_xtool_order_variants( $post_id );
 	$selected_variant = null;
-	$uses_source_variants = metadata_exists( 'post', $post_id, LASERY_XTOOL_SOURCE_ID ) || (bool) $variants;
+	$uses_source_variants = lasery_xtool_uses_source_variants( $post_id );
 	if ( ! $uses_source_variants && isset( $_POST['snapshot'] ) ) {
 		lasery_xtool_order_redirect( $post_id, 'changed' );
 	}
@@ -397,8 +528,8 @@ function lasery_xtool_handle_order() {
 		if ( ! lasery_xtool_source_is_fresh( $post_id ) || ! hash_equals( lasery_xtool_variant_snapshot( $post_id, $variants ), $snapshot ) ) {
 			lasery_xtool_order_redirect( $post_id, 'changed' );
 		}
-		foreach ( $variants as $variant ) {
-			if ( is_array( $variant ) && isset( $variant['id'], $variant['title'], $variant['available'] ) && is_string( $variant['id'] ) && is_string( $variant['title'] ) && true === $variant['available'] && $variant['id'] === $fields['variant'] ) {
+		foreach ( lasery_xtool_available_variants( $post_id ) as $variant ) {
+			if ( $variant['id'] === $fields['variant'] ) {
 				$selected_variant = $variant;
 				break;
 			}

@@ -1,5 +1,5 @@
 <?php
-/** One-time initial descriptions, translated from the authorised xTool product data. */
+/** Initial descriptions translated from the authorised xTool product data. Never overwrites edited texts. */
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
     return;
 }
@@ -35,7 +35,8 @@ $translations = [
         'uk' => [ 'ІЧ-лазер потужністю 5 Вт призначений для гравіювання металів і пластику.', 'Діодний лазер потужністю 15 Вт гравіює та ріже дерево, акрил, шкіру й інші матеріали.', 'Камера 50 Мп забезпечує попередній перегляд і допомагає точно розмістити проєкт.', 'Швидкість до 6000 мм/с підтримує серійну роботу.', 'Компактна конструкція зручна для персоналізації на виїзді.' ],
     ],
 ];
-$accessories = [
+// Earlier one-line placeholders; replaced only while still unedited.
+$placeholders = [
     '15473439604949' => [ 'pl' => 'Źródła lasera galvo do xTool X1. Wybierz odpowiedni wariant.', 'de' => 'Galvo-Laserquellen für xTool X1. Wählen Sie die passende Variante.', 'ru' => 'Источники галво-лазера для xTool X1. Выберите подходящий вариант.', 'uk' => 'Джерела галво-лазера для xTool X1. Виберіть відповідний варіант.' ],
     '15478215934165' => [ 'pl' => 'Panel o strukturze plastra miodu do xTool X1.', 'de' => 'Wabenplatte für xTool X1.', 'ru' => 'Сотовая панель для xTool X1.', 'uk' => 'Стільникова панель для xTool X1.' ],
     '15478164095189' => [ 'pl' => 'Mobilny stojak roboczy do xTool X1.', 'de' => 'Mobiler Arbeitsständer für xTool X1.', 'ru' => 'Мобильная рабочая подставка для xTool X1.', 'uk' => 'Мобільна робоча підставка для xTool X1.' ],
@@ -44,11 +45,50 @@ $accessories = [
     '15453351542997' => [ 'pl' => 'Moduł lasera diodowego 40 W 455 nm do xTool M2.', 'de' => '40-W-Diodenlasermodul mit 455 nm für xTool M2.', 'ru' => 'Модуль диодного лазера 40 Вт, 455 нм для xTool M2.', 'uk' => 'Модуль діодного лазера 40 Вт, 455 нм для xTool M2.' ],
     '15430697255125' => [ 'pl' => 'Zestaw podstawy podwyższającej do xTool M2.', 'de' => 'Erhöhungsbasis-Set für xTool M2.', 'ru' => 'Комплект поднимающего основания для xTool M2.', 'uk' => 'Комплект підвищувальної основи для xTool M2.' ],
 ];
-foreach ( $accessories as $id => $languages ) {
-    foreach ( $languages as $language => $description ) {
-        $translations[ $id ][ $language ] = [ $description ];
-    }
-}
+$translations += [
+    '15473439604949' => [
+        'pl' => [ 'Bazowy moduł galvo z laserem diodowym 20 W umożliwia rozbudowę o kolejne źródła światła.', 'Do zadań specjalnych wybierz źródło galvo UV 5 W, MOPA 60 W lub światłowodowe 30 W.', 'Platforma Laser Swap™ pozwala wygodnie wymieniać źródła z tyłu urządzenia.', 'W jednym zleceniu możesz łączyć laser CO₂, diodowy 20 W oraz źródło światłowodowe, MOPA lub UV.' ],
+        'de' => [ 'Das 20-W-Dioden-Galvo-Basismodul ermöglicht die Erweiterung um weitere Laserquellen.', 'Für Spezialaufgaben stehen Galvo-Quellen mit 5 W UV, 60 W MOPA oder 30 W Faser zur Wahl.', 'Die Laser Swap™-Plattform erlaubt den einfachen Quellenwechsel auf der Rückseite des Geräts.', 'CO₂-, 20-W-Dioden- und Faser-, MOPA- oder UV-Quellen lassen sich in einem Auftrag kombinieren.' ],
+        'ru' => [ 'Базовый гальво-модуль с диодным лазером 20 Вт позволяет подключать другие источники излучения.', 'Для специальных задач доступны гальво-источники: УФ 5 Вт, MOPA 60 Вт или волоконный 30 Вт.', 'Платформа Laser Swap™ позволяет легко менять источники на задней панели устройства.', 'В одном задании можно сочетать CO₂-лазер, диодный лазер 20 Вт и волоконный, MOPA- или УФ-источник.' ],
+        'uk' => [ 'Базовий гальво-модуль із діодним лазером 20 Вт дає змогу підключати інші джерела випромінювання.', 'Для спеціальних завдань доступні гальво-джерела: УФ 5 Вт, MOPA 60 Вт або волоконне 30 Вт.', 'Платформа Laser Swap™ дає змогу легко змінювати джерела на задній панелі пристрою.', 'В одному завданні можна поєднувати CO₂-лазер, діодний лазер 20 Вт і волоконне, MOPA- або УФ-джерело.' ],
+    ],
+    '15478215934165' => [
+        'pl' => [ 'Ogranicza przypalenia i ślady na spodniej stronie materiału podczas cięcia.', 'Struktura plastra miodu równomiernie podpiera drewno, akryl, metal i skórę.', 'Lepszy przepływ powietrza od spodu pomaga odprowadzać dym, a materiał pozostaje stabilny.', 'W zestawie są szpilki, które dociskają wygięte płyty i zapobiegają przesuwaniu.' ],
+        'de' => [ 'Reduziert Brandspuren auf der Unterseite beim Schneiden.', 'Die Wabenstruktur stützt Holz, Acryl, Metall und Leder gleichmäßig.', 'Mehr Luftstrom von unten verbessert die Rauchabsaugung, das Material bleibt dabei stabil.', 'Mitgelieferte Materialstifte halten verzogene Platten flach und verhindern Verrutschen.' ],
+        'ru' => [ 'Уменьшает подпалины и следы на обратной стороне материала при резке.', 'Сотовая структура равномерно поддерживает дерево, акрил, металл и кожу.', 'Улучшенный поток воздуха снизу помогает удалять дым, а материал остаётся неподвижным.', 'В комплекте есть штифты, которые прижимают покоробленные листы и не дают им смещаться.' ],
+        'uk' => [ 'Зменшує підпали й сліди на зворотному боці матеріалу під час різання.', 'Стільникова структура рівномірно підтримує деревину, акрил, метал і шкіру.', 'Кращий потік повітря знизу допомагає відводити дим, а матеріал залишається нерухомим.', 'У комплекті є штифти, що притискають покороблені листи й не дають їм зміщуватися.' ],
+    ],
+    '15478164095189' => [
+        'pl' => [ 'Płynnie toczące się kółka ułatwiają przestawianie ciężkiego X1, np. przy montażu podajnika.', 'Uniwersalne części i precyzyjne otwory montażowe przyspieszają składanie.', 'Szybkie hamulce i ciche kółka pozwalają łatwo pokonywać przeszkody.', 'Panel perforowany i przegródki pozwalają zorganizować narzędzia i części.' ],
+        'de' => [ 'Leichtgängige Rollen erleichtern das Bewegen des schweren X1, etwa beim Aufbau des Förderbands.', 'Universelle Teile und präzise Montagebohrungen sorgen für eine schnelle Montage.', 'Schnell schaltbare Bremsen und leise Rollen überwinden Hindernisse problemlos.', 'Lochwand und Trennelemente schaffen individuellen Stauraum für Werkzeuge und Teile.' ],
+        'ru' => [ 'Плавно катящиеся колёса облегчают перемещение тяжёлого X1, например при установке конвейера.', 'Универсальные детали и точные монтажные отверстия ускоряют сборку.', 'Быстрые тормоза и бесшумные колёса легко преодолевают препятствия.', 'Перфорированная панель и разделители помогают организовать хранение инструментов и деталей.' ],
+        'uk' => [ 'Плавні колеса полегшують переміщення важкого X1, наприклад під час встановлення конвеєра.', 'Універсальні деталі та точні монтажні отвори пришвидшують складання.', 'Швидкі гальма й тихі колеса легко долають перешкоди.', 'Перфорована панель і роздільники допомагають організувати зберігання інструментів і деталей.' ],
+    ],
+    '15467535794389' => [
+        'pl' => [ 'Podniesiona krawędź zatrzymuje odpady i utrzymuje porządek w urządzeniu.', 'Dopasowana do xTool X1, z uchwytami ułatwiającymi wyjmowanie.', 'Płaskość w granicach ±0,5 mm zapewnia powtarzalną jakość obróbki.', 'Chroni podstawę urządzenia przed zarysowaniami i współpracuje z listwami nożowymi lub panelem plastra miodu.' ],
+        'de' => [ 'Der erhöhte Rand hält Bearbeitungsreste zurück und das Gerät sauber.', 'Passgenau für xTool X1, mit Griffmulden zum einfachen Herausnehmen.', 'Eine Ebenheit innerhalb von ±0,5 mm sorgt für zuverlässige Bearbeitungsqualität.', 'Schützt die Gerätebasis vor Kratzern und funktioniert mit Klingenleisten oder Wabenplatten.' ],
+        'ru' => [ 'Приподнятый край удерживает отходы обработки и сохраняет чистоту в устройстве.', 'Точно подогнана под xTool X1, есть выемки для удобного извлечения.', 'Плоскостность в пределах ±0,5 мм обеспечивает стабильное качество обработки.', 'Защищает основание устройства от царапин и совместима с ножевыми планками или сотовой панелью.' ],
+        'uk' => [ 'Піднятий край утримує відходи обробки та підтримує чистоту в пристрої.', 'Точно підігнана під xTool X1, має виїмки для зручного виймання.', 'Площинність у межах ±0,5 мм забезпечує стабільну якість обробки.', 'Захищає основу пристрою від подряпин і сумісна з ножовими планками або стільниковою панеллю.' ],
+    ],
+    '15457292452053' => [
+        'pl' => [ 'Podgląd AI w pełnym rozmiarze łączy obrazy bez martwych pól.', 'Zintegrowana podstawa montowana jednorazowo nie wymaga stołów podporowych.', 'Zdejmowane, podwieszane prowadnice ułatwiają szybki montaż i oszczędzają miejsce.', 'Automatyczne mocowanie materiału i bazowanie skracają przygotowanie do produkcji.' ],
+        'de' => [ 'Die KI-Vorschau in voller Größe setzt Bilder nahtlos ohne tote Winkel zusammen.', 'Die integrierte Basis wird einmal montiert und benötigt keine Stütztische.', 'Abnehmbare, hängende Schienen ermöglichen einen schnellen, platzsparenden Aufbau.', 'Automatisches Spannen und Referenzieren verkürzen die Vorbereitung.' ],
+        'ru' => [ 'Полноразмерный ИИ-предпросмотр сшивает изображения без слепых зон.', 'Встроенное основание устанавливается один раз и не требует опорных столов.', 'Съёмные подвесные направляющие позволяют быстро и компактно собрать систему.', 'Автоматическая фиксация материала и возврат в исходное положение ускоряют подготовку.' ],
+        'uk' => [ 'Повнорозмірний ШІ-перегляд поєднує зображення без сліпих зон.', 'Вбудована основа встановлюється один раз і не потребує опорних столів.', 'Знімні підвісні напрямні дають змогу швидко й компактно зібрати систему.', 'Автоматичне фіксування матеріалу та повернення в початкове положення пришвидшують підготовку.' ],
+    ],
+    '15453351542997' => [
+        'pl' => [ 'Moduł lasera diodowego 40 W (455 nm) radzi sobie z grubszymi materiałami.', 'Przyspiesza produkcję dzięki wydajnej obróbce seryjnej.' ],
+        'de' => [ 'Das 40-W-Diodenlasermodul (455 nm) bewältigt auch dickere Materialien.', 'Effiziente Serienbearbeitung beschleunigt die Produktion.' ],
+        'ru' => [ 'Модуль диодного лазера 40 Вт (455 нм) справляется с более толстыми материалами.', 'Эффективная серийная обработка ускоряет производство.' ],
+        'uk' => [ 'Модуль діодного лазера 40 Вт (455 нм) впорається з товстішими матеріалами.', 'Ефективна серійна обробка пришвидшує виробництво.' ],
+    ],
+    '15430697255125' => [
+        'pl' => [ 'Pozwala obrabiać większe i wyższe przedmioty.', 'Panel o strukturze plastra miodu w zestawie.', 'W pełni zamknięta konstrukcja bez wycieku światła zachowuje klasę bezpieczeństwa 1.' ],
+        'de' => [ 'Ermöglicht die Bearbeitung größerer und höherer Objekte.', 'Wabenplatte im Lieferumfang enthalten.', 'Vollständig geschlossen, ohne Lichtaustritt, mit Sicherheitsklasse 1.' ],
+        'ru' => [ 'Позволяет обрабатывать более крупные и высокие предметы.', 'Сотовая панель в комплекте.', 'Полностью закрытая конструкция без утечки света сохраняет класс безопасности 1.' ],
+        'uk' => [ 'Дає змогу обробляти більші й вищі предмети.', 'Стільникова панель у комплекті.', 'Повністю закрита конструкція без витоку світла зберігає клас безпеки 1.' ],
+    ],
+];
 $titles = [
     '15473430692053' => [ 'pl' => 'Ploter laserowy xTool X1', 'de' => 'xTool X1 Laserschneider', 'ru' => 'Лазерный станок xTool X1', 'uk' => 'Лазерний верстат xTool X1' ],
     '15452856942805' => [ 'pl' => 'Kolorowy laser xTool M2', 'de' => 'xTool M2 Farblaserschneider', 'ru' => 'Цветной лазерный станок xTool M2', 'uk' => 'Кольоровий лазерний верстат xTool M2' ],
@@ -71,10 +111,17 @@ foreach ( $translations as $source_id => $languages ) {
     }
     foreach ( $languages as $language => $items ) {
         $key = '_lasery_description_' . $language;
+        $html = '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>';
         if ( metadata_exists( 'post', $posts[0], $key ) ) {
+            $placeholder = isset( $placeholders[ $source_id ][ $language ] ) ? '<ul><li>' . esc_html( $placeholders[ $source_id ][ $language ] ) . '</li></ul>' : null;
+            if ( $placeholder !== get_post_meta( $posts[0], $key, true ) ) {
+                continue;
+            }
+            if ( ! update_post_meta( $posts[0], $key, wp_slash( wp_kses_post( $html ) ) ) ) {
+                WP_CLI::error( 'Could not replace description for ' . $source_id . ' / ' . $language );
+            }
             continue;
         }
-        $html = '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>';
         if ( ! add_post_meta( $posts[0], $key, wp_slash( wp_kses_post( $html ) ), true ) ) {
             WP_CLI::error( 'Could not save description for ' . $source_id . ' / ' . $language );
         }

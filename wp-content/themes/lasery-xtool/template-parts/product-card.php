@@ -1,25 +1,31 @@
 <?php
-$is_product = get_post_type() === 'lasery_product';
-$excerpt = $is_product && function_exists('lasery_xtool_product_description')
-    ? lasery_xtool_product_description(get_the_ID(), lasery_xtool_interface_language())
-    : get_the_excerpt();
+/** Product tile. Args: heading (h2|h3), featured (bool), eager (bool). */
+$post_id = get_the_ID();
+$heading = isset($args['heading']) && $args['heading'] === 'h2' ? 'h2' : 'h3';
+$featured = !empty($args['featured']);
+$permalink = get_permalink();
+$price = lasery_xtool_price_html($post_id);
+$summary = lasery_xtool_display_summary($post_id);
 ?>
-<article <?php post_class('card'); ?>>
-    <a class="card-image" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
+<article class="product-card<?php echo $featured ? ' product-card--featured' : ''; ?>">
+    <div class="product-card-media">
         <?php if (has_post_thumbnail()) : ?>
-            <?php the_post_thumbnail('medium_large'); ?>
+            <?php the_post_thumbnail('large', [
+                'alt' => '',
+                'sizes' => $featured ? '(min-width: 960px) 560px, 100vw' : '(min-width: 960px) 380px, (min-width: 760px) 33vw, 50vw',
+                'loading' => empty($args['eager']) ? 'lazy' : 'eager',
+            ]); ?>
         <?php else : ?>
-            <span class="card-placeholder"><?php echo $is_product ? esc_html__('xTool', 'lasery-xtool') : esc_html(get_bloginfo('name')); ?></span>
+            <span class="product-card-placeholder" aria-hidden="true">xTool</span>
         <?php endif; ?>
-    </a>
-    <div class="card-body">
-        <?php if ($is_product) : ?><p class="card-label"><?php esc_html_e('PRODUKT XTOOL', 'lasery-xtool'); ?></p><?php endif; ?>
-        <?php $title = $is_product ? lasery_xtool_display_product_title(get_the_ID()) : get_the_title(); ?>
-        <?php if (is_front_page()) : ?><h3><a href="<?php the_permalink(); ?>"><?php echo esc_html($title); ?></a></h3><?php else : ?><h2><a href="<?php the_permalink(); ?>"><?php echo esc_html($title); ?></a></h2><?php endif; ?>
-        <p class="card-excerpt"><?php echo esc_html(wp_trim_words(wp_strip_all_tags($excerpt), 20)); ?></p>
-        <div class="card-actions">
-            <a class="details-link" href="<?php the_permalink(); ?>"><?php esc_html_e('Zobacz szczegóły', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a>
-            <?php if ($is_product && function_exists('lasery_xtool_render_order_form')) : ?><a class="purchase-link" href="<?php echo esc_url(get_permalink() . '#zamow'); ?>"><?php esc_html_e('Zamów', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a><?php endif; ?>
+    </div>
+    <div class="product-card-body">
+        <p class="product-card-kind"><?php echo esc_html(lasery_xtool_kind_label($post_id)); ?></p>
+        <<?php echo $heading; ?> class="product-card-title"><a href="<?php echo esc_url($permalink); ?>"><?php echo esc_html(lasery_xtool_display_product_title($post_id)); ?></a></<?php echo $heading; ?>>
+        <?php if ($summary !== '') : ?><p class="product-card-summary"><?php echo esc_html($summary); ?></p><?php endif; ?>
+        <div class="product-card-footer">
+            <p class="price"><?php echo $price !== '' ? $price : esc_html__('Cena na zapytanie', 'lasery-xtool'); ?></p>
+            <span class="product-card-arrow" aria-hidden="true"><?php echo lasery_xtool_icon('arrow-right'); ?></span>
         </div>
     </div>
 </article>

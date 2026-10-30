@@ -2,126 +2,224 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\nLanguage: en_US\n"
 
-msgid "Przejdź do treści"
-msgstr "Skip to content"
+msgid "%1$s – zdjęcie %2$d"
+msgstr "%1$s – photo %2$d"
 
-msgid "Menu główne"
-msgstr "Main menu"
+msgid "AKCESORIA"
+msgstr "ACCESSORIES"
 
-msgid "Język strony"
-msgstr "Site language"
+msgid "Akcesoria"
+msgstr "Accessories"
 
-msgid "Produkty"
-msgstr "Products"
+msgid "Akcesoria xTool"
+msgstr "xTool accessories"
 
-msgid "Demo"
-msgstr "Demo"
-
-msgid "Kontakt"
-msgstr "Contact"
-
-msgid "Zapytaj o demo"
-msgstr "Ask about a demo"
-
-msgid "LASERY I URZĄDZENIA XTOOL"
-msgstr "XTOOL LASERS AND MACHINES"
-
-msgid "Twórz więcej. Z xTool."
-msgstr "Create more. With xTool."
-
-msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
-msgstr "Explore engraving and cutting machines. Choose a model or ask us about a demo."
-
-msgid "Zobacz produkty"
-msgstr "View products"
-
-msgid "OD POMYSŁU DO REALIZACJI"
-msgstr "FROM IDEA TO CREATION"
-
-msgid "KATALOG XTOOL"
-msgstr "XTOOL CATALOGUE"
-
-msgid "Znajdź urządzenie dla siebie."
-msgstr "Find the right machine for you."
-
-msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
-msgstr "Explore the available machines and choose a solution for your projects."
-
-msgid "Zobacz cały katalog"
-msgstr "View the full catalogue"
-
-msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
-msgstr "Our product catalogue is being prepared. Contact us to ask about our machines."
-
-msgid "POZNAJ XTOOL"
-msgstr "DISCOVER XTOOL"
-
-msgid "Chcesz zobaczyć urządzenie w akcji?"
-msgstr "Want to see a machine in action?"
-
-msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
-msgstr "Choose a convenient time on the xTool demo page or open it in a new tab."
-
-msgid "Otwórz rezerwację demo"
-msgstr "Open demo booking"
-
-msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
-msgstr "The “Book a Service” form is below the profile on the xTool page. Scroll inside the frame to find it."
-
-msgid "Rezerwacja demonstracji xTool u Michała"
-msgstr "Book an xTool demonstration with Michał"
-
-msgid "Wyniki wyszukiwania: %s"
-msgstr "Search results: %s"
+msgid "Akcesorium"
+msgstr "Accessory"
 
 msgid "Brak treści do wyświetlenia."
 msgstr "There is no content to display."
 
-msgid "xTool"
-msgstr "xTool"
+msgid "Cena na zapytanie"
+msgstr "Price on request"
 
-msgid "PRODUKT XTOOL"
-msgstr "XTOOL PRODUCT"
+msgid "Cena orientacyjna z oficjalnego sklepu xTool. Przed płatnością potwierdzimy ostateczną kwotę i koszt dostawy."
+msgstr "Estimated price from the official xTool store. We will confirm the final amount and delivery cost before payment."
 
-msgid "Zobacz szczegóły"
-msgstr "View details"
+msgid "Chcesz zobaczyć urządzenie w akcji?"
+msgstr "Want to see a machine in action?"
 
-msgid "Zamów"
-msgstr "Order"
+msgid "Demo"
+msgstr "Demo"
 
-msgid "Produkty xTool i kontakt w sprawie demo."
-msgstr "xTool products and demo enquiries."
+msgid "Demo na żywo"
+msgstr "Live demo"
 
-msgid "MASZ PYTANIA?"
-msgstr "HAVE A QUESTION?"
+msgid "Dlaczego warto"
+msgstr "Why choose us"
 
-msgid "MAJKEL MICHAŁ MAGALSKI"
-msgstr "MAJKEL MICHAŁ MAGALSKI"
+msgid "Doradzimy model i akcesoria do Twoich materiałów i projektów."
+msgstr "We will help you choose the model and accessories for your materials and projects."
 
-msgid "Produkty xTool"
-msgstr "xTool products"
-msgid "Wyróżnione produkty"
-msgstr "Featured products"
+msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
+msgstr "The “Book a Service” form is below the profile on the xTool page. Scroll inside the frame to find it."
 
-msgid "Poprzedni produkt"
-msgstr "Previous product"
+msgid "Informacje"
+msgstr "Information"
+
+msgid "Język strony: %s"
+msgstr "Site language: %s"
+
+msgid "KATALOG XTOOL"
+msgstr "XTOOL CATALOGUE"
+
+msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
+msgstr "Our product catalogue is being prepared. Contact us to ask about our machines."
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "LASERY I URZĄDZENIA XTOOL"
+msgstr "XTOOL LASERS AND MACHINES"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Menu główne"
+msgstr "Main menu"
+
+msgid "Moduły laserowe, stoły robocze i dodatki do urządzeń xTool."
+msgstr "Laser modules, work surfaces and add-ons for xTool machines."
+
+msgid "Najważniejsze cechy"
+msgstr "Key features"
+
+msgid "Następne zdjęcie"
+msgstr "Next image"
 
 msgid "Następny produkt"
 msgstr "Next product"
 
-msgid "Zdjęcia produktu"
-msgstr "Product images"
-
-msgid "Zdjęcie produktu %d"
-msgstr "Product image %d"
-msgid "Wstrzymaj"
-msgstr "Pause"
-
 msgid "Odtwórz"
 msgstr "Play"
+
+msgid "Oryginalne urządzenia xTool"
+msgstr "Genuine xTool machines"
+
+msgid "Oryginalne urządzenia z oficjalnego sklepu xTool"
+msgstr "Genuine products from the official xTool store"
+
+msgid "Otwórz rezerwację demo"
+msgstr "Open demo booking"
+
+msgid "POZNAJ XTOOL"
+msgstr "DISCOVER XTOOL"
+
+msgid "Pomoc w wyborze"
+msgstr "Help choosing"
+
+msgid "Poprzedni produkt"
+msgstr "Previous product"
 
 msgid "Poprzednie zdjęcie"
 msgstr "Previous image"
 
-msgid "Następne zdjęcie"
-msgstr "Next image"
+msgid "Powiększ zdjęcie %d"
+msgstr "Enlarge photo %d"
+
+msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
+msgstr "Explore the available machines and choose a solution for your projects."
+
+msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
+msgstr "Explore engraving and cutting machines. Choose a model or ask us about a demo."
+
+msgid "Połącz się online z naszym ekspertem."
+msgstr "Join an online call with our expert."
+
+msgid "Produkty xTool"
+msgstr "xTool products"
+
+msgid "Przejdź do produktu {{index}}"
+msgstr "Go to product {{index}}"
+
+msgid "Przejdź do treści"
+msgstr "Skip to content"
+
+msgid "Płacisz dopiero po potwierdzeniu ceny i dostawy"
+msgstr "You pay only after we confirm the price and delivery"
+
+msgid "Rezerwacja demonstracji xTool u Michała"
+msgstr "Book an xTool demonstration with Michał"
+
+msgid "Rodzaj produktów"
+msgstr "Product type"
+
+msgid "Rozbuduj swoje urządzenie."
+msgstr "Expand your machine."
+
+msgid "Strona główna"
+msgstr "Home"
+
+msgid "Twórz więcej. Z xTool."
+msgstr "Create more. With xTool."
+
+msgid "Urządzenia"
+msgstr "Machines"
+
+msgid "Urządzenia xTool"
+msgstr "xTool machines"
+
+msgid "Urządzenia xTool do grawerowania i cięcia laserowego. Pokażemy je na demo i pomożemy w zamówieniu."
+msgstr "xTool machines for laser engraving and cutting. We will show them in a demo and help you order."
+
+msgid "Urządzenie"
+msgstr "Machine"
+
+msgid "Wstrzymaj"
+msgstr "Pause"
+
+msgid "Wszystkie"
+msgstr "All"
+
+msgid "Wszystkie produkty"
+msgstr "All products"
+
+msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
+msgstr "Choose a convenient time on the xTool demo page or open it in a new tab."
+
+msgid "Wybierz termin i urządzenie w kalendarzu xTool."
+msgstr "Pick a date and machine in the xTool calendar."
+
+msgid "Wyniki wyszukiwania: %s"
+msgstr "Search results: %s"
+
+msgid "Wyróżnione produkty"
+msgstr "Featured products"
+
+msgid "Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności."
+msgstr "Send the form – we will confirm the price and send you a payment link."
+
+msgid "Zamów"
+msgstr "Order"
+
+msgid "Zamówienia realizujemy w oficjalnym sklepie xTool."
+msgstr "We place orders in the official xTool store."
+
+msgid "Zamówienie bez konta"
+msgstr "No account needed"
+
+msgid "Zamówienie bez zakładania konta"
+msgstr "Order without creating an account"
+
+msgid "Zapytaj o demo"
+msgstr "Ask about a demo"
+
+msgid "Zdjęcie produktu %d"
+msgstr "Product image %d"
+
+msgid "Zdjęcie produktu {{index}}"
+msgstr "Product photo {{index}}"
+
+msgid "Znajdź urządzenie dla siebie."
+msgstr "Find the right machine for you."
+
+msgid "Zobacz cały katalog"
+msgstr "View the full catalogue"
+
+msgid "Zobacz laser w akcji i zadaj pytania."
+msgstr "See the laser in action and ask questions."
+
+msgid "Zobacz szczegóły"
+msgstr "View details"
+
+msgid "Zobacz urządzenie w akcji podczas spotkania online i zadaj pytania."
+msgstr "See the machine in action during an online meeting and ask questions."
+
+msgid "od %s"
+msgstr "from %s"
+
+msgid "xTool i nazwy produktów są znakami towarowymi ich właścicieli."
+msgstr "xTool and product names are trademarks of their respective owners."
+
+msgid "Ścieżka nawigacji"
+msgstr "Breadcrumb"

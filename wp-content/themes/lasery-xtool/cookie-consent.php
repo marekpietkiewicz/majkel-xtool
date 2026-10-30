@@ -117,11 +117,11 @@ function lasery_xtool_render_consent_banner() {
             <div>
                 <h2 id="lasery-consent-title"><?php echo esc_html($text['title']); ?></h2>
                 <p><?php echo esc_html($text['description']); ?> <?php if ($privacy_url) : ?><a href="<?php echo esc_url($privacy_url); ?>"><?php echo esc_html($text['privacy']); ?></a><?php endif; ?></p>
-                <noscript><style>.lasery-consent{position:static;box-shadow:none}.lasery-consent-actions,.lasery-consent-settings,[data-lasery-consent-open]{display:none!important}</style><p><?php echo esc_html($text['noscript']); ?></p></noscript>
+                <noscript><style>.lasery-consent{position:static;max-width:none;margin:16px;box-shadow:none}.lasery-consent-actions,.lasery-consent-settings,[data-lasery-consent-open]{display:none!important}</style><p><?php echo esc_html($text['noscript']); ?></p></noscript>
             </div>
             <div class="lasery-consent-actions">
-                <button type="button" data-lasery-consent-choice="deny"><?php echo esc_html($text['reject']); ?></button>
-                <button type="button" data-lasery-consent-choice="allow"><?php echo esc_html($text['accept']); ?></button>
+                <button type="button" class="btn btn-primary btn-sm" data-lasery-consent-choice="deny"><?php echo esc_html($text['reject']); ?></button>
+                <button type="button" class="btn btn-primary btn-sm" data-lasery-consent-choice="allow"><?php echo esc_html($text['accept']); ?></button>
             </div>
         </div>
     </section>
@@ -130,8 +130,6 @@ function lasery_xtool_render_consent_banner() {
 add_action('wp_footer', 'lasery_xtool_render_consent_banner', 5);
 
 function lasery_xtool_enqueue_consent() {
-    wp_enqueue_script('lasery-xtool-consent', get_template_directory_uri() . '/assets/cookie-consent.js', [], wp_get_theme()->get('Version'), true);
-    $css = '.lasery-consent{position:fixed;inset:auto 0 0;z-index:9999;background:#fff;color:#171b1b;border-top:1px solid #b9c2ba;box-shadow:0 -4px 20px #0002;padding:20px}.lasery-consent[hidden]{display:none}.lasery-consent-inner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}.lasery-consent h2{font-size:1.1rem;margin:0 0 6px}.lasery-consent p{margin:0;font-size:.9rem;line-height:1.5}.lasery-consent a{color:inherit;text-decoration:underline}.lasery-consent-actions{display:flex;gap:10px;flex-shrink:0}.lasery-consent-actions button{appearance:none;cursor:pointer;border:1px solid #171b1b;background:#fff;color:#171b1b;padding:12px 18px;min-width:110px;font:inherit;font-weight:650}.lasery-consent-actions button:hover{background:#e8eee5}.lasery-consent-actions button:focus-visible{outline:3px solid #668900;outline-offset:3px}.lasery-consent-settings{border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;padding:0}.lasery-consent-settings:focus-visible{outline:3px solid #80a625;outline-offset:4px}@media(max-width:700px){.lasery-consent-inner{display:block}.lasery-consent-actions{margin-top:14px}.lasery-consent-actions button{flex:1}}';
-    wp_add_inline_style('lasery-xtool', $css);
+    wp_enqueue_script('lasery-xtool-consent', get_template_directory_uri() . '/assets/cookie-consent.js', [], wp_get_theme()->get('Version'), ['in_footer' => true, 'strategy' => 'defer']);
 }
 add_action('wp_enqueue_scripts', 'lasery_xtool_enqueue_consent', 20);

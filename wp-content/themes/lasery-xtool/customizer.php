@@ -14,6 +14,11 @@ function lasery_xtool_contact_email() {
     return is_string($email) && is_email($email) ? $email : 'Michal@laseryxtool.pl';
 }
 
+function lasery_xtool_company() {
+    $company = get_theme_mod('lasery_xtool_company', '');
+    return is_string($company) && trim($company) !== '' ? $company : "MAJKEL MICHAŁ MAGALSKI\nul. Stanisława Skarżyńskiego 5a\n85-791 Bydgoszcz, Polska\nNIP 9532666193";
+}
+
 function lasery_xtool_valid_demo_url($url) {
     if (!is_string($url) || strlen($url) > 2048) {
         return false;
@@ -44,11 +49,12 @@ add_action('customize_register', function ($customizer) {
         return $validity;
     }]);
     $customizer->add_control('lasery_xtool_demo_url', ['label' => 'Link do profilu demonstracji xTool', 'section' => 'lasery_xtool_contact', 'type' => 'url']);
+    $customizer->add_setting('lasery_xtool_company', ['default' => '', 'sanitize_callback' => 'sanitize_textarea_field']);
+    $customizer->add_control('lasery_xtool_company', ['label' => 'Dane firmy w stopce', 'description' => 'Nazwa, adres i NIP — każda informacja w osobnej linii. Puste pole pokazuje dane domyślne.', 'section' => 'lasery_xtool_contact', 'type' => 'textarea']);
     $fields = [
         'hero_eyebrow' => ['Hero: mały nagłówek', 'text'],
-        'hero_title' => ['Hero: nagłówek przy braku produktów', 'text'],
+        'hero_title' => ['Hero: główny nagłówek strony (SEO) i tekst przy braku produktów', 'text'],
         'hero_description' => ['Hero: opis', 'textarea'],
-        'hero_products_button' => ['Hero: przycisk katalogu', 'text'],
         'hero_details_button' => ['Hero: przycisk produktu', 'text'],
         'hero_demo_button' => ['Hero: przycisk demo', 'text'],
         'products_eyebrow' => ['Produkty: mały nagłówek', 'text'],
@@ -60,7 +66,18 @@ add_action('customize_register', function ($customizer) {
         'demo_description' => ['Demo: opis', 'textarea'],
         'demo_button' => ['Demo: przycisk rezerwacji', 'text'],
         'demo_frame_note' => ['Demo: opis ramki', 'textarea'],
+        'demo_step_1' => ['Demo: krok 1', 'text'],
+        'demo_step_2' => ['Demo: krok 2', 'text'],
+        'demo_step_3' => ['Demo: krok 3', 'text'],
+        'accessories_eyebrow' => ['Akcesoria: mały nagłówek', 'text'],
+        'accessories_title' => ['Akcesoria: nagłówek', 'text'],
+        'accessories_description' => ['Akcesoria: opis', 'textarea'],
+        'footer_tagline' => ['Stopka: opis', 'textarea'],
     ];
+    for ($number = 1; $number <= 4; $number++) {
+        $fields['benefit_' . $number . '_title'] = ['Zaleta ' . $number . ': tytuł', 'text'];
+        $fields['benefit_' . $number . '_text'] = ['Zaleta ' . $number . ': opis', 'textarea'];
+    }
     foreach (['pl' => 'Polski', 'en' => 'Angielski', 'de' => 'Niemiecki', 'ru' => 'Rosyjski', 'uk' => 'Ukraiński'] as $language => $label) {
         $section = 'lasery_xtool_content_' . $language;
         $customizer->add_section($section, ['title' => $label, 'panel' => 'lasery_xtool_content', 'description' => 'Puste pole wyświetla domyślne tłumaczenie.']);

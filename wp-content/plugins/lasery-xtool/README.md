@@ -22,7 +22,7 @@ Wtyczka udostępnia formularz zgłoszenia zamówienia na stronie opublikowanego 
 
 Importer zapisuje warianty, ich ceny, dostępność oraz adresy zdjęć jako osobne dane źródłowe. Walutę pobiera z metadanych sklepu; jeśli nie jest znana, ceny wymagają potwierdzenia. Formularz pozwala wybrać dostępny wariant i przedstawia cenę orientacyjną, gdy dane źródłowe są świeże. Ręcznie wpisana cena pozostaje dostępna dla produktów bez wariantów źródłowych.
 
-Adres odbiorcy zamówień ustawia się w **Produkty xTool → Ustawienia zamówień**. Przed publikacją trzeba go ustawić; podczas testów należy użyć własnej skrzynki. Aktualne działanie `wp_mail` nie gwarantuje dostarczenia wiadomości.
+Adres odbiorcy zamówień i nazwę nadawcy wiadomości (domyślnie „LaseryXTOOL.pl” zamiast „WordPress”) ustawia się w **Produkty xTool → Ustawienia zamówień**. Przed publikacją trzeba go ustawić; podczas testów należy użyć własnej skrzynki. Aktualne działanie `wp_mail` nie gwarantuje dostarczenia wiadomości.
 
 Wybór kraju dostawy opiera się na kodach dostępnych w checkout xTool zaobserwowanych 30 października 2026 r. Lista może się zmienić i wymaga okresowej aktualizacji w `lasery_xtool_shipping_countries()`. Zamówienie z wariantem źródłowym zawiera w wiadomości link do checkoutu xTool z danymi klienta w adresie URL; może on trafić do historii przeglądarki i logów, dlatego należy traktować go jako poufny.
 
@@ -33,3 +33,8 @@ Synchronizacja hookiem `lasery_xtool_sync_existing` aktualizuje tylko dane źró
 Osobny hook `lasery_xtool_sync_images` zapisuje obrazy, zachowując ręcznie wybrane miniatury. Po odpowiedzi HTTP 429 pobieranie produktów i obrazów zostaje wstrzymane i wymaga wznowienia w panelu importu. Ostatnia prawidłowa oferta pozostaje dostępna do końca swojego 24-godzinnego okresu ważności; po tym czasie formularz wstrzymuje wybór wariantu do aktualizacji. Systemowy harmonogram należy dobrać do wielkości katalogu i limitów źródła: jeden produkt na przebieg co sześć godzin oznacza najwyżej cztery produkty na dobę, co może nie wystarczyć do utrzymania aktualności większego katalogu.
 
 W edycji produktu można wybrać własną, uporządkowaną galerię z biblioteki mediów albo przywrócić automatyczną. Wyboru maksymalnie czterech produktów do karuzeli dokonuje się w **Produkty xTool → Wyróżnione produkty**, a politykę prywatności w pięciu językach można edytować w **Produkty xTool → Polityka prywatności**.
+
+Produkty mają adresy `/produkty/<slug>/`, a katalog — `/produkty/` (filtr `?kind=device` lub `?kind=accessory`). Po zmianie adresów trzeba odświeżyć reguły (`wp rewrite flush`). Kolejność produktów na stronie ustawia pole **Kolejność** w edycji produktu. Akcesoria oznacza się typem **Akcesoria** w taksonomii **Typy produktów** (kolumna i edycja zbiorcza na liście produktów); produkty bez tego typu są pokazywane jako urządzenia.
+
+Formularz zamówienia przedstawia warianty jako listę do wyboru z cenami, a podsumowanie pokazuje wybrany wariant i cenę. Nazwy pól formularza i obsługa po stronie serwera są takie same jak wcześniej.
+
