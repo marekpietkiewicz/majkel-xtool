@@ -71,6 +71,12 @@
     showCartCount();
     window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
+  // After a cart change the page reloads; focus goes to the result instead of the top of the page.
+  const cartNotice = document.querySelector('.cart .order-form-notice[role="status"]');
+  if (cartNotice) {
+    cartNotice.tabIndex = -1;
+    cartNotice.focus();
+  }
   // The order includes the quantities in the form; Enter in a quantity field recalculates the cart instead.
   document.querySelectorAll('[data-cart-form]').forEach((form) => {
     const update = form.querySelector('[data-cart-update]');
@@ -354,14 +360,23 @@
 
   document.querySelectorAll('[data-rail]').forEach((rail) => {
     const controls = controlsOf(rail);
-    new Swiper(rail, {
+    const swiper = new Swiper(rail, {
       slidesPerView: 'auto',
       spaceBetween: 12,
       grabCursor: true,
       watchOverflow: true,
       navigation: { prevEl: controls.prevEl, nextEl: controls.nextEl },
-      a11y: a11y(rail),
+      a11y: { ...a11y(rail), scrollOnFocus: false },
       breakpoints: { 700: { spaceBetween: 20 } },
+    });
+    // Keyboard focus slides a card that is out of view into it.
+    rail.addEventListener('focusin', (event) => {
+      const slide = event.target.closest('.swiper-slide');
+      if (!slide) return;
+      rail.scrollLeft = 0;
+      const box = slide.getBoundingClientRect();
+      const view = rail.getBoundingClientRect();
+      if (box.left < view.left || box.right > view.right) swiper.slideTo(swiper.slides.indexOf(slide));
     });
   });
 
