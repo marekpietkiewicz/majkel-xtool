@@ -79,8 +79,9 @@ function lasery_xtool_import_page() {
 		'locked'   => 'Inny import jest w trakcie. Spróbuj ponownie później.',
 		'locklost' => 'Import przerwany: utracono blokadę. Sprawdź szkice i ponów import.',
 		'complete' => 'Import zakończony.',
+		'batch'    => 'Zakończono partię synchronizacji. Pozostałe produkty zostaną sprawdzone w kolejnych przebiegach.',
 		'limit'    => 'Import zakończony. Osiągnięto limit pobierania — w źródle mogą być dalsze produkty.',
-		'incomplete' => 'Nie znaleziono wszystkich produktów. Brakujące dane wymagają ponownego sprawdzenia.',
+		'incomplete' => 'Nie udało się zsynchronizować części produktów. Sprawdź ich dane źródłowe i ponów próbę.',
 	);
 	$result = isset( $_GET['result'] ) && is_string( $_GET['result'] ) ? sanitize_key( wp_unslash( $_GET['result'] ) ) : '';
 	?>
@@ -109,7 +110,7 @@ function lasery_xtool_import_page() {
 		<?php $last_sync = get_option( 'lasery_xtool_last_sync' ); ?>
 		<?php if ( is_array( $last_sync ) && isset( $last_sync['time'], $last_sync['result'] ) && is_numeric( $last_sync['time'] ) && is_string( $last_sync['result'] ) ) : ?>
 			<p><?php echo esc_html( 'Ostatnia synchronizacja: ' . wp_date( 'Y-m-d H:i', (int) $last_sync['time'] ) . '. ' . ( isset( $messages[ $last_sync['result'] ] ) ? $messages[ $last_sync['result'] ] : 'Nieznany wynik.' ) ); ?>
-			<?php if ( isset( $last_sync['updated'], $last_sync['failed'] ) ) : ?><?php printf( ' Zaktualizowano: %d, błędy zapisu: %d.', absint( $last_sync['updated'] ), absint( $last_sync['failed'] ) ); ?><?php endif; ?></p>
+			<?php if ( isset( $last_sync['updated'], $last_sync['failed'] ) ) : ?><?php printf( ' Zaktualizowano: %d, błędy: %d.', absint( $last_sync['updated'] ), absint( $last_sync['failed'] ) ); ?><?php endif; ?></p>
 		<?php endif; ?>
 		<?php if ( get_option( 'lasery_xtool_fetch_paused' ) ) : ?>
 			<p>Pobieranie wstrzymano po odpowiedzi 429. Wznów dopiero po ustaniu ograniczenia źródła.</p>
@@ -468,7 +469,6 @@ function lasery_xtool_sync_existing() {
 			$targets[ $id ][] = $post_id;
 		}
 	}
-	$all_targets = $targets;
 	$handles = array();
 	$unresolved = 0;
 	foreach ( $targets as $id => $post_ids ) {
@@ -503,21 +503,13 @@ function lasery_xtool_sync_existing() {
 	$deferred = array_slice( $handles, 1, null, true );
 	foreach ( $deferred as $id => $item ) {
 		unset( $targets[ $id ] );
-		++$unresolved;
 	}
 	$handles = array_slice( $handles, 0, 1, true );
 	$handles = array_map( function ( $item ) { return $item['handle']; }, $handles );
 	$fetched = lasery_xtool_fetch_source( array_keys( $targets ), $handles );
 	if ( is_wp_error( $fetched ) ) {
-		// A rate limit doesn't prove the last observed offers changed. Keep each
-		// snapshot usable only until its existing 24-hour freshness limit expires.
-		if ( 'paused' !== $fetched->get_error_code() ) {
-			foreach ( $all_targets as $post_ids ) {
-				foreach ( $post_ids as $post_id ) {
-					update_post_meta( $post_id, '_lasery_source_updated_at', '' );
-				}
-			}
-		}
+		// A failed batch does not invalidate unrelated observed offers. Their
+		// existing freshness limit still applies.
 		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $fetched->get_error_code() ), false );
 		lasery_xtool_release_import_lock();
 		return;
@@ -548,7 +540,7 @@ function lasery_xtool_sync_existing() {
 			++$failed;
 		}
 	}
-	$sync_result = $unresolved ? 'incomplete' : $fetched['result'];
+	$sync_result = $unresolved || $failed || 'incomplete' === $fetched['result'] ? 'incomplete' : ( $deferred ? 'batch' : $fetched['result'] );
 	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $sync_result, 'updated' => $updated, 'failed' => $failed ), false );
 	lasery_xtool_release_import_lock();
 }
