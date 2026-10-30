@@ -569,7 +569,7 @@ html:not(.js) .menu-toggle { display: none; }
 .variant-option:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
 .variant-option-title { font-weight: 600; line-height: 1.4; }
 .variant-option-price { font: 700 1rem/1.2 var(--font-display); white-space: nowrap; }
-.order-summary { display: grid; gap: 14px; padding: 22px; border-radius: var(--radius-lg); background: #fff; }
+.order-summary { display: grid; gap: 14px; padding: 22px; border-radius: var(--radius-lg); background: #fff; container: order-summary / inline-size; }
 .order-summary :is(h2, h3) { font-size: 1.15rem; }
 .order-summary-product { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); font-weight: 700; line-height: 1.35; }
 .order-summary-product img { width: 64px; height: 64px; flex-shrink: 0; border-radius: 12px; background: var(--surface); object-fit: contain; mix-blend-mode: multiply; }
@@ -578,6 +578,12 @@ html:not(.js) .menu-toggle { display: none; }
 .order-summary-list dt { color: var(--muted); }
 .order-summary-list dd { font-weight: 600; text-align: right; }
 .order-summary-price { font: 700 1.35rem/1.2 var(--font-display) !important; }
+/* A narrow summary puts each value under its label, so long prices and variants never overflow. */
+@container order-summary (max-width: 299.98px) {
+  .order-summary-list, .cart .order-summary-list { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .order-summary-list dd { text-align: left; }
+  .order-summary-list dd + dt { margin-top: 8px; }
+}
 .order-summary-note, .order-summary-privacy { color: var(--muted); font-size: .8rem; line-height: 1.5; }
 .order-summary-privacy a { color: var(--ink); }
 .order-form-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
