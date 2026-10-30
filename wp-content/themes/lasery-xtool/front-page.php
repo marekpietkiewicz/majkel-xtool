@@ -1,16 +1,58 @@
 <?php get_header(); ?>
+<?php
+$featured = get_posts([
+    'post_type' => 'lasery_product',
+    'post_status' => 'publish',
+    'posts_per_page' => 6,
+]);
+$slides = [];
+foreach ($featured as $featured_product) {
+    $image_url = get_the_post_thumbnail_url($featured_product->ID, 'large');
+    if ($image_url) {
+        $slides[] = ['post' => $featured_product, 'image' => $image_url];
+    }
+    if (count($slides) === 3) {
+        break;
+    }
+}
+?>
 <section class="hero" aria-labelledby="hero-heading">
-    <div class="wrap hero-inner">
-        <div class="hero-copy">
-            <p class="eyebrow hero-eyebrow"><span aria-hidden="true"></span><?php esc_html_e('LASERY I URZĄDZENIA XTOOL', 'lasery-xtool'); ?></p>
-            <h1 id="hero-heading"><?php esc_html_e('Twórz więcej. Z xTool.', 'lasery-xtool'); ?></h1>
-            <p class="hero-description"><?php esc_html_e('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool'); ?></p>
-            <div class="actions">
-                <a class="button button-light" href="#produkty"><?php esc_html_e('Zobacz produkty', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a>
-                <a class="button button-outline" href="#demo"><?php esc_html_e('Zapytaj o demo', 'lasery-xtool'); ?></a>
+    <div class="wrap hero-shell">
+        <h1 id="hero-heading" class="visually-hidden"><?php esc_html_e('Twórz więcej. Z xTool.', 'lasery-xtool'); ?></h1>
+        <?php if ($slides) : ?>
+            <div class="hero-track" data-carousel aria-label="<?php esc_attr_e('Wyróżnione produkty', 'lasery-xtool'); ?>" tabindex="0">
+                <?php foreach ($slides as $index => $slide) : ?>
+                    <article class="hero-slide">
+                        <div class="hero-copy">
+                            <p class="eyebrow hero-eyebrow"><span aria-hidden="true"></span><?php esc_html_e('LASERY I URZĄDZENIA XTOOL', 'lasery-xtool'); ?></p>
+                            <h2><?php echo esc_html(get_the_title($slide['post']->ID)); ?></h2>
+                            <p class="hero-description"><?php esc_html_e('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool'); ?></p>
+                            <div class="actions">
+                                <a class="button button-light" href="<?php echo esc_url(get_permalink($slide['post']->ID)); ?>"><?php esc_html_e('Zobacz szczegóły', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a>
+                                <a class="button button-outline" href="#demo"><?php esc_html_e('Zapytaj o demo', 'lasery-xtool'); ?></a>
+                            </div>
+                        </div>
+                        <div class="hero-product-image"><img src="<?php echo esc_url($slide['image']); ?>" alt="" decoding="async" loading="<?php echo $index === 0 ? 'eager' : 'lazy'; ?>"></div>
+                    </article>
+                <?php endforeach; ?>
             </div>
-        </div>
-        <span class="hero-caption" aria-hidden="true"><?php esc_html_e('OD POMYSŁU DO REALIZACJI', 'lasery-xtool'); ?></span>
+            <?php if (count($slides) > 1) : ?>
+                <div class="carousel-controls" data-carousel-controls hidden>
+                    <button type="button" data-carousel-prev aria-label="<?php esc_attr_e('Poprzedni produkt', 'lasery-xtool'); ?>">←</button>
+                    <span class="carousel-count" aria-live="polite" data-carousel-count>1 / <?php echo esc_html((string) count($slides)); ?></span>
+                    <button type="button" data-carousel-next aria-label="<?php esc_attr_e('Następny produkt', 'lasery-xtool'); ?>">→</button>
+                </div>
+            <?php endif; ?>
+        <?php else : ?>
+            <div class="hero-fallback hero-slide">
+                <div class="hero-copy">
+                    <p class="eyebrow hero-eyebrow"><span aria-hidden="true"></span><?php esc_html_e('LASERY I URZĄDZENIA XTOOL', 'lasery-xtool'); ?></p>
+                    <h2><?php esc_html_e('Twórz więcej. Z xTool.', 'lasery-xtool'); ?></h2>
+                    <p class="hero-description"><?php esc_html_e('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool'); ?></p>
+                    <div class="actions"><a class="button button-light" href="#produkty"><?php esc_html_e('Zobacz produkty', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a><a class="button button-outline" href="#demo"><?php esc_html_e('Zapytaj o demo', 'lasery-xtool'); ?></a></div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
 <section id="produkty" class="products-section section" aria-labelledby="products-heading">
@@ -55,7 +97,9 @@
     </div>
     <div class="wrap demo-frame-wrap">
         <p><?php esc_html_e('Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć.', 'lasery-xtool'); ?></p>
-        <iframe class="demo-frame" src="https://support.xtool.com/demo-room/host-instruction?id=1252&amp;type=demoPreSale" title="<?php esc_attr_e('Rezerwacja demonstracji xTool u Michała', 'lasery-xtool'); ?>" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <?php $consent_text = lasery_xtool_consent_texts(); ?>
+        <div data-lasery-consent-placeholder><p><?php echo esc_html($consent_text['frame_notice']); ?></p><button type="button" class="lasery-consent-settings" data-lasery-consent-open><?php echo esc_html($consent_text['settings']); ?></button></div>
+        <iframe class="demo-frame" data-lasery-consent-src="https://support.xtool.com/demo-room/host-instruction?id=1252&amp;type=demoPreSale" title="<?php esc_attr_e('Rezerwacja demonstracji xTool u Michała', 'lasery-xtool'); ?>" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
     </div>
 </section>
 <?php get_footer(); ?>

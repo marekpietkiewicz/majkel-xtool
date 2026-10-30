@@ -48,6 +48,7 @@ function lasery_xtool_deactivate() {
 }
 
 require_once __DIR__ . '/order-form.php';
+require_once __DIR__ . '/image-sync.php';
 
 add_action( 'admin_menu', 'lasery_xtool_register_import_page' );
 function lasery_xtool_register_import_page() {
@@ -176,18 +177,17 @@ function lasery_xtool_parse_products( $json ) {
 			if ( ! is_array( $product->images ) ) {
 				return false;
 			}
-			$item['image_url'] = '';
+			$item['image_urls'] = array();
 			foreach ( $product->images as $image ) {
 				if ( ! is_object( $image ) || ! isset( $image->src ) || ! is_string( $image->src ) ) {
 					return false;
 				}
 				$url = esc_url_raw( $image->src, array( 'https' ) );
-				$parts = wp_parse_url( $url );
-				if ( is_array( $parts ) && isset( $parts['scheme'], $parts['host'] ) && 'https' === $parts['scheme'] && in_array( strtolower( $parts['host'] ), array( 'cdn.shopify.com', 'www.xtool.eu' ), true ) && ! isset( $parts['user'] ) && ! isset( $parts['pass'] ) && ! isset( $parts['port'] ) ) {
-					$item['image_url'] = $url;
-					break;
+				if ( lasery_xtool_is_source_image_url( $url ) && ! in_array( $url, $item['image_urls'], true ) && count( $item['image_urls'] ) < 20 ) {
+					$item['image_urls'][] = $url;
 				}
 			}
+			$item['image_url'] = $item['image_urls'] ? $item['image_urls'][0] : '';
 		}
 		$products[] = $item;
 	}
@@ -321,6 +321,12 @@ function lasery_xtool_handle_fetch() {
 	lasery_xtool_save_products( $fetched['products'], $fetched['result'] );
 }
 
+/** Refuse compressed bodies, which could exceed the limit when decompressed. */
+function lasery_xtool_identity_response( $response ) {
+	$encoding = wp_remote_retrieve_header( $response, 'content-encoding' );
+	return is_string( $encoding ) && ( '' === $encoding || 'identity' === strtolower( trim( $encoding ) ) );
+}
+
 /** Return a complete bounded snapshot, without writes to product records. */
 function lasery_xtool_fetch_source( $target_ids = null ) {
 	if ( get_option( 'lasery_xtool_fetch_paused' ) ) {
@@ -335,13 +341,13 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 	$currency = '';
 	$meta_response = wp_safe_remote_get(
 		'https://www.xtool.eu/meta.json',
-		array( 'timeout' => 15, 'redirection' => 0, 'limit_response_size' => 32769 )
+		array( 'timeout' => 15, 'redirection' => 0, 'limit_response_size' => 32769, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) )
 	);
 	if ( ! is_wp_error( $meta_response ) && 429 === wp_remote_retrieve_response_code( $meta_response ) ) {
 		update_option( 'lasery_xtool_fetch_paused', 1, false );
 		return new WP_Error( 'paused' );
 	}
-	if ( ! is_wp_error( $meta_response ) && 200 === wp_remote_retrieve_response_code( $meta_response ) ) {
+	if ( ! is_wp_error( $meta_response ) && 200 === wp_remote_retrieve_response_code( $meta_response ) && lasery_xtool_identity_response( $meta_response ) ) {
 		$meta_body = wp_remote_retrieve_body( $meta_response );
 		$meta = strlen( $meta_body ) <= 32768 ? json_decode( $meta_body ) : null;
 		if ( is_object( $meta ) && isset( $meta->currency ) && is_string( $meta->currency ) && preg_match( '/^[A-Z]{3}$/D', $meta->currency ) ) {
@@ -360,13 +366,15 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 				'timeout'             => 15,
 				'redirection'         => 0,
 				'limit_response_size' => LASERY_XTOOL_MAX_BYTES + 1,
+				'decompress' => false,
+				'headers' => array( 'Accept-Encoding' => 'identity' ),
 			)
 		);
 		if ( ! is_wp_error( $response ) && 429 === wp_remote_retrieve_response_code( $response ) ) {
 			update_option( 'lasery_xtool_fetch_paused', 1, false );
 			return new WP_Error( 'paused' );
 		}
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! lasery_xtool_identity_response( $response ) ) {
 			return new WP_Error( 'network' );
 		}
 		$body = wp_remote_retrieve_body( $response );
@@ -524,7 +532,7 @@ function lasery_xtool_save_products( $products, $result ) {
 
 /** Source data never overwrites edited content, prices or featured images. */
 function lasery_xtool_save_source_data( $post_id, $product ) {
-	$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url' );
+	$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls' );
 	if ( array_key_exists( 'variants', $product ) ) {
 		// Hide the snapshot while any of its fields are being changed. A failed
 		// write must never leave new prices paired with an old currency or time.
@@ -548,4 +556,67 @@ function lasery_xtool_save_source_data( $post_id, $product ) {
 		}
 	}
 	return true;
+}
+
+/** Apply a verified snapshot to specific published products without network access. */
+function lasery_xtool_apply_existing_snapshot( $json, $fetched_at, $currency, $source_ids ) {
+	if ( ! is_string( $json ) || strlen( $json ) > LASERY_XTOOL_MAX_BYTES || ! is_int( $fetched_at ) || $fetched_at < 1 || $fetched_at > time() || ! is_string( $currency ) || ! preg_match( '/^[A-Z]{3}$/D', $currency ) || ! is_array( $source_ids ) || ! $source_ids || count( $source_ids ) > 50 ) {
+		return new WP_Error( 'snapshot_arguments' );
+	}
+	$wanted = array();
+	foreach ( $source_ids as $id ) {
+		if ( ! is_string( $id ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', $id ) || isset( $wanted[ $id ] ) ) {
+			return new WP_Error( 'snapshot_arguments' );
+		}
+		$wanted[ $id ] = true;
+	}
+	$products = lasery_xtool_parse_products( $json );
+	if ( false === $products ) {
+		return new WP_Error( 'format' );
+	}
+	$matches = array();
+	foreach ( $products as $product ) {
+		if ( isset( $wanted[ $product['id'] ] ) ) {
+			$matches[ $product['id'] ] = $product;
+		}
+	}
+	if ( count( $matches ) !== count( $wanted ) ) {
+		return new WP_Error( 'incomplete' );
+	}
+	if ( ! lasery_xtool_lock_import() ) {
+		return new WP_Error( 'locked' );
+	}
+	try {
+		$posts = array();
+		foreach ( $wanted as $id => $unused ) {
+			$found = get_posts( array(
+				'post_type' => LASERY_XTOOL_PRODUCT_TYPE,
+				'post_status' => 'publish',
+				'meta_key' => LASERY_XTOOL_SOURCE_ID,
+				'meta_value' => (string) $id,
+				'fields' => 'ids',
+				'posts_per_page' => 2,
+				'no_found_rows' => true,
+			) );
+			if ( 1 !== count( $found ) ) {
+				return new WP_Error( 'snapshot_target' );
+			}
+			$posts[ $id ] = $found[0];
+		}
+		$updated = 0;
+		foreach ( $matches as $id => $product ) {
+			if ( ! lasery_xtool_refresh_import_lock() ) {
+				return new WP_Error( 'locklost' );
+			}
+			$product['currency'] = $currency;
+			$product['fetched_at'] = $fetched_at;
+			if ( ! lasery_xtool_save_source_data( $posts[ $id ], $product ) ) {
+				return new WP_Error( 'snapshot_write', '', array( 'updated' => $updated ) );
+			}
+			++$updated;
+		}
+		return $updated;
+	} finally {
+		lasery_xtool_release_import_lock();
+	}
 }

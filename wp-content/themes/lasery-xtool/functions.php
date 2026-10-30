@@ -3,6 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once get_template_directory() . '/cookie-consent.php';
+
 add_action('after_setup_theme', function () {
     load_theme_textdomain('lasery-xtool', get_template_directory() . '/languages');
     add_theme_support('title-tag');
@@ -13,6 +15,12 @@ add_action('after_setup_theme', function () {
 
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], wp_get_theme()->get('Version'));
+    if (is_front_page()) {
+        wp_enqueue_script('lasery-xtool-carousel', get_template_directory_uri() . '/assets/carousel.js', [], wp_get_theme()->get('Version'), true);
+    }
+    if (is_singular('lasery_product')) {
+        wp_enqueue_script('lasery-xtool-gallery', get_template_directory_uri() . '/assets/gallery.js', [], wp_get_theme()->get('Version'), true);
+    }
 });
 
 /** Use a URL parameter for interface language until translated products are available. */

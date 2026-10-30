@@ -100,3 +100,17 @@ msgstr "MAJKEL MICHAŁ MAGALSKI"
 
 msgid "Produkty xTool"
 msgstr "Товари xTool"
+msgid "Wyróżnione produkty"
+msgstr "Рекомендовані товари"
+
+msgid "Poprzedni produkt"
+msgstr "Попередній товар"
+
+msgid "Następny produkt"
+msgstr "Наступний товар"
+
+msgid "Zdjęcia produktu"
+msgstr "Фотографії товару"
+
+msgid "Zdjęcie produktu %d"
+msgstr "Фотографія товару %d"

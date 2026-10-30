@@ -1,13 +1,10 @@
 <?php
 $is_product = get_post_type() === 'lasery_product';
-$source_image = $is_product ? get_post_meta(get_the_ID(), '_lasery_source_image_url', true) : '';
 ?>
 <article <?php post_class('card'); ?>>
     <a class="card-image" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
         <?php if (has_post_thumbnail()) : ?>
             <?php the_post_thumbnail('medium_large'); ?>
-        <?php elseif (is_string($source_image) && $source_image !== '') : ?>
-            <img src="<?php echo esc_url($source_image, ['https']); ?>" alt="" loading="lazy" decoding="async">
         <?php else : ?>
             <span class="card-placeholder"><?php echo $is_product ? esc_html__('xTool', 'lasery-xtool') : esc_html(get_bloginfo('name')); ?></span>
         <?php endif; ?>

@@ -8,21 +8,22 @@ Zdjęcie w pierwszej sekcji pochodzi z materiałów xTool: [źródło w CDN Shop
 
 ## Stan środowiska
 
-- Domena `https://laseryxtool.pl` działa przez HTTPS, a na hostingu jest już zainstalowany WordPress z domyślnymi treściami.
+- Domena `https://laseryxtool.pl` działa przez HTTPS na WordPressie. Pierwszy katalog zawiera modele xTool X1 i M2.
 - Istniejąca instalacja korzysta z bazy `host119363_wp874`. Dodatkowa baza `host119363_xtool` nie jest potrzebna do pracy z tą instalacją.
 - SSH działa z lokalnym kluczem Hostido; na serwerze dostępne są PHP i WP-CLI.
 - Odrębnego stagingu nie znaleziono w katalogach hostingu; może istnieć poza nimi i wymaga dalszego sprawdzenia.
-- Domyślne treści są publicznie dostępne, a indeksowanie jest włączone.
+- Domyślne treści WordPressa zostały przeniesione do szkiców; indeksowanie jest włączone.
 
 ## Założenia
 
 - Prosta, czytelna strona w stylu landing page, z produktami, możliwością zakupu oraz kontaktem w sprawie demonstracji. Inspiracje: https://xtool.systems/en/ i https://www.xtool.eu/; strona główna powinna mieć mniej treści niż pierwsza z nich.
 - Zakup ma odbywać się przez formularz zamówienia wysyłany do Michała. Michał ręcznie obsługuje zamówienie w xTool i następnie przekazuje klientowi link do płatności. Formularz ma zawierać produkt i cenę oraz przypominać pola faktycznego formularza xTool.
-- Demo ma wykorzystywać stronę gospodarza xTool: `https://support.xtool.com/demo-room/host-instruction?id=1252&type=demoPreSale`; planowane jest osadzenie jej w iframe, jeśli rzeczywista aplikacja na to pozwala.
+- Demo wykorzystuje stronę gospodarza xTool: `https://support.xtool.com/demo-room/host-instruction?id=1252&type=demoPreSale`, osadzoną w iframe i dostępną przez bezpośredni link.
+- Opcjonalna ramka demo i zewnętrzne materiały w opisach ładują się po zgodzie; decyzję można zmienić w stopce. Wybrane zdjęcia produktów są zapisywane lokalnie jako WebP.
 - Własny motyw i wtyczka do importowania oraz aktualizacji produktów. Źródłem jest katalog Shopify xTool; zakres danych wymaga doprecyzowania. Użytkownik potwierdził, że umowa zezwala na automatyczne pobieranie, publikowanie i tłumaczenie materiałów.
 - Interfejs dostępny jest po polsku, angielsku, niemiecku, rosyjsku i ukraińsku. Automatyczne tłumaczenie opisów produktów nie jest wdrożone; ich treści pozostają w języku źródła.
-- Środowisko staging do sprawdzania zmian przed publikacją. Jego dostępność i konfigurację na hostingu trzeba zweryfikować.
-- Import okresowy uruchamiany przez cron, po ustaleniu źródła danych i przetestowaniu wydajności.
+- Osobny staging nie został jeszcze skonfigurowany.
+- Cron na hostingu uruchamia synchronizację źródłowych danych istniejących produktów co sześć godzin. Po 429 pobieranie jest wstrzymywane do ręcznego wznowienia.
 
 Zakres katalogu oraz zasady aktualizowania ręcznych zmian wymagają dalszego doprecyzowania. Użytkownik potwierdził uprawnienia do używania materiałów xTool.
 

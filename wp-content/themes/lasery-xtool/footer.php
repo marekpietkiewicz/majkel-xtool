@@ -11,6 +11,8 @@
             <?php $privacy_labels = ['pl' => 'Polityka prywatności', 'en' => 'Privacy policy', 'de' => 'Datenschutzerklärung', 'ru' => 'Политика конфиденциальности', 'uk' => 'Політика конфіденційності']; ?>
             <span><a href="<?php echo esc_url(lasery_xtool_language_url($privacy_url)); ?>"><?php echo esc_html($privacy_labels[lasery_xtool_interface_language()]); ?></a></span>
         <?php endif; ?>
+        <?php $consent_text = lasery_xtool_consent_texts(); ?>
+        <span><button type="button" class="lasery-consent-settings" data-lasery-consent-open><?php echo esc_html($consent_text['settings']); ?></button></span>
         <span><?php esc_html_e('MAJKEL MICHAŁ MAGALSKI', 'lasery-xtool'); ?></span>
     </div>
 </footer>
