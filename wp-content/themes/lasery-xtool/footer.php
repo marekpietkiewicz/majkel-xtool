@@ -11,7 +11,7 @@ $email = lasery_xtool_contact_email();
         <div class="footer-grid">
             <div class="footer-about">
                 <a class="brand" href="<?php echo esc_url($home); ?>"><?php lasery_xtool_brand(); ?></a>
-                <p><?php echo esc_html(lasery_xtool_text('footer_tagline', __('Urządzenia xTool do grawerowania i cięcia laserowego. Pokażemy je na demo i pomożemy w zamówieniu.', 'lasery-xtool'))); ?></p>
+                <p><?php echo esc_html(lasery_xtool_text('footer_tagline')); ?></p>
                 <a class="btn btn-light" href="<?php echo esc_url('mailto:' . $email); ?>"><?php echo lasery_xtool_icon('mail'); ?><?php echo esc_html($email); ?></a>
             </div>
             <nav class="footer-col" aria-labelledby="footer-devices">

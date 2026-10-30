@@ -4,14 +4,11 @@ const gallery = document.querySelector('[data-gallery-main]');
 const links = gallery ? Array.from(gallery.querySelectorAll('a[data-pswp-width]')) : [];
 
 if (links.length) {
-  const loadStyles = () => {
-    if (document.getElementById('photoswipe-css')) return;
-    const link = document.createElement('link');
-    link.id = 'photoswipe-css';
-    link.rel = 'stylesheet';
-    link.href = new URL('./lib/photoswipe/photoswipe.css', import.meta.url).href;
-    document.head.append(link);
-  };
+  // Fetched after the page renders, so the gallery itself is not delayed.
+  const styles = document.createElement('link');
+  styles.rel = 'stylesheet';
+  styles.href = new URL('./lib/photoswipe/photoswipe.css', import.meta.url).href;
+  document.head.append(styles);
 
   const lightbox = new PhotoSwipeLightbox({
     dataSource: links.map((link) => ({
@@ -33,7 +30,6 @@ if (links.length) {
     // Swiper cancels the click that ends a drag.
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
-    loadStyles();
     gallery.swiper?.autoplay?.stop();
     lightbox.loadAndOpen(links.indexOf(link));
   });

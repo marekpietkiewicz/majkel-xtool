@@ -98,11 +98,6 @@ function lasery_xtool_order_price_amount( $post_id ) {
 	return array( $price, $currency );
 }
 
-function lasery_xtool_order_price( $post_id ) {
-	$amount = lasery_xtool_order_price_amount( $post_id );
-	return $amount ? $amount[0] . ' ' . $amount[1] : '';
-}
-
 /** Format a price for visitors, e.g. "3 427,33 €" in Polish. */
 function lasery_xtool_format_price( $amount, $currency, $language ) {
 	$locales = array( 'pl' => 'pl_PL', 'en' => 'en_IE', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk_UA' );
@@ -183,6 +178,7 @@ function lasery_xtool_order_texts( $language ) {
 			'privacy_link' => 'Polityka prywatności', 'privacy' => 'Dane wykorzystamy do obsługi zamówienia. Link do formularza xTool zawierający Twoje dane może zostać zapisany w historii przeglądarki i logach.', 'sent' => 'Dziękujemy! Twoje zgłoszenie zostało wysłane. Skontaktujemy się z Tobą w sprawie szczegółów i linku do płatności.', 'sent_no_receipt' => 'Zgłoszenie zostało wysłane, ale nie udało się wysłać potwierdzenia na Twój adres. Nie wysyłaj zamówienia ponownie; w razie pytań napisz na Michal@laseryxtool.pl.', 'failed' => 'Nie udało się wysłać zgłoszenia. Spróbuj ponownie lub napisz na Michal@laseryxtool.pl.', 'invalid' => 'Sprawdź dane formularza i spróbuj ponownie.', 'busy' => 'Odczekaj chwilę przed ponownym wysłaniem zgłoszenia.',
 			'owner_subject' => 'Nowe zamówienie: %s', 'customer_subject' => 'Otrzymaliśmy zgłoszenie: %s', 'customer_body' => 'Dziękujemy za przesłanie zgłoszenia. Skontaktujemy się z Tobą, aby potwierdzić szczegóły zamówienia i przekazać link do płatności.', 'product' => 'Produkt', 'details' => 'Szczegóły zamówienia', 'price' => 'Cena orientacyjna', 'no_price' => 'Cena do potwierdzenia', 'price_note' => 'Ostateczna cena, VAT i koszt dostawy mogą się różnić.',
 			'summary' => 'Podsumowanie', 'contact' => 'Dane kontaktowe', 'address' => 'Adres dostawy', 'extras' => 'Faktura i uwagi', 'summary_empty' => 'Wybierz wariant powyżej', 'next_steps' => 'Po wysłaniu formularza potwierdzimy dostępność i cenę, a następnie wyślemy link do płatności.',
+			'view_product' => 'Zobacz produkt', 'reply_note' => 'Masz pytania? Odpowiedz na tę wiadomość.',
 		),
 		'en' => array(
 			'title' => 'Order this product', 'intro' => 'Send us your order details. We will contact you to confirm the details and provide a payment link.',
@@ -190,6 +186,7 @@ function lasery_xtool_order_texts( $language ) {
 			'privacy_link' => 'Privacy policy', 'privacy' => 'We use your details to handle your order. A link to the xTool checkout containing your data may be stored in browser history and logs.', 'sent' => 'Thank you! Your request has been sent. We will contact you about the details and payment link.', 'sent_no_receipt' => 'Your request was sent, but we could not send your confirmation email. Please do not resubmit; contact Michal@laseryxtool.pl with any questions.', 'failed' => 'Your request could not be sent. Please try again or email Michal@laseryxtool.pl.', 'invalid' => 'Please check the form and try again.', 'busy' => 'Please wait a moment before sending another request.',
 			'owner_subject' => 'New order request: %s', 'customer_subject' => 'We received your request: %s', 'customer_body' => 'Thank you for your request. We will contact you to confirm the order details and provide a payment link.', 'product' => 'Product', 'details' => 'Order details', 'price' => 'Estimated price', 'no_price' => 'Price to be confirmed', 'price_note' => 'The final price, VAT and delivery costs may differ.',
 			'summary' => 'Summary', 'contact' => 'Contact details', 'address' => 'Delivery address', 'extras' => 'Invoice and notes', 'summary_empty' => 'Choose a variant above', 'next_steps' => 'After you send the form, we will confirm availability and price, then send you a payment link.',
+			'view_product' => 'View product', 'reply_note' => 'Questions? Just reply to this email.',
 		),
 		'de' => array(
 			'title' => 'Produkt bestellen', 'intro' => 'Senden Sie uns Ihre Bestelldaten. Wir kontaktieren Sie, um die Einzelheiten zu bestätigen und Ihnen einen Zahlungslink zu senden.',
@@ -197,6 +194,7 @@ function lasery_xtool_order_texts( $language ) {
 			'privacy_link' => 'Datenschutzerklärung', 'privacy' => 'Wir verwenden Ihre Daten zur Bearbeitung Ihrer Bestellung. Ein Link zum xTool-Checkout mit Ihren Daten kann im Browserverlauf und in Protokollen gespeichert werden.', 'sent' => 'Vielen Dank! Ihre Anfrage wurde gesendet. Wir kontaktieren Sie wegen der Einzelheiten und des Zahlungslinks.', 'sent_no_receipt' => 'Ihre Anfrage wurde gesendet, aber die Bestätigungs-E-Mail konnte nicht versendet werden. Bitte senden Sie die Anfrage nicht erneut; bei Fragen schreiben Sie an Michal@laseryxtool.pl.', 'failed' => 'Ihre Anfrage konnte nicht gesendet werden. Versuchen Sie es erneut oder schreiben Sie an Michal@laseryxtool.pl.', 'invalid' => 'Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.', 'busy' => 'Bitte warten Sie einen Moment, bevor Sie eine weitere Anfrage senden.',
 			'owner_subject' => 'Neue Bestellanfrage: %s', 'customer_subject' => 'Wir haben Ihre Anfrage erhalten: %s', 'customer_body' => 'Vielen Dank für Ihre Anfrage. Wir kontaktieren Sie, um die Bestelldetails zu bestätigen und Ihnen einen Zahlungslink zu senden.', 'product' => 'Produkt', 'details' => 'Bestelldetails', 'price' => 'Unverbindlicher Preis', 'no_price' => 'Preis wird bestätigt', 'price_note' => 'Endpreis, MwSt. und Lieferkosten können abweichen.',
 			'summary' => 'Zusammenfassung', 'contact' => 'Kontaktdaten', 'address' => 'Lieferadresse', 'extras' => 'Rechnung und Hinweise', 'summary_empty' => 'Wählen Sie oben eine Variante', 'next_steps' => 'Nach dem Absenden bestätigen wir Verfügbarkeit und Preis und senden Ihnen anschließend einen Zahlungslink.',
+			'view_product' => 'Produkt ansehen', 'reply_note' => 'Fragen? Antworten Sie einfach auf diese E-Mail.',
 		),
 		'ru' => array(
 			'title' => 'Заказать товар', 'intro' => 'Отправьте нам данные заказа. Мы свяжемся с вами, чтобы подтвердить детали и предоставить ссылку для оплаты.',
@@ -204,6 +202,7 @@ function lasery_xtool_order_texts( $language ) {
 			'privacy_link' => 'Политика конфиденциальности', 'privacy' => 'Мы используем данные для обработки заказа. Ссылка на оформление xTool с вашими данными может сохраняться в истории браузера и журналах.', 'sent' => 'Спасибо! Ваша заявка отправлена. Мы свяжемся с вами по поводу деталей и ссылки для оплаты.', 'sent_no_receipt' => 'Заявка отправлена, но письмо с подтверждением отправить не удалось. Не отправляйте заявку повторно; по вопросам пишите на Michal@laseryxtool.pl.', 'failed' => 'Не удалось отправить заявку. Попробуйте ещё раз или напишите на Michal@laseryxtool.pl.', 'invalid' => 'Проверьте данные формы и попробуйте ещё раз.', 'busy' => 'Подождите немного перед повторной отправкой заявки.',
 			'owner_subject' => 'Новая заявка на заказ: %s', 'customer_subject' => 'Мы получили вашу заявку: %s', 'customer_body' => 'Спасибо за заявку. Мы свяжемся с вами, чтобы подтвердить детали заказа и предоставить ссылку для оплаты.', 'product' => 'Товар', 'details' => 'Данные заказа', 'price' => 'Ориентировочная цена', 'no_price' => 'Цена уточняется', 'price_note' => 'Окончательная цена, НДС и стоимость доставки могут отличаться.',
 			'summary' => 'Итог', 'contact' => 'Контактные данные', 'address' => 'Адрес доставки', 'extras' => 'Счёт и комментарии', 'summary_empty' => 'Выберите вариант выше', 'next_steps' => 'После отправки формы мы подтвердим наличие и цену, а затем пришлём ссылку для оплаты.',
+			'view_product' => 'Посмотреть товар', 'reply_note' => 'Есть вопросы? Просто ответьте на это письмо.',
 		),
 		'uk' => array(
 			'title' => 'Замовити товар', 'intro' => 'Надішліть нам дані замовлення. Ми зв’яжемося з вами, щоб підтвердити деталі та надати посилання для оплати.',
@@ -211,6 +210,7 @@ function lasery_xtool_order_texts( $language ) {
 			'privacy_link' => 'Політика конфіденційності', 'privacy' => 'Ми використовуємо дані для обробки замовлення. Посилання на оформлення xTool з вашими даними може зберігатися в історії браузера та журналах.', 'sent' => 'Дякуємо! Вашу заявку надіслано. Ми зв’яжемося з вами щодо деталей і посилання для оплати.', 'sent_no_receipt' => 'Заявку надіслано, але лист із підтвердженням надіслати не вдалося. Не надсилайте заявку повторно; із запитаннями пишіть на Michal@laseryxtool.pl.', 'failed' => 'Не вдалося надіслати заявку. Спробуйте ще раз або напишіть на Michal@laseryxtool.pl.', 'invalid' => 'Перевірте дані форми та спробуйте ще раз.', 'busy' => 'Зачекайте трохи перед повторним надсиланням заявки.',
 			'owner_subject' => 'Нова заявка на замовлення: %s', 'customer_subject' => 'Ми отримали вашу заявку: %s', 'customer_body' => 'Дякуємо за заявку. Ми зв’яжемося з вами, щоб підтвердити деталі замовлення та надати посилання для оплати.', 'product' => 'Товар', 'details' => 'Дані замовлення', 'price' => 'Орієнтовна ціна', 'no_price' => 'Ціна уточнюється', 'price_note' => 'Остаточна ціна, ПДВ і вартість доставки можуть відрізнятися.',
 			'summary' => 'Підсумок', 'contact' => 'Контактні дані', 'address' => 'Адреса доставки', 'extras' => 'Рахунок і примітки', 'summary_empty' => 'Оберіть варіант вище', 'next_steps' => 'Після надсилання форми ми підтвердимо наявність і ціну, а потім надішлемо посилання для оплати.',
+			'view_product' => 'Переглянути товар', 'reply_note' => 'Маєте запитання? Просто дайте відповідь на цей лист.',
 		),
 	);
 	$text = isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
@@ -226,7 +226,7 @@ function lasery_xtool_order_language() {
 		$language = get_locale();
 	}
 	$language = strtolower( substr( $language, 0, 2 ) );
-	return in_array( $language, array( 'pl', 'en', 'de', 'ru', 'uk' ), true ) ? $language : 'pl';
+	return isset( lasery_xtool_description_languages()[ $language ] ) ? $language : 'pl';
 }
 
 /** Checkout countries observed on xtool.eu on 2026-10-30; review as the store changes. */
@@ -242,6 +242,12 @@ function lasery_xtool_shipping_countries() {
 		'PL' => 'Poland', 'PT' => 'Portugal', 'RO' => 'Romania', 'SK' => 'Slovakia',
 		'SI' => 'Slovenia', 'SE' => 'Sweden',
 	);
+}
+
+function lasery_xtool_country_name( $code, $language ) {
+	$countries = lasery_xtool_shipping_countries();
+	$label = class_exists( 'Locale' ) ? Locale::getDisplayRegion( 'und_' . $code, $language ) : '';
+	return is_string( $label ) && '' !== $label ? $label : ( isset( $countries[ $code ] ) ? $countries[ $code ] : $code );
 }
 
 /** Read source variants without accepting prices or availability from the browser. */
@@ -269,33 +275,37 @@ function lasery_xtool_available_variants( $post_id ) {
 function lasery_xtool_variant_amount( $post_id, $variant ) {
 	$currency = get_post_meta( $post_id, '_lasery_source_currency', true );
 	$price = isset( $variant['price'] ) ? $variant['price'] : null;
-	if ( ! is_string( $currency ) || ! preg_match( '/^[A-Z]{3}$/D', $currency ) || ! is_string( $price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $price ) ) {
+	if ( ! is_string( $currency ) || ! preg_match( '/^[A-Z]{3}$/D', $currency ) || ! is_string( $price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $price ) || (float) $price <= 0 ) {
 		return null;
 	}
 	return array( $price, $currency );
 }
 
-function lasery_xtool_source_variant_price( $post_id, $variant ) {
-	$amount = lasery_xtool_variant_amount( $post_id, $variant );
-	return $amount ? $amount[0] . ' ' . $amount[1] : '';
-}
-
-/** The lowest offer shown to visitors: fresh available variants or the manual estimate. */
+/**
+ * The lowest offer shown to visitors as [amount, currency, varies]: fresh available
+ * variants or the manual estimate. "varies" is true when variant prices differ.
+ */
 function lasery_xtool_lowest_price( $post_id ) {
 	if ( ! lasery_xtool_uses_source_variants( $post_id ) ) {
-		return lasery_xtool_order_price_amount( $post_id );
+		$amount = lasery_xtool_order_price_amount( $post_id );
+		return $amount ? array( $amount[0], $amount[1], false ) : null;
 	}
 	if ( ! lasery_xtool_source_is_fresh( $post_id ) ) {
 		return null;
 	}
-	$lowest = null;
+	$prices = array();
 	foreach ( lasery_xtool_available_variants( $post_id ) as $variant ) {
 		$amount = lasery_xtool_variant_amount( $post_id, $variant );
-		if ( $amount && ( null === $lowest || (float) $amount[0] < (float) $lowest[0] ) ) {
-			$lowest = $amount;
+		if ( $amount ) {
+			$prices[ number_format( (float) $amount[0], 2, '.', '' ) ] = $amount;
 		}
 	}
-	return $lowest;
+	if ( ! $prices ) {
+		return null;
+	}
+	uksort( $prices, function ( $a, $b ) { return (float) $a <=> (float) $b; } );
+	$lowest = reset( $prices );
+	return array( $lowest[0], $lowest[1], count( $prices ) > 1 );
 }
 
 function lasery_xtool_source_is_fresh( $post_id ) {
@@ -379,9 +389,8 @@ function lasery_xtool_render_order_form( $post_id ) {
 						<p class="field field-full"><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
 							<select id="order-country" name="country" autocomplete="country" required>
 								<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
-								<?php foreach ( lasery_xtool_shipping_countries() as $code => $fallback ) : ?>
-									<?php $label = class_exists( 'Locale' ) ? Locale::getDisplayRegion( 'und_' . $code, $language ) : ''; ?>
-									<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( is_string( $label ) && '' !== $label ? $label : $fallback ); ?></option>
+								<?php foreach ( array_keys( lasery_xtool_shipping_countries() ) as $code ) : ?>
+									<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( lasery_xtool_country_name( $code, $language ) ); ?></option>
 								<?php endforeach; ?>
 							</select>
 						</p>
@@ -402,7 +411,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<p><?php echo esc_html( $title ); ?></p>
 				</div>
 				<dl class="order-summary-list">
-					<?php if ( $uses_source_variants ) : ?>
+					<?php if ( $available_variants ) : ?>
 						<dt><?php echo esc_html( $text['variant'] ); ?></dt>
 						<dd data-order-summary-variant><?php echo esc_html( $selected ? str_replace( ' / ', ' · ', $selected['title'] ) : $text['summary_empty'] ); ?></dd>
 					<?php endif; ?>
@@ -463,12 +472,82 @@ function lasery_xtool_order_mail_sender( $mailer ) {
 	}
 }
 
-function lasery_xtool_order_mail( $to, $subject, $message, $headers ) {
+/**
+ * Branded email. $email: language, title, intro, sections (heading and rows of
+ * [label, plain-text value]), button ([label, url] or null), note, footer.
+ */
+function lasery_xtool_email_html( $email ) {
+	$font = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;";
+	$cell = 'padding:9px 0;border-bottom:1px solid #e3e5ea;vertical-align:top;font-size:14px;line-height:1.5;';
+	ob_start();
+	?>
+<!doctype html>
+<html lang="<?php echo esc_attr( $email['language'] ); ?>">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?php echo esc_html( $email['title'] ); ?></title></head>
+<body style="margin:0;padding:0;background:#f3f4f6;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;"><?php echo esc_html( $email['intro'] ); ?></div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f4f6;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:16px;<?php echo esc_attr( $font ); ?>color:#0d0f12;">
+<tr><td style="padding:22px 32px;background:#0d0f12;border-radius:16px 16px 0 0;font-size:18px;font-weight:700;color:#ffffff;"><span style="display:inline-block;width:10px;height:10px;margin-right:10px;border-radius:50%;background:#ff5a1f;"></span><?php echo esc_html( lasery_xtool_mail_from_name() ); ?></td></tr>
+<tr><td style="padding:32px 32px 4px;">
+<h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:700;"><?php echo esc_html( $email['title'] ); ?></h1>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#4b515c;"><?php echo esc_html( $email['intro'] ); ?></p>
+</td></tr>
+<?php foreach ( $email['sections'] as $section ) : ?>
+<tr><td style="padding:24px 32px 0;">
+<p style="margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c2410c;"><?php echo esc_html( $section['heading'] ); ?></p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<?php foreach ( $section['rows'] as $row ) : ?>
+<tr><td width="38%" style="<?php echo esc_attr( $cell ); ?>padding-right:12px;color:#5b616c;"><?php echo esc_html( $row[0] ); ?></td><td style="<?php echo esc_attr( $cell ); ?>font-weight:600;"><?php echo nl2br( esc_html( '' !== $row[1] ? $row[1] : '—' ) ); ?></td></tr>
+<?php endforeach; ?>
+</table>
+</td></tr>
+<?php endforeach; ?>
+<?php if ( $email['button'] ) : ?>
+<tr><td style="padding:32px 32px 4px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:999px;background:#0d0f12;">
+<a href="<?php echo esc_url( $email['button'][1] ); ?>" target="_blank" style="display:inline-block;padding:15px 28px;border-radius:999px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;"><?php echo esc_html( $email['button'][0] ); ?> &rarr;</a>
+</td></tr></table>
+</td></tr>
+<?php endif; ?>
+<tr><td style="padding:20px 32px 32px;font-size:12px;line-height:1.6;color:#5b616c;"><?php echo nl2br( esc_html( $email['note'] ) ); ?></td></tr>
+</table>
+<p style="margin:16px 0 0;<?php echo esc_attr( $font ); ?>font-size:12px;line-height:1.6;color:#8b909a;"><?php echo nl2br( esc_html( $email['footer'] ) ); ?></p>
+</td></tr>
+</table>
+</body>
+</html>
+	<?php
+	return ob_get_clean();
+}
+
+function lasery_xtool_email_text( $email ) {
+	$text = $email['title'] . "\n\n" . $email['intro'] . "\n";
+	foreach ( $email['sections'] as $section ) {
+		$text .= "\n" . $section['heading'] . "\n";
+		foreach ( $section['rows'] as $row ) {
+			$text .= $row[0] . ': ' . ( '' !== $row[1] ? $row[1] : '—' ) . "\n";
+		}
+	}
+	if ( $email['button'] ) {
+		$text .= "\n" . $email['button'][0] . ":\n" . $email['button'][1] . "\n";
+	}
+	return $text . "\n" . $email['note'] . "\n\n--\n" . $email['footer'] . "\n";
+}
+
+function lasery_xtool_order_mail( $to, $email, $headers ) {
+	$alternative = static function ( $mailer ) use ( $email ) {
+		$mailer->AltBody = lasery_xtool_email_text( $email );
+	};
+	$headers[] = 'Content-Type: text/html; charset=UTF-8';
 	add_action( 'phpmailer_init', 'lasery_xtool_order_mail_sender' );
+	add_action( 'phpmailer_init', $alternative );
 	try {
-		return wp_mail( $to, $subject, $message, $headers );
+		return wp_mail( $to, $email['title'], lasery_xtool_email_html( $email ), $headers );
 	} finally {
 		remove_action( 'phpmailer_init', 'lasery_xtool_order_mail_sender' );
+		remove_action( 'phpmailer_init', $alternative );
 	}
 }
 
@@ -511,11 +590,12 @@ function lasery_xtool_handle_order() {
 		$fields[ $field ] = sanitize_textarea_field( $fields[ $field ] );
 	}
 	$countries = lasery_xtool_shipping_countries();
-	if ( '' === $fields['first_name'] || '' === $fields['last_name'] || '' === $fields['address1'] || '' === $fields['city'] || '' === $fields['zip'] || ! isset( $countries[ $fields['country'] ] ) || '' === $fields['variant'] || ! is_email( $fields['email'] ) || ! preg_match( '/^(?:[1-9]|[1-9][0-9]|100)$/D', $fields['quantity'] ) || ! in_array( $fields['language'], array( 'pl', 'en', 'de', 'ru', 'uk' ), true ) ) {
+	if ( '' === $fields['first_name'] || '' === $fields['last_name'] || '' === $fields['address1'] || '' === $fields['city'] || '' === $fields['zip'] || ! isset( $countries[ $fields['country'] ] ) || '' === $fields['variant'] || ! is_email( $fields['email'] ) || ! preg_match( '/^(?:[1-9]|[1-9][0-9]|100)$/D', $fields['quantity'] ) || ! isset( lasery_xtool_description_languages()[ $fields['language'] ] ) ) {
 		lasery_xtool_order_redirect( $post_id, 'invalid' );
 	}
 	$variants = lasery_xtool_order_variants( $post_id );
 	$selected_variant = null;
+	$variant_title = $fields['variant'];
 	$uses_source_variants = lasery_xtool_uses_source_variants( $post_id );
 	if ( ! $uses_source_variants && isset( $_POST['snapshot'] ) ) {
 		lasery_xtool_order_redirect( $post_id, 'changed' );
@@ -537,7 +617,8 @@ function lasery_xtool_handle_order() {
 		if ( null === $selected_variant ) {
 			lasery_xtool_order_redirect( $post_id, 'invalid' );
 		}
-		$fields['variant'] = sanitize_text_field( html_entity_decode( $selected_variant['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) . ' (ID: ' . $selected_variant['id'] . ')';
+		$variant_title = sanitize_text_field( html_entity_decode( $selected_variant['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		$fields['variant'] = $variant_title . ' (ID: ' . $selected_variant['id'] . ')';
 	}
 	$ip = isset( $_SERVER['REMOTE_ADDR'] ) && is_string( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '';
 	$reservation = false;
@@ -552,15 +633,19 @@ function lasery_xtool_handle_order() {
 	$product = lasery_xtool_order_product_title( $post_id, 'pl' );
 	$customer_product = lasery_xtool_order_product_title( $post_id, $fields['language'] );
 	$source_product = lasery_xtool_order_product_title( $post_id, '' );
-	$body = $owner_text['details'] . "\n\n" . $owner_text['product'] . ': ' . $product . "\nJęzyk klienta: " . $fields['language'] . "\n";
+	$amount = $selected_variant ? lasery_xtool_variant_amount( $post_id, $selected_variant ) : lasery_xtool_order_price_amount( $post_id );
+	$price = static function ( $texts, $language ) use ( $amount ) {
+		return $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $texts['no_price'];
+	};
+	$order_rows = array( array( $owner_text['product'], $product ) );
 	if ( $source_product !== $product ) {
-		$body .= 'Nazwa źródłowa: ' . $source_product . "\n";
+		$order_rows[] = array( 'Nazwa źródłowa', $source_product );
 	}
-	$price = $selected_variant ? lasery_xtool_source_variant_price( $post_id, $selected_variant ) : lasery_xtool_order_price( $post_id );
-	$body .= $owner_text['price'] . ': ' . ( $price ? $price : $owner_text['no_price'] ) . "\n" . $owner_text['price_note'] . "\n";
-	foreach ( array( 'first_name', 'last_name', 'email', 'phone', 'address1', 'address2', 'city', 'zip', 'country', 'variant', 'quantity', 'invoice', 'notes' ) as $field ) {
-		$body .= $owner_text[ $field ] . ': ' . $fields[ $field ] . "\n";
-	}
+	$order_rows[] = array( $owner_text['variant'], $fields['variant'] );
+	$order_rows[] = array( $owner_text['quantity'], $fields['quantity'] );
+	$order_rows[] = array( $owner_text['price'], $price( $owner_text, 'pl' ) );
+	$order_rows[] = array( 'Język klienta', strtoupper( $fields['language'] ) );
+	$checkout = '';
 	if ( $selected_variant ) {
 		$shipping = array(
 			'first_name' => $fields['first_name'],
@@ -574,17 +659,48 @@ function lasery_xtool_handle_order() {
 			$shipping['address2'] = $fields['address2'];
 		}
 		$query = http_build_query( array( 'checkout' => array( 'email' => $fields['email'], 'shipping_address' => $shipping ) ), '', '&', PHP_QUERY_RFC3986 );
-		$body .= "\nLink do koszyka xTool zawiera dane osobowe klienta. Może zostać zapisany w historii przeglądarki i logach — nie udostępniaj go osobom nieupoważnionym.\n";
-		$body .= 'Koszyk xTool: https://www.xtool.eu/cart/' . $selected_variant['id'] . ':' . $fields['quantity'] . '?' . $query . "\n";
+		$checkout = 'https://www.xtool.eu/cart/' . $selected_variant['id'] . ':' . $fields['quantity'] . '?' . $query;
 	}
+	$owner_email = array(
+		'language' => 'pl',
+		'title'    => sprintf( $owner_text['owner_subject'], $product ),
+		'intro'    => 'Klient czeka na potwierdzenie ceny i link do płatności. Odpowiedź na tę wiadomość trafi bezpośrednio do klienta.',
+		'sections' => array(
+			array( 'heading' => $owner_text['details'], 'rows' => $order_rows ),
+			array( 'heading' => $owner_text['contact'], 'rows' => array( array( $owner_text['first_name'], $fields['first_name'] ), array( $owner_text['last_name'], $fields['last_name'] ), array( $owner_text['email'], $fields['email'] ), array( $owner_text['phone'], $fields['phone'] ) ) ),
+			array( 'heading' => $owner_text['address'], 'rows' => array( array( $owner_text['address1'], $fields['address1'] ), array( $owner_text['address2'], $fields['address2'] ), array( $owner_text['zip'], $fields['zip'] ), array( $owner_text['city'], $fields['city'] ), array( $owner_text['country'], lasery_xtool_country_name( $fields['country'], 'pl' ) . ' (' . $fields['country'] . ')' ) ) ),
+			array( 'heading' => $owner_text['extras'], 'rows' => array( array( $owner_text['invoice'], $fields['invoice'] ), array( $owner_text['notes'], $fields['notes'] ) ) ),
+		),
+		'button'   => $checkout ? array( 'Otwórz koszyk xTool z danymi klienta', $checkout ) : null,
+		'note'     => ( $checkout ? "Link do koszyka xTool zawiera dane osobowe klienta. Może zostać zapisany w historii przeglądarki i logach — nie udostępniaj go osobom nieupoważnionym.\n" : '' ) . $owner_text['price_note'],
+		'footer'   => lasery_xtool_mail_from_name(),
+	);
+	$company = function_exists( 'lasery_xtool_company' ) ? "\n" . lasery_xtool_company() : '';
+	// The address is unverified, so the receipt repeats only data from our side: it must
+	// not let anyone send their own text from this domain to an arbitrary mailbox.
+	$customer_rows = array( array( $text['product'], $customer_product ) );
+	if ( $selected_variant ) {
+		$customer_rows[] = array( $text['variant'], str_replace( ' / ', ' · ', $variant_title ) );
+	}
+	$customer_rows[] = array( $text['quantity'], $fields['quantity'] );
+	$customer_rows[] = array( $text['price'], $price( $text, $fields['language'] ) );
+	$customer_email = array(
+		'language' => $fields['language'],
+		'title'    => sprintf( $text['customer_subject'], $customer_product ),
+		'intro'    => $text['customer_body'],
+		'sections' => array( array( 'heading' => $text['details'], 'rows' => $customer_rows ) ),
+		'button'   => array( $text['view_product'], add_query_arg( 'lang', $fields['language'], get_permalink( $post_id ) ) ),
+		'note'     => $text['price_note'] . "\n" . $text['reply_note'],
+		'footer'   => lasery_xtool_mail_from_name() . ' · ' . lasery_xtool_order_contact_email() . $company,
+	);
 	$headers = array( 'Reply-To: ' . $fields['email'] );
 	$recipient = lasery_xtool_order_recipient();
-	if ( '' === $recipient || ! lasery_xtool_order_mail( $recipient, sprintf( $owner_text['owner_subject'], $product ), $body, $headers ) ) {
+	if ( '' === $recipient || ! lasery_xtool_order_mail( $recipient, $owner_email, $headers ) ) {
 		if ( false !== $reservation ) {
 			lasery_xtool_order_release_ip( $reservation );
 		}
 		lasery_xtool_order_redirect( $post_id, 'failed' );
 	}
-	$receipt_sent = lasery_xtool_order_mail( $fields['email'], sprintf( $text['customer_subject'], $customer_product ), $text['customer_body'], array( 'Reply-To: ' . lasery_xtool_order_contact_email() ) );
+	$receipt_sent = lasery_xtool_order_mail( $fields['email'], $customer_email, array( 'Reply-To: ' . lasery_xtool_order_contact_email() ) );
 	lasery_xtool_order_redirect( $post_id, $receipt_sent ? 'sent' : 'sent_no_receipt' );
 }

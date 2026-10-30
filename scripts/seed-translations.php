@@ -103,6 +103,9 @@ $titles = [
     '15453351542997' => [ 'pl' => 'Moduł lasera diodowego 40 W do M2', 'de' => '40-W-Diodenlasermodul für M2', 'ru' => 'Модуль диодного лазера 40 Вт для M2', 'uk' => 'Модуль діодного лазера 40 Вт для M2' ],
     '15430697255125' => [ 'pl' => 'Zestaw podstawy podwyższającej do M2', 'de' => 'Erhöhungsbasis-Set für M2', 'ru' => 'Комплект поднимающего основания для M2', 'uk' => 'Комплект підвищувальної основи для M2' ],
 ];
+$to_html = static function ( $items ) {
+    return wp_kses_post( '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>' );
+};
 foreach ( $translations as $source_id => $languages ) {
     $posts = get_posts( [ 'post_type' => 'lasery_product', 'post_status' => 'publish', 'meta_key' => '_lasery_shopify_id', 'meta_value' => (string) $source_id, 'posts_per_page' => 2, 'fields' => 'ids' ] );
     if ( count( $posts ) !== 1 ) {
@@ -111,18 +114,18 @@ foreach ( $translations as $source_id => $languages ) {
     }
     foreach ( $languages as $language => $items ) {
         $key = '_lasery_description_' . $language;
-        $html = '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>';
+        $html = $to_html( $items );
         if ( metadata_exists( 'post', $posts[0], $key ) ) {
-            $placeholder = isset( $placeholders[ $source_id ][ $language ] ) ? '<ul><li>' . esc_html( $placeholders[ $source_id ][ $language ] ) . '</li></ul>' : null;
+            $placeholder = isset( $placeholders[ $source_id ][ $language ] ) ? $to_html( [ $placeholders[ $source_id ][ $language ] ] ) : null;
             if ( $placeholder !== get_post_meta( $posts[0], $key, true ) ) {
                 continue;
             }
-            if ( ! update_post_meta( $posts[0], $key, wp_slash( wp_kses_post( $html ) ) ) ) {
+            if ( ! update_post_meta( $posts[0], $key, wp_slash( $html ) ) ) {
                 WP_CLI::error( 'Could not replace description for ' . $source_id . ' / ' . $language );
             }
             continue;
         }
-        if ( ! add_post_meta( $posts[0], $key, wp_slash( wp_kses_post( $html ) ), true ) ) {
+        if ( ! add_post_meta( $posts[0], $key, wp_slash( $html ), true ) ) {
             WP_CLI::error( 'Could not save description for ' . $source_id . ' / ' . $language );
         }
     }

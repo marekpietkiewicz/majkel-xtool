@@ -4,9 +4,55 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-function lasery_xtool_text($field, $default) {
+/** Editable page texts: field => [admin label, control type, translated default]. */
+function lasery_xtool_text_fields() {
+    $fields = [
+        'hero_eyebrow' => ['Hero: mały nagłówek', 'text', __('LASERY I URZĄDZENIA XTOOL', 'lasery-xtool')],
+        'hero_title' => ['Hero: główny nagłówek strony (SEO) i tekst przy braku produktów', 'text', __('Twórz więcej. Z xTool.', 'lasery-xtool')],
+        'hero_description' => ['Hero: opis (także opis strony w wyszukiwarkach)', 'textarea', __('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool')],
+        'hero_details_button' => ['Hero: przycisk produktu', 'text', __('Zobacz szczegóły', 'lasery-xtool')],
+        'hero_demo_button' => ['Przycisk demo (nagłówek, hero, strona produktu)', 'text', __('Zapytaj o demo', 'lasery-xtool')],
+        'products_eyebrow' => ['Produkty: mały nagłówek', 'text', __('KATALOG XTOOL', 'lasery-xtool')],
+        'products_title' => ['Produkty: nagłówek', 'text', __('Znajdź urządzenie dla siebie.', 'lasery-xtool')],
+        'products_description' => ['Produkty: opis', 'textarea', __('Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów.', 'lasery-xtool')],
+        'products_button' => ['Produkty: przycisk katalogu', 'text', __('Zobacz cały katalog', 'lasery-xtool')],
+        'accessories_eyebrow' => ['Akcesoria: mały nagłówek', 'text', __('AKCESORIA', 'lasery-xtool')],
+        'accessories_title' => ['Akcesoria: nagłówek', 'text', __('Rozbuduj swoje urządzenie.', 'lasery-xtool')],
+        'accessories_description' => ['Akcesoria: opis', 'textarea', __('Moduły laserowe, stoły robocze i dodatki do urządzeń xTool.', 'lasery-xtool')],
+        'demo_eyebrow' => ['Demo: mały nagłówek', 'text', __('POZNAJ XTOOL', 'lasery-xtool')],
+        'demo_title' => ['Demo: nagłówek', 'text', __('Chcesz zobaczyć urządzenie w akcji?', 'lasery-xtool')],
+        'demo_description' => ['Demo: opis', 'textarea', __('Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie.', 'lasery-xtool')],
+        'demo_button' => ['Demo: przycisk rezerwacji', 'text', __('Otwórz rezerwację demo', 'lasery-xtool')],
+        'demo_step_1' => ['Demo: krok 1', 'text', __('Wybierz termin i urządzenie w kalendarzu xTool.', 'lasery-xtool')],
+        'demo_step_2' => ['Demo: krok 2', 'text', __('Połącz się online z naszym ekspertem.', 'lasery-xtool')],
+        'demo_step_3' => ['Demo: krok 3', 'text', __('Zobacz laser w akcji i zadaj pytania.', 'lasery-xtool')],
+        'demo_models_title' => ['Demo: nagłówek listy modeli', 'text', __('Na demo pokażemy te modele:', 'lasery-xtool')],
+        'demo_callout_title' => ['Produkt z demo: nagłówek ramki', 'text', __('Zobacz ten model na żywo', 'lasery-xtool')],
+        'demo_callout_text' => ['Produkt z demo: opis ramki', 'textarea', __('Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup.', 'lasery-xtool')],
+        'demo_callout_button' => ['Produkt z demo: przycisk', 'text', __('Umów demo', 'lasery-xtool')],
+        'demo_frame_note' => ['Demo: opis ramki', 'textarea', __('Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć.', 'lasery-xtool')],
+        'footer_tagline' => ['Stopka: opis', 'textarea', __('Urządzenia xTool do grawerowania i cięcia laserowego. Pokażemy je na demo i pomożemy w zamówieniu.', 'lasery-xtool')],
+    ];
+    $benefits = [
+        [__('Demo na żywo', 'lasery-xtool'), __('Zobacz urządzenie w akcji podczas spotkania online i zadaj pytania.', 'lasery-xtool')],
+        [__('Zamówienie bez konta', 'lasery-xtool'), __('Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności.', 'lasery-xtool')],
+        [__('Pomoc w wyborze', 'lasery-xtool'), __('Doradzimy model i akcesoria do Twoich materiałów i projektów.', 'lasery-xtool')],
+        [__('Oryginalne urządzenia xTool', 'lasery-xtool'), __('Zamówienia realizujemy w oficjalnym sklepie xTool.', 'lasery-xtool')],
+    ];
+    foreach ($benefits as $index => $benefit) {
+        $number = $index + 1;
+        $fields['benefit_' . $number . '_title'] = ['Zaleta ' . $number . ': tytuł', 'text', $benefit[0]];
+        $fields['benefit_' . $number . '_text'] = ['Zaleta ' . $number . ': opis', 'textarea', $benefit[1]];
+    }
+    return $fields;
+}
+
+/** The text saved for the current language, or its translated default. */
+function lasery_xtool_text($field) {
+    static $fields = null;
+    $fields ??= lasery_xtool_text_fields();
     $value = get_theme_mod('lasery_xtool_' . $field . '_' . lasery_xtool_interface_language(), '');
-    return is_string($value) && trim($value) !== '' ? $value : $default;
+    return is_string($value) && trim($value) !== '' ? $value : $fields[$field][2];
 }
 
 function lasery_xtool_contact_email() {
@@ -51,36 +97,10 @@ add_action('customize_register', function ($customizer) {
     $customizer->add_control('lasery_xtool_demo_url', ['label' => 'Link do profilu demonstracji xTool', 'section' => 'lasery_xtool_contact', 'type' => 'url']);
     $customizer->add_setting('lasery_xtool_company', ['default' => '', 'sanitize_callback' => 'sanitize_textarea_field']);
     $customizer->add_control('lasery_xtool_company', ['label' => 'Dane firmy w stopce', 'description' => 'Nazwa, adres i NIP — każda informacja w osobnej linii. Puste pole pokazuje dane domyślne.', 'section' => 'lasery_xtool_contact', 'type' => 'textarea']);
-    $fields = [
-        'hero_eyebrow' => ['Hero: mały nagłówek', 'text'],
-        'hero_title' => ['Hero: główny nagłówek strony (SEO) i tekst przy braku produktów', 'text'],
-        'hero_description' => ['Hero: opis', 'textarea'],
-        'hero_details_button' => ['Hero: przycisk produktu', 'text'],
-        'hero_demo_button' => ['Hero: przycisk demo', 'text'],
-        'products_eyebrow' => ['Produkty: mały nagłówek', 'text'],
-        'products_title' => ['Produkty: nagłówek', 'text'],
-        'products_description' => ['Produkty: opis', 'textarea'],
-        'products_button' => ['Produkty: przycisk katalogu', 'text'],
-        'demo_eyebrow' => ['Demo: mały nagłówek', 'text'],
-        'demo_title' => ['Demo: nagłówek', 'text'],
-        'demo_description' => ['Demo: opis', 'textarea'],
-        'demo_button' => ['Demo: przycisk rezerwacji', 'text'],
-        'demo_frame_note' => ['Demo: opis ramki', 'textarea'],
-        'demo_step_1' => ['Demo: krok 1', 'text'],
-        'demo_step_2' => ['Demo: krok 2', 'text'],
-        'demo_step_3' => ['Demo: krok 3', 'text'],
-        'accessories_eyebrow' => ['Akcesoria: mały nagłówek', 'text'],
-        'accessories_title' => ['Akcesoria: nagłówek', 'text'],
-        'accessories_description' => ['Akcesoria: opis', 'textarea'],
-        'footer_tagline' => ['Stopka: opis', 'textarea'],
-    ];
-    for ($number = 1; $number <= 4; $number++) {
-        $fields['benefit_' . $number . '_title'] = ['Zaleta ' . $number . ': tytuł', 'text'];
-        $fields['benefit_' . $number . '_text'] = ['Zaleta ' . $number . ': opis', 'textarea'];
-    }
-    foreach (['pl' => 'Polski', 'en' => 'Angielski', 'de' => 'Niemiecki', 'ru' => 'Rosyjski', 'uk' => 'Ukraiński'] as $language => $label) {
+    $fields = lasery_xtool_text_fields();
+    foreach (lasery_xtool_languages() as $language => $label) {
         $section = 'lasery_xtool_content_' . $language;
-        $customizer->add_section($section, ['title' => $label, 'panel' => 'lasery_xtool_content', 'description' => 'Puste pole wyświetla domyślne tłumaczenie.']);
+        $customizer->add_section($section, ['title' => 'Teksty: ' . $label, 'panel' => 'lasery_xtool_content', 'description' => 'Puste pole wyświetla domyślne tłumaczenie.']);
         foreach ($fields as $key => $field) {
             $id = 'lasery_xtool_' . $key . '_' . $language;
             $customizer->add_setting($id, ['default' => '', 'sanitize_callback' => $field[1] === 'textarea' ? 'sanitize_textarea_field' : 'sanitize_text_field']);

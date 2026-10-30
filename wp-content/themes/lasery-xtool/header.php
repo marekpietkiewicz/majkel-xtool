@@ -13,7 +13,7 @@
 $home = lasery_xtool_language_url(home_url('/'));
 $current_language = lasery_xtool_interface_language();
 $languages = lasery_xtool_languages();
-$demo_label = lasery_xtool_text('hero_demo_button', __('Zapytaj o demo', 'lasery-xtool'));
+$demo_label = lasery_xtool_text('hero_demo_button');
 ?>
 <header class="site-header" data-site-header>
     <div class="wrap header-bar">

@@ -23,9 +23,9 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], $version);
     $sliders = is_front_page() || is_singular('lasery_product');
     if ($sliders) {
-        wp_enqueue_script('swiper', $assets . 'lib/swiper/swiper-bundle.min.js', [], '14.3.0', $script);
+        wp_enqueue_script('lasery-xtool-swiper', $assets . 'lib/swiper/swiper-bundle.min.js', [], '14.3.0', $script);
     }
-    wp_enqueue_script('lasery-xtool-site', $assets . 'site.js', $sliders ? ['swiper'] : [], $version, $script);
+    wp_enqueue_script('lasery-xtool-site', $assets . 'site.js', $sliders ? ['lasery-xtool-swiper'] : [], $version, $script);
     if (is_singular('lasery_product')) {
         wp_enqueue_script_module('lasery-xtool-lightbox', $assets . 'lightbox.js', [], $version);
     }
@@ -92,13 +92,14 @@ add_action('wp_head', function () {
     $description = '';
     $url = '';
     if (is_front_page()) {
-        $description = lasery_xtool_text('hero_description', __('Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo.', 'lasery-xtool'));
+        $description = lasery_xtool_text('hero_description');
         $url = home_url('/');
     } elseif (is_singular('lasery_product')) {
         $description = lasery_xtool_display_summary(get_queried_object_id());
         $url = get_permalink(get_queried_object_id());
     } elseif (is_post_type_archive('lasery_product')) {
-        $url = get_post_type_archive_link('lasery_product');
+        $kind = lasery_xtool_requested_kind();
+        $url = $kind === '' ? get_post_type_archive_link('lasery_product') : add_query_arg('kind', $kind, get_post_type_archive_link('lasery_product'));
     }
     if ($description !== '') {
         printf('<meta name="description" content="%s">' . "\n", esc_attr(wp_html_excerpt($description, 160, '…')));
