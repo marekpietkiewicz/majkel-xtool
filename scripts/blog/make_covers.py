@@ -1,7 +1,8 @@
 """Compose language-neutral article covers from product packshots (white backgrounds).
 
-Usage: put the products' main images (WebP from the media library) in ./src as
-p<post ID>.webp, adjust the file names below and run `python3 make_covers.py` in this folder.
+Usage: put the products' main images in ./src (WebP from the media library as p<post ID>.webp,
+or the first image of the xTool product, e.g. f1ultra.webp), adjust the file names below and run
+`python3 make_covers.py` in this folder.
 """
 import math
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
@@ -78,4 +79,12 @@ cover('cover-laser-types.webp', [('p24.webp', 190, 270, 720), ('p23.webp', 210, 
 cover('cover-laser-business.webp', [('p6.webp', 230, 380, 740), ('p22.webp', 400, 800, 770), ('p116.webp', 380, 1200, 760)], glow=(800, 740))
 # Laser welding: MetalFab.
 cover('cover-laser-welding.webp', [('p118.webp', 620, 800, 800)], glow=(800, 760))
+# Metal engraving: F2 Ultra (MOPA), F1 Ultra (fibre), F2 (IR).
+cover('cover-laser-metal.webp', [('p22.webp', 330, 380, 740), ('f1ultra.webp', 330, 800, 750), ('p117.webp', 330, 1220, 750)], glow=(800, 740))
+# Cost: from the M2 to the P3 and MetalFab.
+cover('cover-laser-cost.webp', [('p6.webp', 200, 260, 735), ('p22.webp', 320, 600, 745), ('p23.webp', 210, 960, 740), ('p118.webp', 400, 1370, 770)], glow=(800, 740))
+# Safety: enclosed S1, X1 and P3.
+cover('cover-laser-safety.webp', [('p24.webp', 210, 330, 735), ('p5.webp', 240, 800, 745), ('p23.webp', 230, 1270, 740)], glow=(800, 740))
+# DTF and UV printing: O1, Apparel Printer Plus, WonderPress 3D.
+cover('cover-dtf-printing.webp', [('o1.webp', 270, 330, 745), ('apparel.webp', 270, 820, 750), ('wonderpress.webp', 290, 1290, 745)], glow=(800, 740))
 print('done')
