@@ -1,5 +1,5 @@
 <?php
-/** Publish initially selected machines from verified private Shopify snapshots. */
+/** Publish selected machines from verified private Shopify snapshots; existing products are skipped. */
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! function_exists( 'lasery_xtool_merge_handle_documents' ) ) {
     return;
 }
@@ -14,9 +14,19 @@ $products = [
     '9163846877397' => 'xtool-f2-5w-ir-15w-diode-portable-dual-laser-engraver',
     '9089720189141' => 'xtool-p3-the-flagship-80w-co2-laser-cutters',
     '8169201631445' => 'xtool-s1-laser-cutter',
+    '9187692970197' => 'xtool-f2-ultra-uv-5w-uv-laser-engraver',
+    '9009695293653' => 'xtool-f2-ultra-60w-mopa-40w-diode-dual-laser-engraver',
+    '8974447804629' => 'xtool-metalfab-laser-welder-and-cnc-cutter',
 ];
 $prepared = [];
+$exists = static function ( $id ) {
+    return (bool) get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private', 'trash' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => (string) $id, 'fields' => 'ids', 'posts_per_page' => 1 ] );
+};
 foreach ( $products as $id => $handle ) {
+    if ( $exists( $id ) ) {
+        WP_CLI::log( 'Product ' . $id . ' already exists; skipped.' );
+        continue;
+    }
     $json_path = $args[0] . '/' . $handle . '.json';
     $js_path = $args[0] . '/' . $handle . '.js';
     if ( ! is_readable( $json_path ) || ! is_readable( $js_path ) ) {
@@ -40,8 +50,7 @@ foreach ( $prepared as $id => $product ) {
     if ( ! lasery_xtool_refresh_import_lock() ) {
         WP_CLI::error( 'Lost the import lock.' );
     }
-    $existing = get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private', 'trash' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => (string) $id, 'fields' => 'ids', 'posts_per_page' => 1 ] );
-    if ( $existing ) {
+    if ( $exists( $id ) ) {
         WP_CLI::warning( 'Product ' . $id . ' already exists; skipped.' );
         continue;
     }
