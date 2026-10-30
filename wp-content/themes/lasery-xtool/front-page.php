@@ -75,6 +75,7 @@ foreach ($featured as $featured_product) {
             'post_type' => 'lasery_product',
             'posts_per_page' => 6,
             'post_status' => 'publish',
+            'orderby' => ['date' => 'ASC', 'ID' => 'ASC'],
         ]);
         if ($products->have_posts()) : ?>
             <div class="grid">
