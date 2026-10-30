@@ -116,6 +116,8 @@ add_action('template_redirect', function () {
     }
     [$page, $posts] = lasery_xtool_blog_listing();
     if ($page < 2 || $page > $posts->max_num_pages) {
+        // Not cached: a page past the end becomes valid when more articles are published.
+        do_action('litespeed_control_set_nocache', 'lasery-xtool blog page redirect');
         wp_safe_redirect(remove_query_arg('strona'), $page < 2 ? 301 : 302);
         exit;
     }
