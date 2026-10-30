@@ -126,7 +126,7 @@ msgid "POZNAJ XTOOL"
 msgstr "ДІЗНАЙТЕСЯ ПРО XTOOL"
 
 msgid "Pasuje do urządzeń"
-msgstr "Підходить до пристроїв"
+msgstr "Сумісні пристрої"
 
 msgid "Pierwsze artykuły pojawią się wkrótce."
 msgstr "Перші статті незабаром з’являться."

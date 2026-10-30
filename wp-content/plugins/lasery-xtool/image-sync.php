@@ -165,8 +165,7 @@ function lasery_xtool_sync_images() {
 
 /** The image editor class: WordPress's GD editor with palette images converted (class-image-editor.php). */
 function lasery_xtool_image_editor_class() {
-	require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
-	require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
+	// WordPress loads its editor classes before it applies the wp_image_editors filter that calls this.
 	require_once __DIR__ . '/class-image-editor.php';
 	return 'Lasery_XTool_Image_Editor';
 }
