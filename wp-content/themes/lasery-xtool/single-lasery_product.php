@@ -12,7 +12,7 @@
     $description = function_exists('lasery_xtool_product_description') ? lasery_xtool_product_description($post_id, lasery_xtool_interface_language()) : get_the_content();
     // A machine lists its accessories, an accessory the machines it fits (set in the panel).
     $related_query = function_exists('lasery_xtool_related_meta_query') ? lasery_xtool_related_meta_query($post_id) : null;
-    $related = $related_query ? lasery_xtool_products($is_accessory ? 'device' : 'accessory', 12, ['post__not_in' => [$post_id], 'meta_query' => $related_query]) : [];
+    $related = $related_query ? lasery_xtool_products($is_accessory ? 'device' : 'accessory', -1, ['post__not_in' => [$post_id], 'meta_query' => $related_query]) : [];
     $articles_query = function_exists('lasery_xtool_product_articles_meta_query') ? lasery_xtool_product_articles_meta_query($post_id) : null;
     $articles = $articles_query ? lasery_xtool_blog_query(['posts_per_page' => 3, 'no_found_rows' => true, 'meta_query' => $articles_query]) : null;
     ?>

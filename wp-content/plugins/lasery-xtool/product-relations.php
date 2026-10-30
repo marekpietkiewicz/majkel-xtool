@@ -52,6 +52,10 @@ function lasery_xtool_sku_index() {
 function lasery_xtool_set_contents( $post_id, $variant ) {
 	$parts = isset( $variant['sku'] ) && is_string( $variant['sku'] ) ? explode( '-', $variant['sku'] ) : array();
 	$count = count( $parts );
+	// A set has at least two parts; xTool's largest have seven.
+	if ( $count < 2 || $count > 12 ) {
+		return array();
+	}
 	$index = lasery_xtool_sku_index();
 	// $items[ $i ]: the most items that parts $i.. split into, -1 when they cannot be matched;
 	// $next[ $i ]: where the first of those items ends.
@@ -107,6 +111,10 @@ function lasery_xtool_article_source_ids( $content ) {
 		return $sources;
 	}
 	foreach ( $matches as $match ) {
+		// [[lasery_produkty]] is shown as text, not as products.
+		if ( '[' === $match[1] && ']' === $match[6] ) {
+			continue;
+		}
 		$attributes = shortcode_parse_atts( $match[3] );
 		$attributes = is_array( $attributes ) ? $attributes : array();
 		foreach ( explode( ',', $attributes['xtool'] ?? '' ) as $source ) {
@@ -143,7 +151,8 @@ function lasery_xtool_fits_box_register() {
 function lasery_xtool_fits_box( $post ) {
 	wp_nonce_field( 'lasery_xtool_save_fits', 'lasery_xtool_fits_nonce' );
 	$fits = get_post_meta( $post->ID, LASERY_XTOOL_FITS );
-	$devices = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC', 'tax_query' => lasery_xtool_kind_tax_query( 'device' ), 'post__not_in' => array( $post->ID ) ) );
+	// Every machine that is not in the trash, so saving keeps the fits of one being edited as a draft.
+	$devices = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => array( 'publish', 'future', 'draft', 'pending', 'private' ), 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC', 'tax_query' => lasery_xtool_kind_tax_query( 'device' ), 'post__not_in' => array( $post->ID ) ) );
 	echo '<p class="description">Dla akcesoriów: urządzenia, przy których akcesorium jest pokazywane w sekcji „Akcesoria do tego urządzenia”. Strona akcesorium pokazuje je w sekcji „Pasuje do urządzeń”.</p>';
 	foreach ( $devices as $device ) {
 		$source = get_post_meta( $device->ID, LASERY_XTOOL_SOURCE_ID, true );
