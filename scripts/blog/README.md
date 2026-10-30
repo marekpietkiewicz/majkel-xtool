@@ -7,7 +7,7 @@ Instrukcja dla kolejnych artykułów na laseryxtool.pl. Opisuje cały proces: od
 - Zacznij od pytania, które klient zadaje przed zakupem, a nie od produktu. Dobre tematy odpowiadają na jedno konkretne pytanie: „jaki laser do metalu”, „ile kosztuje laser”, „czy laser w domu jest bezpieczny”.
 - Ułóż tematy wzdłuż drogi klienta: wybór rodzaju urządzenia, zastosowania i pomysły, koszty, bezpieczeństwo i przygotowanie pracowni, porównania modeli, pierwsze kroki po zakupie.
 - Sprawdź, czy temat nie dubluje istniejącego artykułu (lista niżej). Dwa artykuły na tę samą frazę konkurują ze sobą w wynikach wyszukiwania.
-- Wybierz 2–4 produkty, które naturalnie pasują do tematu. Maszyny z zestawu demo Michała (P3, F2 Ultra UV, F2 Ultra, F2, MetalFab) mają pierwszeństwo, bo przy nich artykuł może zaprosić na pokaz.
+- Wybierz 2–4 produkty, które naturalnie pasują do tematu. Maszyny z zestawu demo Michała (P3, M2, F2 Ultra UV, F2 Ultra, F2, MetalFab; na stronie mają oznaczenie demo) mają pierwszeństwo, bo przy nich artykuł może zaprosić na pokaz.
 - Ustal główną frazę w każdym języku osobno: tak, jak ludzie naprawdę szukają w danym kraju (np. PL „grawerowanie metalu laserem”, DE „Metall lasergravieren”, RU „лазерная гравировка металла”, UK „лазерне гравіювання металу”).
 
 Opublikowane artykuły (klucz — temat):
