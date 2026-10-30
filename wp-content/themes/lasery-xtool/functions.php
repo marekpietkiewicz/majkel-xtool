@@ -44,6 +44,59 @@ add_action('wp', function () {
 });
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
+// No version, editing-client or shortlink tags in the page head.
+remove_action('wp_head', 'wp_generator');
+remove_action('wp_head', 'rsd_link');
+remove_action('wp_head', 'wp_shortlink_wp_head');
+
+// Every page: no MIME sniffing, no framing by other sites (the order form) and a modest referrer.
+add_action('send_headers', function () {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header_remove('X-Powered-By');
+});
+
+// User names stay private: no user list for visitors (the editor still lists authors), no user or category
+// sitemaps, no author in embeds.
+add_filter('rest_endpoints', function ($endpoints) {
+    if (!is_user_logged_in()) {
+        unset($endpoints['/wp/v2/users'], $endpoints['/wp/v2/users/(?P<id>[\d]+)']);
+    }
+    return $endpoints;
+});
+add_filter('wp_sitemaps_add_provider', function ($provider, $name) {
+    return in_array($name, ['users', 'taxonomies'], true) ? false : $provider;
+}, 10, 2);
+add_filter('oembed_response_data', function ($data) {
+    unset($data['author_name'], $data['author_url']);
+    return $data;
+});
+// Author, date, category and tag archives would list articles of every language under a user name;
+// the blog page lists them instead. Before redirect_canonical, which would reveal the author's slug.
+add_action('template_redirect', function () {
+    if (is_author() || is_date() || is_category() || is_tag()) {
+        $blog = lasery_xtool_blog_url();
+        wp_safe_redirect($blog !== '' ? $blog : lasery_xtool_language_url(home_url('/')), 301);
+        exit;
+    }
+}, 9);
+
+// The brand mark as the site icon, unless one is chosen in the Customizer.
+add_action('wp_head', function () {
+    if (has_site_icon()) {
+        return;
+    }
+    $assets = get_template_directory_uri() . '/assets/';
+    printf('<link rel="icon" href="%s" type="image/svg+xml">' . "\n", esc_url($assets . 'favicon.svg'));
+    printf('<link rel="apple-touch-icon" href="%s">' . "\n", esc_url($assets . 'apple-touch-icon.png'));
+});
+add_action('do_faviconico', function () {
+    if (!has_site_icon()) {
+        wp_redirect(get_template_directory_uri() . '/assets/favicon-32.png', 301);
+        exit;
+    }
+});
 
 // The theme shows no comments, so none can be posted (this also stops comment spam and trackbacks).
 add_filter('comments_open', '__return_false');
@@ -72,16 +125,33 @@ function lasery_xtool_language_url($url) {
 }
 
 function lasery_xtool_display_product_title($post_id) {
-    return function_exists('lasery_xtool_product_title')
+    return lasery_xtool_keep_together(function_exists('lasery_xtool_product_title')
         ? lasery_xtool_product_title($post_id, lasery_xtool_interface_language())
-        : get_the_title($post_id);
+        : get_the_title($post_id));
 }
 
+// Titles in the interface language (WordPress would use the Polish site tagline, post type label and page titles).
 add_filter('document_title_parts', function ($parts) {
-    if (is_singular('lasery_product')) {
+    $language = lasery_xtool_interface_language();
+    if (is_front_page()) {
+        $parts['tagline'] = __('Produkty xTool i demonstracje', 'lasery-xtool');
+    } elseif (is_singular('lasery_product')) {
         $parts['title'] = lasery_xtool_display_product_title(get_queried_object_id());
+    } elseif (is_post_type_archive('lasery_product')) {
+        $kinds = ['device' => __('Urządzenia', 'lasery-xtool'), 'accessory' => __('Akcesoria', 'lasery-xtool')];
+        $kind = lasery_xtool_requested_kind();
+        $parts['title'] = $kind !== '' ? $kinds[$kind] . ' – ' . __('Produkty xTool', 'lasery-xtool') : __('Produkty xTool', 'lasery-xtool');
+        if (isset($parts['page'])) {
+            $parts['page'] = sprintf(__('Strona %d', 'lasery-xtool'), max(2, (int) get_query_var('paged')));
+        }
     } elseif (is_page('koszyk') && function_exists('lasery_xtool_order_texts')) {
-        $parts['title'] = lasery_xtool_order_texts(lasery_xtool_interface_language())['cart_title'];
+        $parts['title'] = lasery_xtool_order_texts($language)['cart_title'];
+    } elseif (is_privacy_policy()) {
+        $parts['title'] = lasery_xtool_privacy_texts($language)['title'];
+    } elseif (is_search()) {
+        $parts['title'] = get_search_query(false) === '' ? __('Szukaj', 'lasery-xtool') : sprintf(__('Wyniki wyszukiwania: %s', 'lasery-xtool'), get_search_query(false));
+    } elseif (is_404()) {
+        $parts['title'] = __('Nie znaleźliśmy tej strony', 'lasery-xtool');
     }
     return $parts;
 });

@@ -69,7 +69,17 @@ function lasery_xtool_kind_label($post_id) {
 }
 
 function lasery_xtool_display_summary($post_id) {
-    return function_exists('lasery_xtool_product_summary') ? lasery_xtool_product_summary($post_id, lasery_xtool_interface_language()) : '';
+    return function_exists('lasery_xtool_product_summary') ? lasery_xtool_keep_together(lasery_xtool_product_summary($post_id, lasery_xtool_interface_language())) : '';
+}
+
+/** Non-breaking spaces keep a number with its unit or its next thousand ("60 W", "15 000 mm/s"). */
+function lasery_xtool_keep_together($text) {
+    return preg_replace('/(?<=\d) (?=\d{3}(?!\d)|(?:kW|W|кВт|Вт|mm|мм|cm|см|nm|нм|m|м|MP|Мп|kg|кг|%|€)(?![\p{L}\p{N}]))/u', "\u{00A0}", $text);
+}
+
+/** The same for the text of HTML, leaving tags and attributes alone. */
+function lasery_xtool_keep_together_html($html) {
+    return preg_replace_callback('/(?<=>|^)[^<]+/u', fn($text) => lasery_xtool_keep_together($text[0]), $html);
 }
 
 /** "from €…" when variants differ in price, otherwise the single price. Escaped HTML. */
@@ -118,6 +128,11 @@ function lasery_xtool_badges_html($post_id) {
 function lasery_xtool_requested_kind() {
     $kind = isset($_GET['kind']) && is_string($_GET['kind']) ? sanitize_key(wp_unslash($_GET['kind'])) : '';
     return in_array($kind, ['device', 'accessory'], true) ? $kind : '';
+}
+
+/** Screen-reader note for links that open in a new tab. */
+function lasery_xtool_new_tab_hint() {
+    return '<span class="visually-hidden"> ' . esc_html__('(otwiera się w nowej karcie)', 'lasery-xtool') . '</span>';
 }
 
 /** The published blog page in the given (default: current) language, or ''. */

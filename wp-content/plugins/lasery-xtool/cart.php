@@ -337,8 +337,8 @@ function lasery_xtool_render_cart() {
 							<p class="field field-full"><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
 								<select id="order-country" name="country" autocomplete="country" required>
 									<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
-									<?php foreach ( array_keys( lasery_xtool_shipping_countries() ) as $code ) : ?>
-										<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( lasery_xtool_country_name( $code, $language ) ); ?></option>
+									<?php foreach ( lasery_xtool_country_options( $language ) as $code => $name ) : ?>
+										<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( $name ); ?></option>
 									<?php endforeach; ?>
 								</select>
 							</p>

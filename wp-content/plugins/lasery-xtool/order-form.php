@@ -136,7 +136,8 @@ function lasery_xtool_format_price( $amount, $currency, $language ) {
 	if ( class_exists( 'NumberFormatter' ) && '' !== $locale ) {
 		$formatted = ( new NumberFormatter( $locale, NumberFormatter::CURRENCY ) )->formatCurrency( (float) $amount, $currency );
 		if ( is_string( $formatted ) ) {
-			return $formatted;
+			// Some locales (Ukrainian) write the code instead of the sign; every other price shows "€".
+			return 'EUR' === $currency ? str_replace( 'EUR', '€', $formatted ) : $formatted;
 		}
 	}
 	return number_format_i18n( (float) $amount, 2 ) . ' ' . $currency;
@@ -370,6 +371,17 @@ function lasery_xtool_shipping_countries() {
 		'PL' => 'Poland', 'PT' => 'Portugal', 'RO' => 'Romania', 'SK' => 'Slovakia',
 		'SI' => 'Slovenia', 'SE' => 'Sweden',
 	);
+}
+
+/** Shipping countries as code => name in the given language, in that language's alphabetical order. */
+function lasery_xtool_country_options( $language ) {
+	$options = array();
+	foreach ( array_keys( lasery_xtool_shipping_countries() ) as $code ) {
+		$options[ $code ] = lasery_xtool_country_name( $code, $language );
+	}
+	$collator = class_exists( 'Collator' ) ? new Collator( lasery_xtool_icu_locale( $language ) ) : null;
+	uasort( $options, $collator ? array( $collator, 'compare' ) : 'strcmp' );
+	return $options;
 }
 
 function lasery_xtool_country_name( $code, $language ) {

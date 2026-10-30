@@ -20,11 +20,7 @@
             <?php the_archive_description('<div class="section-lead">', '</div>'); ?>
         <?php elseif (is_search()) : ?>
             <h1 class="page-title"><?php echo get_search_query(false) === '' ? esc_html__('Szukaj', 'lasery-xtool') : sprintf(esc_html__('Wyniki wyszukiwania: %s', 'lasery-xtool'), esc_html(get_search_query(false))); ?></h1>
-            <form class="search-page-form" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-                <input type="search" name="s" value="<?php echo esc_attr(get_search_query(false)); ?>" aria-label="<?php esc_attr_e('Szukaj', 'lasery-xtool'); ?>" placeholder="<?php esc_attr_e('Szukaj urządzeń, akcesoriów i artykułów', 'lasery-xtool'); ?>">
-                <input type="hidden" name="lang" value="<?php echo esc_attr(lasery_xtool_interface_language()); ?>">
-                <button class="btn btn-primary" type="submit"><?php esc_html_e('Szukaj', 'lasery-xtool'); ?></button>
-            </form>
+            <?php get_template_part('template-parts/search-form'); ?>
         <?php else : ?>
             <h1 class="page-title"><?php echo esc_html(get_bloginfo('name')); ?></h1>
         <?php endif; ?>
@@ -45,8 +41,8 @@
                     <section class="search-page-section">
                         <h2 class="section-title section-title--sm"><?php echo esc_html($heading); ?></h2>
                         <div class="<?php echo esc_attr($grid); ?>">
-                            <?php foreach (get_posts(['post_type' => $post_type, 'post__in' => $ids, 'orderby' => 'post__in', 'posts_per_page' => -1]) as $post) : setup_postdata($post); ?>
-                                <?php get_template_part('template-parts/' . $card); ?>
+                            <?php foreach (get_posts(['post_type' => $post_type, 'post__in' => $ids, 'orderby' => 'post__in', 'posts_per_page' => -1]) as $position => $post) : setup_postdata($post); ?>
+                                <?php get_template_part('template-parts/' . $card, null, ['position' => $position]); ?>
                             <?php endforeach; wp_reset_postdata(); ?>
                         </div>
                     </section>
@@ -60,13 +56,13 @@
         <div class="product-grid product-grid--catalogue">
             <?php while (have_posts()) : the_post(); ?>
                 <?php if (get_post_type() === 'lasery_product') : ?>
-                    <?php get_template_part('template-parts/product-card', null, ['heading' => 'h2']); ?>
+                    <?php get_template_part('template-parts/product-card', null, ['heading' => 'h2', 'position' => $wp_query->current_post]); ?>
                 <?php else : ?>
                     <?php get_template_part('template-parts/post-card', null, ['heading' => 'h2']); ?>
                 <?php endif; ?>
             <?php endwhile; ?>
         </div>
-        <div class="pagination"><?php the_posts_pagination(); ?></div>
+        <div class="pagination"><?php the_posts_pagination(['prev_text' => __('Poprzednia', 'lasery-xtool'), 'next_text' => __('Następna', 'lasery-xtool'), 'screen_reader_text' => __('Kolejne strony', 'lasery-xtool'), 'aria_label' => __('Kolejne strony', 'lasery-xtool')]); ?></div>
     <?php else : ?>
         <p class="empty-state"><?php esc_html_e('Brak treści do wyświetlenia.', 'lasery-xtool'); ?></p>
     <?php endif; ?>
