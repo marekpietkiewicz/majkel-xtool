@@ -213,6 +213,8 @@ function lasery_xtool_order_texts( $language ) {
 			'reply_note' => 'Masz pytania? Odpowiedz na tę wiadomość.',
 			'add' => 'Dodaj do koszyka',
 			'go_to_cart' => 'Przejdź do koszyka',
+			'set' => 'W zestawie',
+			'set_more' => 'Zobacz, co jest w zestawie',
 			'cart_title' => 'Koszyk',
 			'cart_intro' => 'Sprawdź produkty i podaj dane do zamówienia. Płatność nie jest pobierana na stronie: po potwierdzeniu dostępności i ceny wyślemy Ci link do płatności.',
 			'cart_empty' => 'Koszyk jest pusty.',
@@ -238,6 +240,8 @@ function lasery_xtool_order_texts( $language ) {
 			'reply_note' => 'Questions? Just reply to this email.',
 			'add' => 'Add to cart',
 			'go_to_cart' => 'Go to cart',
+			'set' => 'What’s included',
+			'set_more' => 'See what’s included',
 			'cart_title' => 'Cart',
 			'cart_intro' => 'Check the products and enter your order details. No payment is taken on this site: once we confirm availability and price, we will send you a payment link.',
 			'cart_empty' => 'Your cart is empty.',
@@ -263,6 +267,8 @@ function lasery_xtool_order_texts( $language ) {
 			'reply_note' => 'Fragen? Antworten Sie einfach auf diese E-Mail.',
 			'add' => 'In den Warenkorb',
 			'go_to_cart' => 'Zum Warenkorb',
+			'set' => 'Im Set enthalten',
+			'set_more' => 'Inhalt des Sets ansehen',
 			'cart_title' => 'Warenkorb',
 			'cart_intro' => 'Prüfen Sie die Produkte und geben Sie Ihre Bestelldaten an. Auf dieser Website wird nicht bezahlt: Nach Bestätigung von Verfügbarkeit und Preis senden wir Ihnen einen Zahlungslink.',
 			'cart_empty' => 'Ihr Warenkorb ist leer.',
@@ -288,6 +294,8 @@ function lasery_xtool_order_texts( $language ) {
 			'reply_note' => 'Есть вопросы? Просто ответьте на это письмо.',
 			'add' => 'В корзину',
 			'go_to_cart' => 'Перейти в корзину',
+			'set' => 'В комплекте',
+			'set_more' => 'Что входит в комплект',
 			'cart_title' => 'Корзина',
 			'cart_intro' => 'Проверьте товары и укажите данные для заказа. Оплата на сайте не производится: после подтверждения наличия и цены мы пришлём ссылку для оплаты.',
 			'cart_empty' => 'Корзина пуста.',
@@ -313,6 +321,8 @@ function lasery_xtool_order_texts( $language ) {
 			'reply_note' => 'Маєте запитання? Просто дайте відповідь на цей лист.',
 			'add' => 'Додати до кошика',
 			'go_to_cart' => 'Перейти до кошика',
+			'set' => 'У комплекті',
+			'set_more' => 'Що входить до комплекту',
 			'cart_title' => 'Кошик',
 			'cart_intro' => 'Перевірте товари та вкажіть дані для замовлення. Оплата на сайті не здійснюється: після підтвердження наявності й ціни ми надішлемо посилання для оплати.',
 			'cart_empty' => 'Кошик порожній.',
@@ -470,11 +480,39 @@ function lasery_xtool_render_order_form( $post_id ) {
 							<?php foreach ( $available_variants as $variant ) : ?>
 								<?php $amount = lasery_xtool_variant_amount( $post_id, $variant ); ?>
 								<?php $variant_price = $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $text['no_price']; ?>
-								<label class="variant-option">
-									<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required data-price="<?php echo esc_attr( $variant_price ); ?>" <?php checked( $selected === $variant ); ?>>
-									<span class="variant-option-title"><?php echo esc_html( lasery_xtool_variant_label( $variant ) ); ?></span>
-									<span class="variant-option-price"><?php echo esc_html( $variant_price ); ?></span>
-								</label>
+								<?php $set = lasery_xtool_set_contents( $post_id, $variant ); ?>
+								<?php $set_id = 'variant-set-' . $variant['id']; ?>
+								<div class="variant-option">
+									<label class="variant-option-choice">
+										<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required data-price="<?php echo esc_attr( $variant_price ); ?>" <?php checked( $selected === $variant ); ?><?php if ( $set ) : ?> aria-describedby="<?php echo esc_attr( $set_id ); ?>"<?php endif; ?>>
+										<span class="variant-option-title"><?php echo esc_html( lasery_xtool_variant_label( $variant ) ); ?></span>
+										<span class="variant-option-price"><?php echo esc_html( $variant_price ); ?></span>
+										<?php if ( $set ) : ?><span class="variant-option-more" aria-hidden="true"><?php echo esc_html( $text['set_more'] ); ?></span><?php endif; ?>
+									</label>
+									<?php if ( $set ) : ?>
+										<?php // Shown when the variant is chosen, also without JavaScript (CSS :has). ?>
+										<div class="variant-set" id="<?php echo esc_attr( $set_id ); ?>">
+											<p class="variant-set-title"><?php echo esc_html( $text['set'] ); ?></p>
+											<ul class="variant-set-list">
+												<?php foreach ( $set as $part ) : ?>
+													<?php $part_title = lasery_xtool_order_product_title( $part['product'], $language ); ?>
+													<li class="variant-set-item">
+														<?php echo get_the_post_thumbnail( $part['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?>
+														<span class="variant-set-name">
+															<?php if ( $part['product'] === $post_id ) : ?>
+																<?php echo esc_html( $part_title ); ?>
+															<?php else : ?>
+																<a href="<?php echo esc_url( add_query_arg( 'lang', $language, get_permalink( $part['product'] ) ) ); ?>"><?php echo esc_html( $part_title ); ?></a>
+															<?php endif; ?>
+															<?php if ( 'Default Title' !== $part['variant']['title'] ) : ?><small><?php echo esc_html( lasery_xtool_variant_label( $part['variant'] ) ); ?></small><?php endif; ?>
+														</span>
+														<?php if ( $part['quantity'] > 1 ) : ?><span class="variant-set-quantity">× <?php echo esc_html( $part['quantity'] ); ?></span><?php endif; ?>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										</div>
+									<?php endif; ?>
+								</div>
 							<?php endforeach; ?>
 						</div>
 					<?php elseif ( $uses_source_variants ) : ?>

@@ -18,7 +18,7 @@ const LASERY_XTOOL_MAX_PRODUCTS = 500;
 const LASERY_XTOOL_PAGE_SIZE    = 250;
 const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
-const LASERY_XTOOL_SCHEMA       = '5';
+const LASERY_XTOOL_SCHEMA       = '6';
 
 add_action( 'init', 'lasery_xtool_register_product_type' );
 function lasery_xtool_register_product_type() {
@@ -94,6 +94,10 @@ function lasery_xtool_install() {
 			wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'comment_status' => 'closed' ) );
 		}
 	}
+	// Products shown in existing articles; saving a post keeps this up to date (schema 6).
+	foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $post_id ) {
+		lasery_xtool_index_article_products( $post_id );
+	}
 	// Left over from the per-product sync replaced in schema 4.
 	delete_post_meta_by_key( '_lasery_source_handle' );
 	delete_post_meta_by_key( '_lasery_handle_retry_after' );
@@ -113,6 +117,7 @@ require_once __DIR__ . '/product-kind.php';
 require_once __DIR__ . '/product-badges.php';
 require_once __DIR__ . '/order-form.php';
 require_once __DIR__ . '/cart.php';
+require_once __DIR__ . '/product-relations.php';
 require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';
 require_once __DIR__ . '/product-translations.php';

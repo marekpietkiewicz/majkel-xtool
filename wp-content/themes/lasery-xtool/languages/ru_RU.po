@@ -14,14 +14,17 @@ msgstr "АКСЕССУАРЫ"
 msgid "Akcesoria"
 msgstr "Аксессуары"
 
-msgid "Akcesoria xTool"
-msgstr "Аксессуары xTool"
+msgid "Akcesoria do tego urządzenia"
+msgstr "Аксессуары для этого устройства"
 
 msgid "Akcesorium"
 msgstr "Аксессуар"
 
 msgid "Artykuły"
 msgstr "Статьи"
+
+msgid "Artykuły o tym produkcie"
+msgstr "Статьи об этом товаре"
 
 msgid "BLOG"
 msgstr "БЛОГ"
@@ -122,6 +125,9 @@ msgstr "Открыть запись на демонстрацию"
 msgid "POZNAJ XTOOL"
 msgstr "УЗНАЙТЕ ОБ XTOOL"
 
+msgid "Pasuje do urządzeń"
+msgstr "Подходит к устройствам"
+
 msgid "Pierwsze artykuły pojawią się wkrótce."
 msgstr "Первые статьи скоро появятся."
 
@@ -208,9 +214,6 @@ msgstr "Запишитесь на онлайн-демо — покажем вы�
 
 msgid "Urządzenia"
 msgstr "Устройства"
-
-msgid "Urządzenia xTool"
-msgstr "Устройства xTool"
 
 msgid "Urządzenia xTool do grawerowania i cięcia laserowego. Pokażemy je na demo i pomożemy w zamówieniu."
 msgstr "Устройства xTool для лазерной гравировки и резки. Покажем их на демо и поможем с заказом."

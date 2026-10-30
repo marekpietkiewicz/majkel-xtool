@@ -129,11 +129,12 @@ function lasery_xtool_blog_url($language = '') {
     return add_query_arg('lang', $language !== '' ? $language : lasery_xtool_interface_language(), get_permalink($page));
 }
 
-/** Blog posts written in the current language. */
+/** Blog posts written in the current language (and matching an optional meta_query). */
 function lasery_xtool_blog_query($args = []) {
     $args += ['post_type' => 'post', 'post_status' => 'publish', 'ignore_sticky_posts' => true];
     if (function_exists('lasery_xtool_language_meta_query')) {
-        $args['meta_query'] = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
+        $language = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
+        $args['meta_query'] = isset($args['meta_query']) ? ['relation' => 'AND', $args['meta_query'], $language] : $language;
     }
     return new WP_Query($args);
 }
