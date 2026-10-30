@@ -144,7 +144,7 @@ function lasery_xtool_fits_box( $post ) {
 	wp_nonce_field( 'lasery_xtool_save_fits', 'lasery_xtool_fits_nonce' );
 	$fits = get_post_meta( $post->ID, LASERY_XTOOL_FITS );
 	$devices = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC', 'tax_query' => lasery_xtool_kind_tax_query( 'device' ), 'post__not_in' => array( $post->ID ) ) );
-	echo '<p class="description">Dla akcesoriów: urządzenia, przy których akcesorium jest pokazywane. Strona akcesorium pokazuje je jako „Pasuje do”.</p>';
+	echo '<p class="description">Dla akcesoriów: urządzenia, przy których akcesorium jest pokazywane w sekcji „Akcesoria do tego urządzenia”. Strona akcesorium pokazuje je w sekcji „Pasuje do urządzeń”.</p>';
 	foreach ( $devices as $device ) {
 		$source = get_post_meta( $device->ID, LASERY_XTOOL_SOURCE_ID, true );
 		if ( ! is_string( $source ) || '' === $source ) {
