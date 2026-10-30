@@ -28,7 +28,7 @@ Pierwsze trzy artykuły w pięciu językach tworzy `wp eval-file scripts/seed-bl
 
 Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera okno wyszukiwania urządzeń, akcesoriów i artykułów w języku interfejsu. Przeglądarka pobiera raz mały indeks (`/wp-json/lasery/v1/search?lang=pl`, kilkanaście–kilkadziesiąt KB, przeglądarka przechowuje go 10 minut) i wyszukuje w nim od razu przy wpisywaniu, bez rozróżniania wielkości liter i polskich znaków; angielska nazwa ze sklepu xTool również znajduje produkt. Indeks jest odświeżany po zapisaniu produktu lub artykułu i po każdej synchronizacji cen. Bez JavaScriptu ten sam indeks obsługuje stronę wyników `/?s=…&lang=…`.
 
-Strona główna pokazuje osiem pierwszych urządzeń według pola **Kolejność** (na telefonie i tablecie siedem, żeby siatka była pełna); pozostałe są w katalogu `/produkty/`.
+Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie siedem, żeby siatka była pełna): najpierw maszyny z oznaczeniem demo, potem pozostałe, w obu grupach według pola **Kolejność**. Pozostałe są w katalogu `/produkty/`.
 
 ## Stan środowiska
 

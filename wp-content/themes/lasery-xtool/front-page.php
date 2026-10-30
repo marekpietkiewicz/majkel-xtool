@@ -3,7 +3,7 @@
 $selected_products = get_option('lasery_xtool_featured_products', []);
 $selected_products = is_array($selected_products) ? array_slice(array_values(array_unique(array_filter(array_map('absint', array_filter($selected_products, 'is_scalar'))))), 0, 4) : [];
 $slides = $selected_products
-    ? get_posts(['post_type' => 'lasery_product', 'post_status' => 'publish', 'post__in' => $selected_products, 'orderby' => 'post__in', 'posts_per_page' => 4, 'lasery_demo_first' => true, 'suppress_filters' => false])
+    ? lasery_xtool_products('', 4, ['post__in' => $selected_products, 'orderby' => 'post__in'])
     : lasery_xtool_products('device', 4);
 // Eight cards fill the featured grid evenly; the catalogue lists the rest.
 $devices = lasery_xtool_products('device', 8);
