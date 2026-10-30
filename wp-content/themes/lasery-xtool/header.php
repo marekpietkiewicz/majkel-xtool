@@ -37,6 +37,12 @@ $blog = lasery_xtool_blog_url();
             <a class="search-toggle" href="<?php echo esc_url(add_query_arg(['s' => '', 'lang' => $current_language], home_url('/'))); ?>" data-search-open aria-keyshortcuts="Control+K Meta+K /">
                 <span class="visually-hidden"><?php esc_html_e('Szukaj', 'lasery-xtool'); ?></span><?php echo lasery_xtool_icon('search'); ?>
             </a>
+            <?php $cart = function_exists('lasery_xtool_cart_url') ? lasery_xtool_cart_url($current_language) : ''; ?>
+            <?php if ($cart !== '') : ?>
+                <a class="search-toggle cart-link" href="<?php echo esc_url($cart); ?>"<?php if (is_page('koszyk')) : ?> aria-current="page"<?php endif; ?>>
+                    <span class="visually-hidden"><?php esc_html_e('Koszyk', 'lasery-xtool'); ?></span><?php echo lasery_xtool_icon('bag'); ?><span class="cart-count" data-cart-count hidden></span>
+                </a>
+            <?php endif; ?>
             <details class="lang-menu" data-lang-menu>
                 <summary aria-label="<?php echo esc_attr(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>">
                     <?php echo lasery_xtool_icon('globe'); ?><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>

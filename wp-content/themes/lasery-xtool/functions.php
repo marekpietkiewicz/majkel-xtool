@@ -80,6 +80,8 @@ function lasery_xtool_display_product_title($post_id) {
 add_filter('document_title_parts', function ($parts) {
     if (is_singular('lasery_product')) {
         $parts['title'] = lasery_xtool_display_product_title(get_queried_object_id());
+    } elseif (is_page('koszyk')) {
+        $parts['title'] = __('Koszyk', 'lasery-xtool');
     }
     return $parts;
 });

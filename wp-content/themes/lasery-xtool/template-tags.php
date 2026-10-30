@@ -207,6 +207,6 @@ function lasery_xtool_language_switch_url($language) {
         $blog = lasery_xtool_blog_url($language);
         return $blog !== '' ? $blog : add_query_arg('lang', $language, home_url('/'));
     }
-    return add_query_arg('lang', $language, remove_query_arg(['order_result', 'strona']));
+    return add_query_arg('lang', $language, remove_query_arg(['cart', 'strona']));
 }
 
