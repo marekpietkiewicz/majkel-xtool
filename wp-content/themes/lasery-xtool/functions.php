@@ -43,12 +43,12 @@ add_action('wp', function () {
 });
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
-// Adjacent posts can be in another language.
-remove_action('wp_head', 'adjacent_posts_rel_link_wp_head');
 
 // The theme shows no comments, so none can be posted (this also stops comment spam and trackbacks).
 add_filter('comments_open', '__return_false');
 add_filter('pings_open', '__return_false');
+// Category, tag and archive feed links would point to the Polish feed.
+remove_action('wp_head', 'feed_links_extra', 3);
 
 add_action('wp_head', function () {
     $fonts = get_template_directory_uri() . '/assets/fonts/';
@@ -105,7 +105,7 @@ add_filter('get_canonical_url', function ($url, $post) {
         return $url;
     }
     $url = lasery_xtool_language_url($url);
-    $page = is_page('blog') ? lasery_xtool_blog_listing()[0] : 1;
+    $page = $post->ID === get_queried_object_id() && is_page('blog') ? lasery_xtool_blog_listing()[0] : 1;
     return $page > 1 ? add_query_arg('strona', $page, $url) : $url;
 }, 10, 2);
 
@@ -135,7 +135,8 @@ add_action('wp_head', function () {
         $description = get_the_excerpt(get_queried_object_id());
     } elseif (is_page('blog')) {
         $description = lasery_xtool_text('blog_description');
-        $url = get_permalink(get_queried_object_id());
+        // Further pages differ per language, so only the first one has alternates.
+        $url = lasery_xtool_blog_listing()[0] > 1 ? '' : get_permalink(get_queried_object_id());
     } elseif (is_post_type_archive('lasery_product')) {
         $kind = lasery_xtool_requested_kind();
         $url = $kind === '' ? get_post_type_archive_link('lasery_product') : add_query_arg('kind', $kind, get_post_type_archive_link('lasery_product'));
@@ -164,9 +165,9 @@ add_action('wp_head', function () {
     }
 });
 
-// Pages with source prices (also product cards inside articles) stay in the page cache for at most an hour.
+// Pages with source prices (also product cards inside articles) and the article list stay in the page cache for at most an hour.
 add_action('template_redirect', function () {
-    if (is_front_page() || is_post_type_archive('lasery_product') || is_singular(['lasery_product', 'post'])) {
+    if (is_front_page() || is_post_type_archive('lasery_product') || is_singular(['lasery_product', 'post']) || is_page('blog')) {
         do_action('litespeed_control_set_ttl', HOUR_IN_SECONDS);
     }
 });

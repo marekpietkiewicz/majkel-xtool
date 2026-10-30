@@ -58,28 +58,34 @@
     // The raw href matches the heading id, also for Cyrillic ids.
     const tocLinks = Array.from(document.querySelectorAll('.article-toc a'));
     const headings = tocLinks.map((link) => document.getElementById(link.getAttribute('href').slice(1)));
+    // Links from the table of contents stop at scroll-padding-top; a section is current
+    // once its heading has reached that line under the sticky header.
+    let line = 0;
+    let current = -2;
     let frame = 0;
+    const measure = () => { line = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + 8; };
     const update = () => {
       frame = 0;
+      // Read every position before writing styles.
       const rect = articleContent.getBoundingClientRect();
       const value = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height - window.innerHeight * 0.6, 1)));
-      progress.style.transform = `scaleX(${value})`;
-      // The current section is the last one whose heading reached the sticky header
-      // (scroll-padding-top is where links from the table of contents stop).
-      const line = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + 8;
-      let current = -1;
+      let next = -1;
       headings.forEach((heading, index) => {
-        if (heading && heading.getBoundingClientRect().top <= line) current = index;
+        if (heading && heading.getBoundingClientRect().top <= line) next = index;
       });
+      progress.style.transform = `scaleX(${value})`;
+      if (next === current) return;
+      current = next;
       tocLinks.forEach((link, index) => {
         if (index === current) link.setAttribute('aria-current', 'true');
         else link.removeAttribute('aria-current');
       });
     };
     const schedule = () => { frame = frame || requestAnimationFrame(update); };
+    measure();
     update();
     window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('resize', () => { measure(); schedule(); }, { passive: true });
   }
 
   /* Sliders (Swiper is loaded only on pages that use it). */

@@ -2,7 +2,6 @@
 /** Blog listing for the page with the slug "blog", in the current language. */
 get_header();
 [$page_number, $blog_posts] = lasery_xtool_blog_listing();
-$page_number = max(1, $page_number);
 ?>
 <div class="wrap">
     <header class="page-hero">
@@ -18,7 +17,7 @@ $page_number = max(1, $page_number);
         </div>
         <?php if ($blog_posts->max_num_pages > 1) : ?>
             <nav class="pagination" aria-label="<?php esc_attr_e('Strony bloga', 'lasery-xtool'); ?>">
-                <div class="nav-links"><?php echo wp_kses_post(paginate_links(['base' => esc_url_raw(add_query_arg('strona', '%#%')), 'format' => '', 'current' => $page_number, 'total' => $blog_posts->max_num_pages, 'prev_text' => '←', 'next_text' => '→'])); ?></div>
+                <div class="nav-links"><?php echo wp_kses_post(paginate_links(['base' => esc_url_raw(lasery_xtool_blog_url()) . '%_%', 'format' => '&strona=%#%', 'current' => $page_number, 'total' => $blog_posts->max_num_pages, 'prev_text' => '←', 'next_text' => '→'])); ?></div>
             </nav>
         <?php endif; ?>
     <?php else : ?>
