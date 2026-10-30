@@ -1,5 +1,5 @@
 <?php
-/** Product tile. Args: heading (h2|h3), featured (bool), eager (bool). */
+/** Product tile. Args: heading (h2|h3), featured (bool). */
 $post_id = get_the_ID();
 $heading = isset($args['heading']) && $args['heading'] === 'h2' ? 'h2' : 'h3';
 $featured = !empty($args['featured']);
@@ -9,11 +9,12 @@ $summary = lasery_xtool_display_summary($post_id);
 ?>
 <article class="product-card<?php echo $featured ? ' product-card--featured' : ''; ?>">
     <div class="product-card-media">
+        <?php echo lasery_xtool_badges_html($post_id); ?>
         <?php if (has_post_thumbnail()) : ?>
             <?php the_post_thumbnail('large', [
                 'alt' => '',
                 'sizes' => $featured ? '(min-width: 960px) 560px, 100vw' : '(min-width: 960px) 380px, (min-width: 760px) 33vw, 50vw',
-                'loading' => empty($args['eager']) ? 'lazy' : 'eager',
+                'loading' => 'lazy',
             ]); ?>
         <?php else : ?>
             <span class="product-card-placeholder" aria-hidden="true">xTool</span>

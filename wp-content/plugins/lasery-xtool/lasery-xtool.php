@@ -14,6 +14,8 @@ const LASERY_XTOOL_PRODUCT_TYPE = 'lasery_product';
 const LASERY_XTOOL_SOURCE_ID    = '_lasery_shopify_id';
 const LASERY_XTOOL_MAX_BYTES    = 2 * 1024 * 1024;
 const LASERY_XTOOL_MAX_PRODUCTS = 500;
+// Raise when lasery_xtool_install() has new work for existing sites.
+const LASERY_XTOOL_SCHEMA       = '2';
 
 add_action( 'init', 'lasery_xtool_register_product_type' );
 function lasery_xtool_register_product_type() {
@@ -35,11 +37,53 @@ function lasery_xtool_register_product_type() {
 	);
 }
 
+// Products moved from /lasery_product/ to /produkty/ in October 2026. Runs before
+// redirect_canonical(), whose fuzzy slug guess could pick a different product.
+add_action( 'template_redirect', 'lasery_xtool_redirect_old_urls', 9 );
+function lasery_xtool_redirect_old_urls() {
+	$path = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) : '';
+	if ( ! is_404() || ! is_string( $path ) || ! preg_match( '~^/lasery_product(?:/([a-z0-9-]+))?/?$~', $path, $match ) ) {
+		return;
+	}
+	$product = isset( $match[1] ) ? get_page_by_path( $match[1], OBJECT, LASERY_XTOOL_PRODUCT_TYPE ) : null;
+	$target = $product && 'publish' === $product->post_status ? get_permalink( $product ) : get_post_type_archive_link( LASERY_XTOOL_PRODUCT_TYPE );
+	if ( $target ) {
+		wp_safe_redirect( $target, 301 );
+		exit;
+	}
+}
+
 register_activation_hook( __FILE__, 'lasery_xtool_activate' );
 function lasery_xtool_activate() {
 	lasery_xtool_register_product_type();
 	lasery_xtool_register_kind_taxonomy();
+	lasery_xtool_register_badge_taxonomy();
+	lasery_xtool_install();
+}
+
+// Updates of an already active plugin do not run the activation hook.
+add_action( 'init', 'lasery_xtool_maybe_install', 20 );
+function lasery_xtool_maybe_install() {
+	if ( LASERY_XTOOL_SCHEMA !== get_option( 'lasery_xtool_schema' ) ) {
+		lasery_xtool_install();
+	}
+}
+
+/** Create the terms templates rely on and refresh URLs. Names can be changed in the panel. */
+function lasery_xtool_install() {
+	if ( ! term_exists( LASERY_XTOOL_ACCESSORY_TERM, LASERY_XTOOL_KIND_TAXONOMY ) ) {
+		wp_insert_term( 'Akcesoria', LASERY_XTOOL_KIND_TAXONOMY, array( 'slug' => LASERY_XTOOL_ACCESSORY_TERM ) );
+	}
+	if ( ! term_exists( LASERY_XTOOL_DEMO_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) ) {
+		$term = wp_insert_term( 'Demo na żywo', LASERY_XTOOL_BADGE_TAXONOMY, array( 'slug' => LASERY_XTOOL_DEMO_BADGE ) );
+		if ( is_array( $term ) ) {
+			foreach ( array( 'en' => 'Live demo', 'de' => 'Live-Demo', 'ru' => 'Демо вживую', 'uk' => 'Демо наживо' ) as $language => $name ) {
+				update_term_meta( $term['term_id'], 'lasery_name_' . $language, $name );
+			}
+		}
+	}
 	flush_rewrite_rules();
+	update_option( 'lasery_xtool_schema', LASERY_XTOOL_SCHEMA );
 }
 
 register_deactivation_hook( __FILE__, 'lasery_xtool_deactivate' );
@@ -51,6 +95,7 @@ function lasery_xtool_deactivate() {
 }
 
 require_once __DIR__ . '/product-kind.php';
+require_once __DIR__ . '/product-badges.php';
 require_once __DIR__ . '/order-form.php';
 require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';

@@ -4,8 +4,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/** Site languages come from the catalogue plugin; without it only Polish is offered. */
 function lasery_xtool_languages() {
-    return ['pl' => 'Polski', 'en' => 'English', 'de' => 'Deutsch', 'ru' => 'Русский', 'uk' => 'Українська'];
+    return function_exists('lasery_xtool_description_languages') ? lasery_xtool_description_languages() : ['pl' => 'Polski'];
 }
 
 /** Inline stroke icons; names are fixed in templates. */
@@ -44,17 +45,16 @@ function lasery_xtool_brand() {
 }
 
 /** Published products of one kind in the order set in the admin panel. */
-function lasery_xtool_products($kind, $limit = -1, $exclude = []) {
-    $args = [
+function lasery_xtool_products($kind, $limit = -1, $extra = []) {
+    $args = $extra + [
         'post_type' => 'lasery_product',
         'post_status' => 'publish',
         'posts_per_page' => $limit,
         'orderby' => ['menu_order' => 'ASC', 'date' => 'ASC', 'ID' => 'ASC'],
-        'post__not_in' => $exclude,
         'no_found_rows' => true,
     ];
     if (function_exists('lasery_xtool_kind_tax_query')) {
-        $args['tax_query'] = lasery_xtool_kind_tax_query($kind);
+        $args['tax_query'] = array_merge($args['tax_query'] ?? [], lasery_xtool_kind_tax_query($kind));
     }
     return get_posts($args);
 }
@@ -69,7 +69,7 @@ function lasery_xtool_display_summary($post_id) {
     return function_exists('lasery_xtool_product_summary') ? lasery_xtool_product_summary($post_id, lasery_xtool_interface_language()) : '';
 }
 
-/** "from €…" when several variants are offered, otherwise the single price. Escaped HTML. */
+/** "from €…" when variants differ in price, otherwise the single price. Escaped HTML. */
 function lasery_xtool_price_html($post_id) {
     if (!function_exists('lasery_xtool_lowest_price')) {
         return '';
@@ -79,19 +79,37 @@ function lasery_xtool_price_html($post_id) {
         return '';
     }
     $amount = '<strong>' . esc_html(lasery_xtool_format_price($price[0], $price[1], lasery_xtool_interface_language())) . '</strong>';
-    return count(lasery_xtool_available_variants($post_id)) > 1
-        /* translators: %s: the lowest product price. */
-        ? sprintf(esc_html__('od %s', 'lasery-xtool'), $amount)
-        : $amount;
+    /* translators: %s: the lowest product price. */
+    return $price[2] ? sprintf(esc_html__('od %s', 'lasery-xtool'), $amount) : $amount;
 }
 
-/** Local product photos: the featured image first, then the gallery. */
+/** Local product photos as [id, full URL, width, height]: the featured image first, then the gallery. */
 function lasery_xtool_product_images($post_id) {
     $ids = array_filter([get_post_thumbnail_id($post_id)]);
     if (function_exists('lasery_xtool_product_gallery')) {
         $ids = array_merge($ids, lasery_xtool_product_gallery($post_id));
     }
-    return array_values(array_unique(array_map('absint', $ids)));
+    $images = [];
+    foreach (array_unique(array_map('absint', $ids)) as $id) {
+        $full = wp_get_attachment_image_src($id, 'full');
+        if ($full) {
+            $images[] = [$id, $full[0], $full[1], $full[2]];
+        }
+    }
+    return $images;
+}
+
+/** Badges set in the admin panel (Produkty xTool → Oznaczenia). Escaped HTML. */
+function lasery_xtool_badges_html($post_id) {
+    if (!function_exists('lasery_xtool_product_badges')) {
+        return '';
+    }
+    $html = '';
+    foreach (lasery_xtool_product_badges($post_id, lasery_xtool_interface_language()) as [$slug, $label]) {
+        $icon = $slug === LASERY_XTOOL_DEMO_BADGE ? lasery_xtool_icon('video') : '';
+        $html .= '<span class="badge badge--' . esc_attr(sanitize_html_class($slug)) . '">' . $icon . esc_html($label) . '</span>';
+    }
+    return $html === '' ? '' : '<span class="badges">' . $html . '</span>';
 }
 
 function lasery_xtool_requested_kind() {

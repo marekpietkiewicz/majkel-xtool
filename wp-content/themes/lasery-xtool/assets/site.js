@@ -58,8 +58,6 @@
   const a11y = (element) => ({
     prevSlideMessage: element.dataset.labelPrev,
     nextSlideMessage: element.dataset.labelNext,
-    paginationBulletMessage: element.dataset.labelSlide || element.dataset.labelNext,
-    slideLabelMessage: '{{index}} / {{slidesLength}}',
   });
 
   const controlsOf = (element) => {
@@ -108,7 +106,15 @@
         clickable: true,
         bulletClass: 'hero-bullet',
         bulletActiveClass: 'is-active',
-        renderBullet: (index, className) => `<button type="button" class="${className}"><span></span></button>`,
+        // Swiper labels only its default bullets, so custom ones carry their own name.
+        renderBullet: (index, className) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = className;
+          button.setAttribute('aria-label', hero.dataset.labelSlide.replace('{{index}}', String(index + 1)));
+          button.append(document.createElement('span'));
+          return button.outerHTML;
+        },
       },
       a11y: a11y(hero),
       on: {

@@ -8,7 +8,7 @@
             $archive = get_post_type_archive_link('lasery_product');
             $filters = ['' => __('Wszystkie', 'lasery-xtool'), 'device' => __('Urządzenia', 'lasery-xtool'), 'accessory' => __('Akcesoria', 'lasery-xtool')];
             ?>
-            <p class="eyebrow"><?php echo esc_html(lasery_xtool_text('products_eyebrow', __('KATALOG XTOOL', 'lasery-xtool'))); ?></p>
+            <p class="eyebrow"><?php echo esc_html(lasery_xtool_text('products_eyebrow')); ?></p>
             <h1 class="page-title"><?php esc_html_e('Produkty xTool', 'lasery-xtool'); ?></h1>
             <nav class="filter-chips" aria-label="<?php esc_attr_e('Rodzaj produktów', 'lasery-xtool'); ?>">
                 <?php foreach ($filters as $value => $label) : ?>

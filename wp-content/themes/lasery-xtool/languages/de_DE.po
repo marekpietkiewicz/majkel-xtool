@@ -47,6 +47,9 @@ msgstr "Das Formular „Book a Service“ befindet sich unter dem Profil auf der
 msgid "Informacje"
 msgstr "Informationen"
 
+msgid "Jak wygląda demo?"
+msgstr "Wie läuft die Demo ab?"
+
 msgid "Język strony: %s"
 msgstr "Seitensprache: %s"
 
@@ -70,6 +73,9 @@ msgstr "Hauptmenü"
 
 msgid "Moduły laserowe, stoły robocze i dodatki do urządzeń xTool."
 msgstr "Lasermodule, Arbeitsflächen und Erweiterungen für xTool-Geräte."
+
+msgid "Na demo pokażemy te modele:"
+msgstr "In der Demo zeigen wir diese Modelle:"
 
 msgid "Najważniejsze cechy"
 msgstr "Wichtigste Merkmale"
@@ -140,8 +146,14 @@ msgstr "Erweitern Sie Ihr Gerät."
 msgid "Strona główna"
 msgstr "Startseite"
 
+msgid "Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup."
+msgstr "Dieses Modell steht in unserer Werkstatt. Buchen Sie eine Online-Demo und sehen Sie es in Aktion, bevor Sie sich entscheiden."
+
 msgid "Twórz więcej. Z xTool."
 msgstr "Mehr gestalten. Mit xTool."
+
+msgid "Umów demo"
+msgstr "Demo buchen"
 
 msgid "Urządzenia"
 msgstr "Geräte"
@@ -197,9 +209,6 @@ msgstr "Demo anfragen"
 msgid "Zdjęcie produktu %d"
 msgstr "Produktbild %d"
 
-msgid "Zdjęcie produktu {{index}}"
-msgstr "Produktfoto {{index}}"
-
 msgid "Znajdź urządzenie dla siebie."
 msgstr "Finden Sie das passende Gerät."
 
@@ -211,6 +220,9 @@ msgstr "Sehen Sie den Laser in Aktion und stellen Sie Fragen."
 
 msgid "Zobacz szczegóły"
 msgstr "Details ansehen"
+
+msgid "Zobacz ten model na żywo"
+msgstr "Dieses Modell live erleben"
 
 msgid "Zobacz urządzenie w akcji podczas spotkania online i zadaj pytania."
 msgstr "Sehen Sie das Gerät in einem Online-Termin in Aktion und stellen Sie Fragen."

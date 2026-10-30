@@ -6,10 +6,11 @@
     $images = lasery_xtool_product_images($post_id);
     $price = lasery_xtool_price_html($post_id);
     $is_accessory = function_exists('lasery_xtool_is_accessory') && lasery_xtool_is_accessory($post_id);
+    $has_demo = function_exists('lasery_xtool_has_demo') && lasery_xtool_has_demo($post_id);
     $home = lasery_xtool_language_url(home_url('/'));
     $archive = get_post_type_archive_link('lasery_product');
     $description = function_exists('lasery_xtool_product_description') ? lasery_xtool_product_description($post_id, lasery_xtool_interface_language()) : get_the_content();
-    $related = lasery_xtool_products($is_accessory ? 'device' : 'accessory', 12, [$post_id]);
+    $related = lasery_xtool_products($is_accessory ? 'device' : 'accessory', 12, ['post__not_in' => [$post_id]]);
     ?>
     <div class="wrap">
         <nav class="breadcrumbs" aria-label="<?php esc_attr_e('Ścieżka nawigacji', 'lasery-xtool'); ?>">
@@ -22,23 +23,24 @@
 
         <article <?php post_class('product'); ?>>
             <div class="product-hero">
-                <div class="product-gallery" data-gallery>
+                <div class="product-gallery">
                     <?php if ($images) : ?>
-                        <div class="swiper gallery-main" data-gallery-main data-label-prev="<?php esc_attr_e('Poprzednie zdjęcie', 'lasery-xtool'); ?>" data-label-next="<?php esc_attr_e('Następne zdjęcie', 'lasery-xtool'); ?>" data-label-slide="<?php esc_attr_e('Zdjęcie produktu {{index}}', 'lasery-xtool'); ?>">
+                        <div class="swiper gallery-main" data-gallery-main data-label-prev="<?php esc_attr_e('Poprzednie zdjęcie', 'lasery-xtool'); ?>" data-label-next="<?php esc_attr_e('Następne zdjęcie', 'lasery-xtool'); ?>">
                             <div class="swiper-wrapper">
-                                <?php foreach ($images as $index => $image_id) : ?>
-                                    <?php $full = wp_get_attachment_image_src($image_id, 'full'); ?>
-                                    <?php if (!$full) continue; ?>
-                                    <a class="swiper-slide gallery-slide" href="<?php echo esc_url($full[0]); ?>" data-pswp-width="<?php echo esc_attr($full[1]); ?>" data-pswp-height="<?php echo esc_attr($full[2]); ?>" aria-label="<?php echo esc_attr(sprintf(__('Powiększ zdjęcie %d', 'lasery-xtool'), $index + 1)); ?>">
-                                        <?php echo wp_get_attachment_image($image_id, 'large', false, [
-                                            'alt' => sprintf(__('%1$s – zdjęcie %2$d', 'lasery-xtool'), $title, $index + 1),
-                                            'sizes' => '(min-width: 960px) 680px, 100vw',
-                                            'loading' => $index === 0 ? 'eager' : 'lazy',
-                                            'fetchpriority' => $index === 0 ? 'high' : 'auto',
-                                        ]); ?>
-                                    </a>
+                                <?php foreach ($images as $index => $image) : ?>
+                                    <div class="swiper-slide">
+                                        <a class="gallery-slide" href="<?php echo esc_url($image[1]); ?>" data-pswp-width="<?php echo esc_attr($image[2]); ?>" data-pswp-height="<?php echo esc_attr($image[3]); ?>" aria-label="<?php echo esc_attr(sprintf(__('Powiększ zdjęcie %d', 'lasery-xtool'), $index + 1)); ?>">
+                                            <?php echo wp_get_attachment_image($image[0], 'large', false, [
+                                                'alt' => sprintf(__('%1$s – zdjęcie %2$d', 'lasery-xtool'), $title, $index + 1),
+                                                'sizes' => '(min-width: 960px) 680px, 100vw',
+                                                'loading' => $index === 0 ? 'eager' : 'lazy',
+                                                'fetchpriority' => $index === 0 ? 'high' : 'auto',
+                                            ]); ?>
+                                        </a>
+                                    </div>
                                 <?php endforeach; ?>
                             </div>
+                            <?php echo lasery_xtool_badges_html($post_id); ?>
                             <span class="gallery-zoom-hint" aria-hidden="true"><?php echo lasery_xtool_icon('zoom'); ?></span>
                             <?php if (count($images) > 1) : ?>
                                 <div class="gallery-controls" data-slider-controls hidden>
@@ -52,10 +54,12 @@
                         <?php if (count($images) > 1) : ?>
                             <div class="swiper gallery-thumbs" data-gallery-thumbs>
                                 <div class="swiper-wrapper">
-                                    <?php foreach ($images as $index => $image_id) : ?>
-                                        <button type="button" class="swiper-slide gallery-thumb" aria-label="<?php echo esc_attr(sprintf(__('Zdjęcie produktu %d', 'lasery-xtool'), $index + 1)); ?>"<?php if ($index === 0) : ?> aria-current="true"<?php endif; ?>>
-                                            <?php echo wp_get_attachment_image($image_id, 'thumbnail', false, ['alt' => '', 'loading' => 'lazy']); ?>
-                                        </button>
+                                    <?php foreach ($images as $index => $image) : ?>
+                                        <div class="swiper-slide">
+                                            <button type="button" class="gallery-thumb" aria-label="<?php echo esc_attr(sprintf(__('Zdjęcie produktu %d', 'lasery-xtool'), $index + 1)); ?>"<?php if ($index === 0) : ?> aria-current="true"<?php endif; ?>>
+                                                <?php echo wp_get_attachment_image($image[0], 'thumbnail', false, ['alt' => '', 'loading' => 'lazy']); ?>
+                                            </button>
+                                        </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -72,10 +76,25 @@
                         <p class="price price--large"><?php echo $price !== '' ? $price : esc_html__('Cena na zapytanie', 'lasery-xtool'); ?></p>
                         <p class="price-box-note"><?php esc_html_e('Cena orientacyjna z oficjalnego sklepu xTool. Przed płatnością potwierdzimy ostateczną kwotę i koszt dostawy.', 'lasery-xtool'); ?></p>
                     </div>
-                    <div class="product-actions">
+                    <div class="product-actions<?php echo $has_demo ? ' product-actions--single' : ''; ?>">
                         <a class="btn btn-primary btn-lg" href="#zamow"><?php esc_html_e('Zamów', 'lasery-xtool'); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
-                        <a class="btn btn-secondary btn-lg" href="<?php echo esc_url($home . '#demo'); ?>"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html(lasery_xtool_text('hero_demo_button', __('Zapytaj o demo', 'lasery-xtool'))); ?></a>
+                        <?php if (!$has_demo) : ?>
+                            <a class="btn btn-secondary btn-lg" href="<?php echo esc_url($home . '#demo'); ?>"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html(lasery_xtool_text('hero_demo_button')); ?></a>
+                        <?php endif; ?>
                     </div>
+                    <?php if ($has_demo) : ?>
+                        <div class="demo-callout">
+                            <span class="demo-callout-icon" aria-hidden="true"><?php echo lasery_xtool_icon('video'); ?></span>
+                            <div>
+                                <h2 class="demo-callout-title"><?php echo esc_html(lasery_xtool_text('demo_callout_title')); ?></h2>
+                                <p><?php echo esc_html(lasery_xtool_text('demo_callout_text')); ?></p>
+                                <div class="demo-callout-actions">
+                                    <a class="btn btn-accent" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?></a>
+                                    <a class="demo-callout-link" href="<?php echo esc_url($home . '#demo'); ?>"><?php esc_html_e('Jak wygląda demo?', 'lasery-xtool'); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <ul class="assurances">
                         <li><?php echo lasery_xtool_icon('check'); ?><?php esc_html_e('Zamówienie bez zakładania konta', 'lasery-xtool'); ?></li>
                         <li><?php echo lasery_xtool_icon('check'); ?><?php esc_html_e('Płacisz dopiero po potwierdzeniu ceny i dostawy', 'lasery-xtool'); ?></li>
