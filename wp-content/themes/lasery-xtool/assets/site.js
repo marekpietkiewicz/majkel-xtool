@@ -51,6 +51,36 @@
     });
   });
 
+  /* Articles: reading progress and the current section in the table of contents. */
+  const progress = document.querySelector('[data-reading-progress]');
+  const articleContent = document.querySelector('.article-content');
+  if (progress && articleContent) {
+    const updateProgress = () => {
+      const rect = articleContent.getBoundingClientRect();
+      const value = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height - window.innerHeight * 0.6, 1)));
+      progress.style.transform = `scaleX(${value})`;
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress, { passive: true });
+  }
+  const tocLinks = Array.from(document.querySelectorAll('.article-toc a'));
+  if (tocLinks.length && 'IntersectionObserver' in window) {
+    const linkFor = new Map(tocLinks.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        tocLinks.forEach((link) => link.removeAttribute('aria-current'));
+        const link = linkFor.get(entry.target.id);
+        if (link) link.setAttribute('aria-current', 'true');
+      });
+    }, { rootMargin: '-15% 0px -70% 0px' });
+    linkFor.forEach((link, id) => {
+      const heading = document.getElementById(id);
+      if (heading) observer.observe(heading);
+    });
+  }
+
   /* Sliders (Swiper is loaded only on pages that use it). */
   const Swiper = window.Swiper;
   if (typeof Swiper !== 'function') return;

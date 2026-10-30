@@ -98,11 +98,17 @@ function lasery_xtool_order_price_amount( $post_id ) {
 	return array( $price, $currency );
 }
 
+/** ICU locale for numbers and dates; English uses European conventions (EUR prices). */
+function lasery_xtool_icu_locale( $language ) {
+	$locales = array( 'pl' => 'pl_PL', 'en' => 'en_IE', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk_UA' );
+	return isset( $locales[ $language ] ) ? $locales[ $language ] : '';
+}
+
 /** Format a price for visitors, e.g. "3 427,33 €" in Polish. */
 function lasery_xtool_format_price( $amount, $currency, $language ) {
-	$locales = array( 'pl' => 'pl_PL', 'en' => 'en_IE', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk_UA' );
-	if ( class_exists( 'NumberFormatter' ) && isset( $locales[ $language ] ) ) {
-		$formatted = ( new NumberFormatter( $locales[ $language ], NumberFormatter::CURRENCY ) )->formatCurrency( (float) $amount, $currency );
+	$locale = lasery_xtool_icu_locale( $language );
+	if ( class_exists( 'NumberFormatter' ) && '' !== $locale ) {
+		$formatted = ( new NumberFormatter( $locale, NumberFormatter::CURRENCY ) )->formatCurrency( (float) $amount, $currency );
 		if ( is_string( $formatted ) ) {
 			return $formatted;
 		}

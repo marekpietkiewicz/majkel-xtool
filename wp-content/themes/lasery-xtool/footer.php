@@ -30,6 +30,8 @@ $email = lasery_xtool_contact_email();
                         <li><a href="<?php echo esc_url(add_query_arg('kind', 'accessory', $archive)); ?>"><?php esc_html_e('Akcesoria', 'lasery-xtool'); ?></a></li>
                     <?php endif; ?>
                     <li><a href="<?php echo esc_url($home . '#demo'); ?>"><?php esc_html_e('Demo', 'lasery-xtool'); ?></a></li>
+                    <?php $blog = lasery_xtool_blog_url(); ?>
+                    <?php if ($blog !== '') : ?><li><a href="<?php echo esc_url($blog); ?>"><?php esc_html_e('Blog', 'lasery-xtool'); ?></a></li><?php endif; ?>
                     <?php if ($privacy_url) : ?>
                         <li><a href="<?php echo esc_url(lasery_xtool_language_url($privacy_url)); ?>"><?php echo esc_html($consent_text['privacy']); ?></a></li>
                     <?php endif; ?>
