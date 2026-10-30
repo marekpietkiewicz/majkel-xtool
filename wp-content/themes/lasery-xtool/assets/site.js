@@ -36,6 +36,10 @@
         details.querySelector('summary').focus();
       }
     });
+    // Tabbing out closes the list, like a click outside.
+    details.addEventListener('focusout', (event) => {
+      if (details.open && !details.contains(event.relatedTarget)) details.open = false;
+    });
   });
 
   /* Order form: show the chosen variant and its price in the summary. */

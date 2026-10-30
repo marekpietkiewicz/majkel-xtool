@@ -301,3 +301,30 @@ msgstr "xTool і назви товарів є торговельними мар�
 
 msgid "Ścieżka nawigacji"
 msgstr "Навігаційний ланцюжок"
+
+msgid "Nie znaleźliśmy tej strony"
+msgstr "Сторінку не знайдено"
+
+msgid "Adres może być nieaktualny albo zawierać literówkę. Wyszukaj urządzenie, akcesorium lub artykuł albo przejdź do katalogu."
+msgstr "Можливо, адреса застаріла або містить помилку. Знайдіть пристрій, аксесуар чи статтю або перейдіть до каталогу."
+
+msgid "Zobacz produkty"
+msgstr "Переглянути товари"
+
+msgid "Produkty xTool i demonstracje"
+msgstr "Товари xTool і демонстрації"
+
+msgid "Strona %d"
+msgstr "Сторінка %d"
+
+msgid "Poprzednia"
+msgstr "Назад"
+
+msgid "Następna"
+msgstr "Далі"
+
+msgid "Kolejne strony"
+msgstr "Інші сторінки"
+
+msgid "(otwiera się w nowej karcie)"
+msgstr "(відкриється в новій вкладці)"

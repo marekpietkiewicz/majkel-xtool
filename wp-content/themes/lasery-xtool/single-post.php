@@ -45,7 +45,7 @@
                     <p><?php echo esc_html(lasery_xtool_text('blog_cta_text')); ?></p>
                 </div>
                 <div class="article-cta-actions">
-                    <a class="btn btn-accent btn-lg" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?></a>
+                    <a class="btn btn-accent btn-lg" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?><?php echo lasery_xtool_new_tab_hint(); ?></a>
                     <a class="btn btn-light btn-lg" href="<?php echo esc_url($home . '#urzadzenia'); ?>"><?php echo esc_html(lasery_xtool_text('blog_products_button')); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
                 </div>
             </aside>

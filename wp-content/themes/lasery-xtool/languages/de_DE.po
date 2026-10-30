@@ -301,3 +301,30 @@ msgstr "xTool und Produktnamen sind Marken ihrer jeweiligen Inhaber."
 
 msgid "Ścieżka nawigacji"
 msgstr "Brotkrumen-Navigation"
+
+msgid "Nie znaleźliśmy tej strony"
+msgstr "Diese Seite wurde nicht gefunden"
+
+msgid "Adres może być nieaktualny albo zawierać literówkę. Wyszukaj urządzenie, akcesorium lub artykuł albo przejdź do katalogu."
+msgstr "Die Adresse ist vielleicht veraltet oder enthält einen Tippfehler. Suchen Sie ein Gerät, Zubehör oder einen Artikel oder öffnen Sie den Katalog."
+
+msgid "Zobacz produkty"
+msgstr "Produkte ansehen"
+
+msgid "Produkty xTool i demonstracje"
+msgstr "xTool-Produkte und Vorführungen"
+
+msgid "Strona %d"
+msgstr "Seite %d"
+
+msgid "Poprzednia"
+msgstr "Zurück"
+
+msgid "Następna"
+msgstr "Weiter"
+
+msgid "Kolejne strony"
+msgstr "Weitere Seiten"
+
+msgid "(otwiera się w nowej karcie)"
+msgstr "(öffnet sich in einem neuen Tab)"

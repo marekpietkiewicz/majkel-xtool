@@ -301,3 +301,30 @@ msgstr "xTool and product names are trademarks of their respective owners."
 
 msgid "Ścieżka nawigacji"
 msgstr "Breadcrumb"
+
+msgid "Nie znaleźliśmy tej strony"
+msgstr "We could not find this page"
+
+msgid "Adres może być nieaktualny albo zawierać literówkę. Wyszukaj urządzenie, akcesorium lub artykuł albo przejdź do katalogu."
+msgstr "The address may be out of date or contain a typo. Search for a machine, accessory or article, or go to the catalogue."
+
+msgid "Zobacz produkty"
+msgstr "Browse products"
+
+msgid "Produkty xTool i demonstracje"
+msgstr "xTool products and demos"
+
+msgid "Strona %d"
+msgstr "Page %d"
+
+msgid "Poprzednia"
+msgstr "Previous"
+
+msgid "Następna"
+msgstr "Next"
+
+msgid "Kolejne strony"
+msgstr "More pages"
+
+msgid "(otwiera się w nowej karcie)"
+msgstr "(opens in a new tab)"

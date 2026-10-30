@@ -44,8 +44,9 @@ $blog = lasery_xtool_blog_url();
                 </a>
             <?php endif; ?>
             <details class="lang-menu" data-lang-menu>
-                <summary aria-label="<?php echo esc_attr(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>">
-                    <?php echo lasery_xtool_icon('globe'); ?><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>
+                <?php // The name includes the visible code, so voice control finds the menu by what it shows. ?>
+                <summary>
+                    <?php echo lasery_xtool_icon('globe'); ?><span class="visually-hidden"><?php echo esc_html(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>, </span><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>
                 </summary>
                 <ul class="lang-menu-list">
                     <?php foreach ($languages as $language => $name) : ?>

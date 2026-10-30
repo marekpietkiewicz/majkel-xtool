@@ -36,7 +36,7 @@
                                         <a class="gallery-slide" href="<?php echo esc_url($image[1]); ?>" data-pswp-width="<?php echo esc_attr($image[2]); ?>" data-pswp-height="<?php echo esc_attr($image[3]); ?>" aria-label="<?php echo esc_attr(sprintf(__('Powiększ zdjęcie %d', 'lasery-xtool'), $index + 1)); ?>">
                                             <?php echo wp_get_attachment_image($image[0], 'large', false, [
                                                 'alt' => sprintf(__('%1$s – zdjęcie %2$d', 'lasery-xtool'), $title, $index + 1),
-                                                'sizes' => '(min-width: 960px) 680px, 100vw',
+                                                'sizes' => '(min-width: 1280px) 585px, (min-width: 960px) 45vw, 81vw',
                                                 'loading' => $index === 0 ? 'eager' : 'lazy',
                                                 'fetchpriority' => $index === 0 ? 'high' : 'auto',
                                             ]); ?>
@@ -93,7 +93,7 @@
                                 <h2 class="demo-callout-title"><?php echo esc_html(lasery_xtool_text('demo_callout_title')); ?></h2>
                                 <p><?php echo esc_html(lasery_xtool_text('demo_callout_text')); ?></p>
                                 <div class="demo-callout-actions">
-                                    <a class="btn btn-accent" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?></a>
+                                    <a class="btn btn-accent" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?><?php echo lasery_xtool_new_tab_hint(); ?></a>
                                     <a class="demo-callout-link" href="<?php echo esc_url($home . '#demo'); ?>"><?php esc_html_e('Jak wygląda demo?', 'lasery-xtool'); ?></a>
                                 </div>
                             </div>
@@ -110,7 +110,7 @@
             <?php if (trim(wp_strip_all_tags($description)) !== '') : ?>
                 <section class="product-section" aria-labelledby="product-features-heading">
                     <h2 id="product-features-heading" class="section-title section-title--sm"><?php esc_html_e('Najważniejsze cechy', 'lasery-xtool'); ?></h2>
-                    <div class="prose product-description"><?php echo apply_filters('the_content', wp_kses_post($description)); ?></div>
+                    <div class="prose product-description"><?php echo lasery_xtool_keep_together_html(apply_filters('the_content', wp_kses_post($description))); ?></div>
                 </section>
             <?php endif; ?>
         </article>

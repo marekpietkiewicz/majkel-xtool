@@ -1,0 +1,4 @@
+# The documentation is for the repository, not for visitors.
+<FilesMatch "\.md$">
+	Require all denied
+</FilesMatch>

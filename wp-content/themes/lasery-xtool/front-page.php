@@ -35,7 +35,7 @@ $benefit_icons = [1 => 'video', 2 => 'bag', 3 => 'chat', 4 => 'shield'];
                                 <div class="actions">
                                     <a class="btn btn-primary" href="<?php echo esc_url($link . '#zamow'); ?>"><?php esc_html_e('Zamów', 'lasery-xtool'); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
                                     <?php if (function_exists('lasery_xtool_has_demo') && lasery_xtool_has_demo($slide->ID)) : ?>
-                                        <a class="btn btn-accent" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?></a>
+                                        <a class="btn btn-accent" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?><?php echo lasery_xtool_new_tab_hint(); ?></a>
                                     <?php else : ?>
                                         <a class="btn btn-secondary" href="<?php echo esc_url($link); ?>"><?php echo esc_html(lasery_xtool_text('hero_details_button')); ?></a>
                                     <?php endif; ?>
@@ -148,7 +148,7 @@ $benefit_icons = [1 => 'video', 2 => 'bag', 3 => 'chat', 4 => 'shield'];
                     <p class="eyebrow eyebrow--light"><?php echo esc_html(lasery_xtool_text('demo_eyebrow')); ?></p>
                     <h2 id="demo-heading" class="section-title"><?php echo esc_html(lasery_xtool_text('demo_title')); ?></h2>
                     <p class="demo-lead"><?php echo esc_html(lasery_xtool_text('demo_description')); ?></p>
-                    <a class="btn btn-light" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_button')); ?><?php echo lasery_xtool_icon('arrow-up-right'); ?></a>
+                    <a class="btn btn-light" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_button')); ?><?php echo lasery_xtool_icon('arrow-up-right'); ?><?php echo lasery_xtool_new_tab_hint(); ?></a>
                 </div>
                 <ol class="demo-steps">
                     <li><?php echo esc_html(lasery_xtool_text('demo_step_1')); ?></li>
