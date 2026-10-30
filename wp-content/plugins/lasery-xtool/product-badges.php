@@ -32,6 +32,22 @@ function lasery_xtool_has_demo( $post_id ) {
 	return has_term( LASERY_XTOOL_DEMO_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $post_id );
 }
 
+/**
+ * The query var lasery_demo_first lists products with a demo before the rest, each group in
+ * its usual order (get_posts() needs suppress_filters => false).
+ */
+add_filter( 'posts_clauses', 'lasery_xtool_demo_first_clauses', 10, 2 );
+function lasery_xtool_demo_first_clauses( $clauses, $query ) {
+	$term = $query->get( 'lasery_demo_first' ) ? get_term_by( 'slug', LASERY_XTOOL_DEMO_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) : false;
+	if ( ! $term ) {
+		return $clauses;
+	}
+	global $wpdb;
+	$clauses['join'] .= $wpdb->prepare( " LEFT JOIN {$wpdb->term_relationships} AS lasery_demo ON lasery_demo.object_id = {$wpdb->posts}.ID AND lasery_demo.term_taxonomy_id = %d", $term->term_taxonomy_id );
+	$clauses['orderby'] = rtrim( 'lasery_demo.object_id IS NULL, ' . $clauses['orderby'], ', ' );
+	return $clauses;
+}
+
 function lasery_xtool_demo_tax_query() {
 	return array(
 		array(

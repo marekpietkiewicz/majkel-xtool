@@ -191,6 +191,7 @@ add_action('pre_get_posts', function ($query) {
     }
     $query->set('posts_per_page', 48);
     $query->set('orderby', ['menu_order' => 'ASC', 'date' => 'ASC', 'ID' => 'ASC']);
+    $query->set('lasery_demo_first', true);
     $kind = lasery_xtool_requested_kind();
     if ($kind !== '' && function_exists('lasery_xtool_kind_tax_query')) {
         $query->set('tax_query', lasery_xtool_kind_tax_query($kind));

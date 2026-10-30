@@ -14,9 +14,11 @@ const LASERY_XTOOL_PRODUCT_TYPE = 'lasery_product';
 const LASERY_XTOOL_SOURCE_ID    = '_lasery_shopify_id';
 const LASERY_XTOOL_MAX_BYTES    = 4 * 1024 * 1024;
 const LASERY_XTOOL_MAX_PRODUCTS = 500;
+// Shopify's largest products.json page; eight pages cover the catalogue (about 800 products) with room to grow.
+const LASERY_XTOOL_PAGE_SIZE    = 250;
 const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
-const LASERY_XTOOL_SCHEMA       = '3';
+const LASERY_XTOOL_SCHEMA       = '4';
 
 add_action( 'init', 'lasery_xtool_register_product_type' );
 function lasery_xtool_register_product_type() {
@@ -90,6 +92,9 @@ function lasery_xtool_install() {
 	if ( ! get_page_by_path( 'blog' ) ) {
 		wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Blog', 'post_name' => 'blog', 'comment_status' => 'closed' ) );
 	}
+	// Left over from the per-product sync replaced in schema 4.
+	delete_post_meta_by_key( '_lasery_source_handle' );
+	delete_post_meta_by_key( '_lasery_handle_retry_after' );
 	flush_rewrite_rules();
 	update_option( 'lasery_xtool_schema', LASERY_XTOOL_SCHEMA );
 }
@@ -109,7 +114,6 @@ require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';
 require_once __DIR__ . '/product-translations.php';
 require_once __DIR__ . '/privacy-settings.php';
-require_once __DIR__ . '/handle-sync.php';
 require_once __DIR__ . '/gallery-editor.php';
 require_once __DIR__ . '/blog.php';
 
@@ -177,7 +181,7 @@ function lasery_xtool_import_page() {
 				<?php submit_button( 'Wznów pobieranie' ); ?>
 			</form>
 		<?php endif; ?>
-		<p>Ręczne pobranie z xtool.eu obejmuje maksymalnie 2000 produktów. Nowe wpisy zostaną zapisane jako szkice.</p>
+		<p>Ręczne pobranie z xtool.eu obejmuje maksymalnie <?php echo esc_html( LASERY_XTOOL_MAX_PAGES * LASERY_XTOOL_PAGE_SIZE ); ?> produktów. Nowe wpisy zostaną zapisane jako szkice.</p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="lasery_xtool_fetch">
 			<?php wp_nonce_field( 'lasery_xtool_fetch' ); ?>
@@ -187,77 +191,86 @@ function lasery_xtool_import_page() {
 	<?php
 }
 
+/** One validated product from Shopify's products.json, or false. */
+function lasery_xtool_parse_product( $product ) {
+	if ( ! is_object( $product ) || ! isset( $product->id, $product->title ) || ( ! is_int( $product->id ) && ! is_string( $product->id ) ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $product->id ) || ! is_string( $product->title ) || ( isset( $product->body_html ) && ! is_string( $product->body_html ) ) ) {
+		return false;
+	}
+	$title = sanitize_text_field( $product->title );
+	if ( '' === $title ) {
+		return false;
+	}
+	$item = array(
+		'id'      => (string) $product->id,
+		'title'   => $title,
+		'content' => isset( $product->body_html ) ? wp_kses_post( $product->body_html ) : '',
+	);
+	if ( property_exists( $product, 'variants' ) ) {
+		if ( ! is_array( $product->variants ) ) {
+			return false;
+		}
+		$item['variants'] = array();
+		$variant_ids = array();
+		foreach ( $product->variants as $variant ) {
+			if ( ! is_object( $variant ) || ! isset( $variant->id, $variant->title, $variant->price, $variant->available ) || ( ! is_int( $variant->id ) && ! is_string( $variant->id ) ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $variant->id ) || ! is_string( $variant->title ) || ! is_string( $variant->price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $variant->price ) || ! is_bool( $variant->available ) || ( isset( $variant->sku ) && ! is_string( $variant->sku ) ) || ( isset( $variant->compare_at_price ) && ( ! is_string( $variant->compare_at_price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $variant->compare_at_price ) ) ) ) {
+				return false;
+			}
+			$variant_id = (string) $variant->id;
+			$variant_title = sanitize_text_field( $variant->title );
+			if ( '' === $variant_title || isset( $variant_ids[ $variant_id ] ) ) {
+				return false;
+			}
+			$variant_ids[ $variant_id ] = true;
+			$item['variants'][] = array(
+				'id' => $variant_id,
+				'title' => $variant_title,
+				'sku' => isset( $variant->sku ) ? sanitize_text_field( $variant->sku ) : '',
+				'price' => $variant->price,
+				'compare_at_price' => isset( $variant->compare_at_price ) ? $variant->compare_at_price : null,
+				'available' => $variant->available,
+			);
+		}
+	}
+	if ( property_exists( $product, 'images' ) ) {
+		if ( ! is_array( $product->images ) ) {
+			return false;
+		}
+		$item['image_urls'] = array();
+		foreach ( $product->images as $image ) {
+			if ( ! is_object( $image ) || ! isset( $image->src ) || ! is_string( $image->src ) ) {
+				return false;
+			}
+			$url = esc_url_raw( $image->src, array( 'https' ) );
+			if ( lasery_xtool_is_source_image_url( $url ) && ! in_array( $url, $item['image_urls'], true ) && count( $item['image_urls'] ) < 20 ) {
+				$item['image_urls'][] = $url;
+			}
+		}
+		$item['image_url'] = $item['image_urls'] ? $item['image_urls'][0] : '';
+	}
+	return $item;
+}
+
+/** The raw products of a products.json document with at most $limit entries, or false. */
+function lasery_xtool_decode_products( $json, $limit ) {
+	$data = json_decode( $json, false, 512, JSON_BIGINT_AS_STRING );
+	return JSON_ERROR_NONE === json_last_error() && is_object( $data ) && isset( $data->products ) && is_array( $data->products ) && count( $data->products ) <= $limit ? $data->products : false;
+}
+
 /** Validate the complete document before creating any drafts. */
 function lasery_xtool_parse_products( $json ) {
-	$data = json_decode( $json, false, 512, JSON_BIGINT_AS_STRING );
-	if ( JSON_ERROR_NONE !== json_last_error() || ! is_object( $data ) || ! isset( $data->products ) || ! is_array( $data->products ) || count( $data->products ) > LASERY_XTOOL_MAX_PRODUCTS ) {
+	$raw = lasery_xtool_decode_products( $json, LASERY_XTOOL_MAX_PRODUCTS );
+	if ( false === $raw ) {
 		return false;
 	}
 	$products = array();
-	$seen     = array();
-	foreach ( $data->products as $product ) {
-		if ( ! is_object( $product ) || ! isset( $product->id, $product->title ) || ( ! is_int( $product->id ) && ! is_string( $product->id ) ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $product->id ) || ! is_string( $product->title ) || ( isset( $product->body_html ) && ! is_string( $product->body_html ) ) ) {
+	foreach ( $raw as $product ) {
+		$item = lasery_xtool_parse_product( $product );
+		if ( false === $item || isset( $products[ $item['id'] ] ) ) {
 			return false;
 		}
-		$id    = (string) $product->id;
-		$title = sanitize_text_field( $product->title );
-		if ( '' === $title || isset( $seen[ $id ] ) ) {
-			return false;
-		}
-		$seen[ $id ] = true;
-		$item = array(
-			'id'      => $id,
-			'title'   => $title,
-			'content' => isset( $product->body_html ) ? wp_kses_post( $product->body_html ) : '',
-		);
-		if ( isset( $product->handle ) && lasery_xtool_valid_source_handle( $product->handle ) ) {
-			$item['handle'] = $product->handle;
-		}
-		if ( property_exists( $product, 'variants' ) ) {
-			if ( ! is_array( $product->variants ) ) {
-				return false;
-			}
-			$item['variants'] = array();
-			$variant_ids = array();
-			foreach ( $product->variants as $variant ) {
-				if ( ! is_object( $variant ) || ! isset( $variant->id, $variant->title, $variant->price, $variant->available ) || ( ! is_int( $variant->id ) && ! is_string( $variant->id ) ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $variant->id ) || ! is_string( $variant->title ) || ! is_string( $variant->price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $variant->price ) || ! is_bool( $variant->available ) || ( isset( $variant->sku ) && ! is_string( $variant->sku ) ) || ( isset( $variant->compare_at_price ) && ( ! is_string( $variant->compare_at_price ) || ! preg_match( '/^[0-9]{1,9}(?:\.[0-9]{1,2})?$/D', $variant->compare_at_price ) ) ) ) {
-					return false;
-				}
-				$variant_id = (string) $variant->id;
-				$variant_title = sanitize_text_field( $variant->title );
-				if ( '' === $variant_title || isset( $variant_ids[ $variant_id ] ) ) {
-					return false;
-				}
-				$variant_ids[ $variant_id ] = true;
-				$item['variants'][] = array(
-					'id' => $variant_id,
-					'title' => $variant_title,
-					'sku' => isset( $variant->sku ) ? sanitize_text_field( $variant->sku ) : '',
-					'price' => $variant->price,
-					'compare_at_price' => isset( $variant->compare_at_price ) ? $variant->compare_at_price : null,
-					'available' => $variant->available,
-				);
-			}
-		}
-		if ( property_exists( $product, 'images' ) ) {
-			if ( ! is_array( $product->images ) ) {
-				return false;
-			}
-			$item['image_urls'] = array();
-			foreach ( $product->images as $image ) {
-				if ( ! is_object( $image ) || ! isset( $image->src ) || ! is_string( $image->src ) ) {
-					return false;
-				}
-				$url = esc_url_raw( $image->src, array( 'https' ) );
-				if ( lasery_xtool_is_source_image_url( $url ) && ! in_array( $url, $item['image_urls'], true ) && count( $item['image_urls'] ) < 20 ) {
-					$item['image_urls'][] = $url;
-				}
-			}
-			$item['image_url'] = $item['image_urls'] ? $item['image_urls'][0] : '';
-		}
-		$products[] = $item;
+		$products[ $item['id'] ] = $item;
 	}
-	return $products;
+	return array_values( $products );
 }
 
 function lasery_xtool_redirect_import( $args ) {
@@ -377,6 +390,10 @@ function lasery_xtool_handle_fetch() {
 		wp_die( esc_html__( 'Brak uprawnień.', 'lasery-xtool' ), '', array( 'response' => 403 ) );
 	}
 	check_admin_referer( 'lasery_xtool_fetch' );
+	// Up to a few thousand drafts take longer than a usual request.
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( 600 );
+	}
 	if ( ! lasery_xtool_lock_import() ) {
 		lasery_xtool_redirect_import( array( 'result' => 'locked' ) );
 	}
@@ -421,13 +438,10 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 		}
 	}
 	$products = array();
-	$seen     = array();
 	$result   = 'complete';
-	$fetched_at = time();
-	// Shopify's largest page; the whole catalogue (about 800 products) takes four requests.
-	$page_size = 250;
+	$source   = array( 'currency' => $currency, 'fetched_at' => time() );
 	for ( $page = 1; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
-		$url = add_query_arg( array( 'limit' => $page_size, 'page' => $page ), 'https://www.xtool.eu/products.json' );
+		$url = add_query_arg( array( 'limit' => LASERY_XTOOL_PAGE_SIZE, 'page' => $page ), 'https://www.xtool.eu/products.json' );
 		$response = wp_safe_remote_get(
 			$url,
 			array(
@@ -449,29 +463,36 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 		if ( strlen( $body ) > LASERY_XTOOL_MAX_BYTES ) {
 			return new WP_Error( 'network' );
 		}
-		$page_products = lasery_xtool_parse_products( $body );
-		if ( false === $page_products || count( $page_products ) > $page_size ) {
+		$raw = lasery_xtool_decode_products( $body, LASERY_XTOOL_PAGE_SIZE );
+		if ( false === $raw ) {
 			return new WP_Error( 'format' );
 		}
-		foreach ( $page_products as $product ) {
-			if ( isset( $seen[ $product['id'] ] ) ) {
-				return new WP_Error( 'format' );
+		if ( null === $remaining ) {
+			// Drafts: every product of the page must be valid and new.
+			foreach ( $raw as $entry ) {
+				$product = lasery_xtool_parse_product( $entry );
+				if ( false === $product || isset( $products[ $product['id'] ] ) ) {
+					return new WP_Error( 'format' );
+				}
+				$products[ $product['id'] ] = $product + $source;
 			}
-			$seen[ $product['id'] ] = true;
-			if ( null !== $remaining && ! isset( $remaining[ $product['id'] ] ) ) {
-				continue;
+		} else {
+			// Sync: only the site's products are validated, so an unrelated malformed product
+			// or one shifted between pages while xTool edits the catalogue cannot stop it.
+			// A product that is invalid or missing stays in $remaining and loses its offer.
+			foreach ( $raw as $entry ) {
+				$id = is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
+				$product = isset( $remaining[ $id ] ) ? lasery_xtool_parse_product( $entry ) : false;
+				if ( $product ) {
+					$products[ $id ] = $product + $source;
+					unset( $remaining[ $id ] );
+				}
 			}
-			$product['currency'] = $currency;
-			$product['fetched_at'] = $fetched_at;
-			$products[] = $product;
-			if ( null !== $remaining ) {
-				unset( $remaining[ $product['id'] ] );
+			if ( ! $remaining ) {
+				break;
 			}
 		}
-		if ( null !== $remaining && ! $remaining ) {
-			break;
-		}
-		if ( count( $page_products ) < $page_size ) {
+		if ( count( $raw ) < LASERY_XTOOL_PAGE_SIZE ) {
 			$result = null !== $remaining ? 'incomplete' : 'complete';
 			break;
 		}
@@ -479,7 +500,7 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 			$result = null !== $remaining ? 'incomplete' : 'limit';
 		}
 	}
-	return array( 'products' => $products, 'result' => $result );
+	return array( 'products' => array_values( $products ), 'result' => $result );
 }
 
 
@@ -598,7 +619,7 @@ function lasery_xtool_save_products( $products, $result ) {
 
 /** Source data never overwrites edited content, prices or featured images. */
 function lasery_xtool_save_source_data( $post_id, $product ) {
-	$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls', 'handle' => '_lasery_source_handle' );
+	$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls' );
 	if ( array_key_exists( 'variants', $product ) ) {
 		// Hide the snapshot while any of its fields are being changed. A failed
 		// write must never leave new prices paired with an old currency or time.
@@ -622,67 +643,4 @@ function lasery_xtool_save_source_data( $post_id, $product ) {
 		}
 	}
 	return true;
-}
-
-/** Apply a verified snapshot to specific published products without network access. */
-function lasery_xtool_apply_existing_snapshot( $json, $fetched_at, $currency, $source_ids ) {
-	if ( ! is_string( $json ) || strlen( $json ) > LASERY_XTOOL_MAX_BYTES || ! is_int( $fetched_at ) || $fetched_at < 1 || $fetched_at > time() || ! is_string( $currency ) || ! preg_match( '/^[A-Z]{3}$/D', $currency ) || ! is_array( $source_ids ) || ! $source_ids || count( $source_ids ) > 50 ) {
-		return new WP_Error( 'snapshot_arguments' );
-	}
-	$wanted = array();
-	foreach ( $source_ids as $id ) {
-		if ( ! is_string( $id ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', $id ) || isset( $wanted[ $id ] ) ) {
-			return new WP_Error( 'snapshot_arguments' );
-		}
-		$wanted[ $id ] = true;
-	}
-	$products = lasery_xtool_parse_products( $json );
-	if ( false === $products ) {
-		return new WP_Error( 'format' );
-	}
-	$matches = array();
-	foreach ( $products as $product ) {
-		if ( isset( $wanted[ $product['id'] ] ) ) {
-			$matches[ $product['id'] ] = $product;
-		}
-	}
-	if ( count( $matches ) !== count( $wanted ) ) {
-		return new WP_Error( 'incomplete' );
-	}
-	if ( ! lasery_xtool_lock_import() ) {
-		return new WP_Error( 'locked' );
-	}
-	try {
-		$posts = array();
-		foreach ( $wanted as $id => $unused ) {
-			$found = get_posts( array(
-				'post_type' => LASERY_XTOOL_PRODUCT_TYPE,
-				'post_status' => 'publish',
-				'meta_key' => LASERY_XTOOL_SOURCE_ID,
-				'meta_value' => (string) $id,
-				'fields' => 'ids',
-				'posts_per_page' => 2,
-				'no_found_rows' => true,
-			) );
-			if ( 1 !== count( $found ) ) {
-				return new WP_Error( 'snapshot_target' );
-			}
-			$posts[ $id ] = $found[0];
-		}
-		$updated = 0;
-		foreach ( $matches as $id => $product ) {
-			if ( ! lasery_xtool_refresh_import_lock() ) {
-				return new WP_Error( 'locklost' );
-			}
-			$product['currency'] = $currency;
-			$product['fetched_at'] = $fetched_at;
-			if ( ! lasery_xtool_save_source_data( $posts[ $id ], $product ) ) {
-				return new WP_Error( 'snapshot_write', '', array( 'updated' => $updated ) );
-			}
-			++$updated;
-		}
-		return $updated;
-	} finally {
-		lasery_xtool_release_import_lock();
-	}
 }

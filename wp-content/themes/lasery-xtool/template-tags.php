@@ -45,7 +45,7 @@ function lasery_xtool_brand() {
     <?php
 }
 
-/** Published products of one kind in the order set in the admin panel. */
+/** Published products of one kind: machines with a demo first, then the order set in the panel. */
 function lasery_xtool_products($kind, $limit = -1, $extra = []) {
     $args = $extra + [
         'post_type' => 'lasery_product',
@@ -53,6 +53,8 @@ function lasery_xtool_products($kind, $limit = -1, $extra = []) {
         'posts_per_page' => $limit,
         'orderby' => ['menu_order' => 'ASC', 'date' => 'ASC', 'ID' => 'ASC'],
         'no_found_rows' => true,
+        'lasery_demo_first' => true,
+        'suppress_filters' => false,
     ];
     if (function_exists('lasery_xtool_kind_tax_query')) {
         $args['tax_query'] = array_merge($args['tax_query'] ?? [], lasery_xtool_kind_tax_query($kind));

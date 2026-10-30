@@ -92,15 +92,17 @@
   const searchDialog = document.querySelector('[data-search]');
   const searchOpeners = document.querySelectorAll('[data-search-open]');
   if (searchDialog && searchOpeners.length && typeof searchDialog.showModal === 'function') {
-    const input = searchDialog.querySelector('input[type="search"]');
+    const form = searchDialog.querySelector('form');
+    const input = form.querySelector('input[type="search"]');
     const results = searchDialog.querySelector('[data-search-results]');
     const status = searchDialog.querySelector('[data-search-status]');
     const labels = searchDialog.dataset;
     let entries = null;
     let loading = null;
 
-    // Case- and accent-insensitive, so "laser swiatlowodowy" finds "Laser światłowodowy".
-    const normalize = (text) => String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
+    // Case- and accent-insensitive, so "laser swiatlowodowy" finds "Laser światłowodowy"
+    // (the same folding as the results page without JavaScript).
+    const normalize = (text) => String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l').replace(/ß/g, 's');
     const load = () => {
       loading = loading || fetch(labels.endpoint, { credentials: 'omit' })
         .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
@@ -146,7 +148,8 @@
     };
     const render = () => {
       if (!entries) return;
-      const terms = normalize(input.value).split(/\s+/).filter(Boolean);
+      const query = input.value.trim();
+      const terms = normalize(query).split(/\s+/).filter(Boolean);
       results.replaceChildren();
       if (!terms.length) {
         status.textContent = '';
@@ -156,17 +159,26 @@
         .map((entry) => ({ item: entry.item, score: score(entry, terms) }))
         .filter((match) => match.score > 0)
         .sort((a, b) => b.score - a.score);
-      let shown = 0;
-      [['p', labels.labelProducts, 8], ['a', labels.labelArticles, 4]].forEach(([type, heading, limit]) => {
-        const items = matches.filter((match) => match.item[0] === type).slice(0, limit);
-        if (!items.length) return;
+      // The group with the best match comes first, so Enter opens the best match.
+      const groups = [['p', labels.labelProducts, 8], ['a', labels.labelArticles, 4]];
+      if (matches.length && matches[0].item[0] === 'a') groups.reverse();
+      let truncated = false;
+      groups.forEach(([type, heading, limit]) => {
+        const found = matches.filter((match) => match.item[0] === type);
+        if (!found.length) return;
+        truncated = truncated || found.length > limit;
         const group = element('section', 'search-group');
-        group.append(element('p', 'search-group-title', heading), ...items.map((match) => resultLink(match.item)));
+        group.append(element('p', 'search-group-title', heading), ...found.slice(0, limit).map((match) => resultLink(match.item)));
         results.append(group);
-        shown += items.length;
       });
-      if (!shown) results.append(element('p', 'search-empty', labels.labelEmpty.replace('%s', input.value.trim())));
-      status.textContent = labels.labelCount.replace('%d', String(shown));
+      // Functions as replacements keep "$&" and similar in the query literal.
+      if (!matches.length) results.append(element('p', 'search-empty', labels.labelEmpty.replace('%s', () => query)));
+      if (truncated) {
+        const all = element('a', 'search-all', labels.labelAll.replace('%d', () => String(matches.length)));
+        all.href = `${form.action}?${new URLSearchParams(new FormData(form))}`;
+        results.append(all);
+      }
+      status.textContent = labels.labelCount.replace('%d', () => String(matches.length));
     };
     const open = (event) => {
       if (event) event.preventDefault();
@@ -183,9 +195,10 @@
       opener.addEventListener('pointerenter', load, { once: true });
       opener.addEventListener('focus', load, { once: true });
     });
-    input.addEventListener('input', render);
+    // Loading again after a failed request, so typing retries.
+    input.addEventListener('input', () => load().then(render));
     // Enter opens the best match; without one, the form shows the results page.
-    searchDialog.querySelector('form').addEventListener('submit', (event) => {
+    form.addEventListener('submit', (event) => {
       const first = results.querySelector('a');
       if (first) {
         event.preventDefault();
@@ -199,7 +212,9 @@
     searchDialog.addEventListener('keydown', (event) => {
       // A search field would first clear its text on Escape; the dialog closes at once instead.
       if (event.key === 'Escape') {
+        // Not also the mobile menu, whose handler listens on the document.
         event.preventDefault();
+        event.stopPropagation();
         searchDialog.close();
         return;
       }
