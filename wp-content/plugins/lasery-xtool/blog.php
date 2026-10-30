@@ -78,6 +78,8 @@ function lasery_xtool_redirect_post_language() {
 	$requested = isset( $_GET['lang'] ) && is_string( $_GET['lang'] ) ? sanitize_key( wp_unslash( $_GET['lang'] ) ) : '';
 	if ( $language !== $requested ) {
 		// Only the language changes; the path and other parameters (e.g. UTM tags) stay.
+		// LiteSpeed leaves UTM tags out of its cache key, so a cached redirect would drop them.
+		do_action( 'litespeed_control_set_nocache', 'lasery-xtool language redirect' );
 		wp_safe_redirect( add_query_arg( 'lang', $language ), 301 );
 		exit;
 	}
