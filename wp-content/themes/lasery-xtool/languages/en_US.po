@@ -1,0 +1,102 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\nLanguage: en_US\n"
+
+msgid "Przejdź do treści"
+msgstr "Skip to content"
+
+msgid "Menu główne"
+msgstr "Main menu"
+
+msgid "Język strony"
+msgstr "Site language"
+
+msgid "Produkty"
+msgstr "Products"
+
+msgid "Demo"
+msgstr "Demo"
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "Zapytaj o demo"
+msgstr "Ask about a demo"
+
+msgid "LASERY I URZĄDZENIA XTOOL"
+msgstr "XTOOL LASERS AND MACHINES"
+
+msgid "Twórz więcej. Z xTool."
+msgstr "Create more. With xTool."
+
+msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
+msgstr "Explore engraving and cutting machines. Choose a model or ask us about a demo."
+
+msgid "Zobacz produkty"
+msgstr "View products"
+
+msgid "OD POMYSŁU DO REALIZACJI"
+msgstr "FROM IDEA TO CREATION"
+
+msgid "KATALOG XTOOL"
+msgstr "XTOOL CATALOGUE"
+
+msgid "Znajdź urządzenie dla siebie."
+msgstr "Find the right machine for you."
+
+msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
+msgstr "Explore the available machines and choose a solution for your projects."
+
+msgid "Zobacz cały katalog"
+msgstr "View the full catalogue"
+
+msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
+msgstr "Our product catalogue is being prepared. Contact us to ask about our machines."
+
+msgid "POZNAJ XTOOL"
+msgstr "DISCOVER XTOOL"
+
+msgid "Chcesz zobaczyć urządzenie w akcji?"
+msgstr "Want to see a machine in action?"
+
+msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
+msgstr "Choose a convenient time on the xTool demo page or open it in a new tab."
+
+msgid "Otwórz rezerwację demo"
+msgstr "Open demo booking"
+
+msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
+msgstr "The “Book a Service” form is below the profile on the xTool page. Scroll inside the frame to find it."
+
+msgid "Rezerwacja demonstracji xTool u Michała"
+msgstr "Book an xTool demonstration with Michał"
+
+msgid "Wyniki wyszukiwania: %s"
+msgstr "Search results: %s"
+
+msgid "Brak treści do wyświetlenia."
+msgstr "There is no content to display."
+
+msgid "xTool"
+msgstr "xTool"
+
+msgid "PRODUKT XTOOL"
+msgstr "XTOOL PRODUCT"
+
+msgid "Zobacz szczegóły"
+msgstr "View details"
+
+msgid "Zamów"
+msgstr "Order"
+
+msgid "Produkty xTool i kontakt w sprawie demo."
+msgstr "xTool products and demo enquiries."
+
+msgid "MASZ PYTANIA?"
+msgstr "HAVE A QUESTION?"
+
+msgid "MAJKEL MICHAŁ MAGALSKI"
+msgstr "MAJKEL MICHAŁ MAGALSKI"
+
+msgid "Produkty xTool"
+msgstr "xTool products"

@@ -1,0 +1,18 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+wp-config.php
+wp-config-local.php
+auth.json
+
+# Dependencies and generated files
+node_modules/
+vendor/
+.DS_Store
+
+# User content, database exports and logs
+wp-content/uploads/
+*.sql
+*.sql.gz
+*.log

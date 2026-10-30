@@ -1,0 +1,102 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\nLanguage: ru_RU\n"
+
+msgid "Przejdź do treści"
+msgstr "Перейти к содержимому"
+
+msgid "Menu główne"
+msgstr "Главное меню"
+
+msgid "Język strony"
+msgstr "Язык сайта"
+
+msgid "Produkty"
+msgstr "Товары"
+
+msgid "Demo"
+msgstr "Демонстрация"
+
+msgid "Kontakt"
+msgstr "Контакты"
+
+msgid "Zapytaj o demo"
+msgstr "Узнать о демонстрации"
+
+msgid "LASERY I URZĄDZENIA XTOOL"
+msgstr "ЛАЗЕРЫ И ОБОРУДОВАНИЕ XTOOL"
+
+msgid "Twórz więcej. Z xTool."
+msgstr "Создавайте больше. С xTool."
+
+msgid "Poznaj urządzenia do grawerowania i cięcia. Wybierz model dla siebie lub zapytaj nas o demo."
+msgstr "Изучите оборудование для гравировки и резки. Выберите модель или узнайте о демонстрации."
+
+msgid "Zobacz produkty"
+msgstr "Посмотреть товары"
+
+msgid "OD POMYSŁU DO REALIZACJI"
+msgstr "ОТ ИДЕИ К ВОПЛОЩЕНИЮ"
+
+msgid "KATALOG XTOOL"
+msgstr "КАТАЛОГ XTOOL"
+
+msgid "Znajdź urządzenie dla siebie."
+msgstr "Найдите подходящее оборудование."
+
+msgid "Poznaj dostępne urządzenia i wybierz rozwiązanie do swoich projektów."
+msgstr "Изучите доступное оборудование и выберите решение для своих проектов."
+
+msgid "Zobacz cały katalog"
+msgstr "Посмотреть весь каталог"
+
+msgid "Katalog produktów jest w przygotowaniu. Skontaktuj się z nami, aby zapytać o urządzenia."
+msgstr "Каталог товаров готовится. Свяжитесь с нами, чтобы узнать об оборудовании."
+
+msgid "POZNAJ XTOOL"
+msgstr "УЗНАЙТЕ ОБ XTOOL"
+
+msgid "Chcesz zobaczyć urządzenie w akcji?"
+msgstr "Хотите увидеть оборудование в работе?"
+
+msgid "Wybierz dogodny termin na stronie demonstracji xTool lub otwórz ją w nowej karcie."
+msgstr "Выберите удобное время на странице демонстрации xTool или откройте её в новой вкладке."
+
+msgid "Otwórz rezerwację demo"
+msgstr "Открыть запись на демонстрацию"
+
+msgid "Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć."
+msgstr "Форма «Book a Service» находится под профилем на странице xTool. Прокрутите содержимое рамки, чтобы её увидеть."
+
+msgid "Rezerwacja demonstracji xTool u Michała"
+msgstr "Запись на демонстрацию xTool у Михала"
+
+msgid "Wyniki wyszukiwania: %s"
+msgstr "Результаты поиска: %s"
+
+msgid "Brak treści do wyświetlenia."
+msgstr "Нет содержимого для отображения."
+
+msgid "xTool"
+msgstr "xTool"
+
+msgid "PRODUKT XTOOL"
+msgstr "ТОВАР XTOOL"
+
+msgid "Zobacz szczegóły"
+msgstr "Подробнее"
+
+msgid "Zamów"
+msgstr "Заказать"
+
+msgid "Produkty xTool i kontakt w sprawie demo."
+msgstr "Товары xTool и запросы о демонстрации."
+
+msgid "MASZ PYTANIA?"
+msgstr "ЕСТЬ ВОПРОСЫ?"
+
+msgid "MAJKEL MICHAŁ MAGALSKI"
+msgstr "MAJKEL MICHAŁ MAGALSKI"
+
+msgid "Produkty xTool"
+msgstr "Товары xTool"
