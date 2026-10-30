@@ -22,7 +22,7 @@ Lista artykułów jest na stronie o adresie `blog` (szablon `page-blog.php`, str
 
 Karty produktów w treści wstawia blok „Shortcode” z `[lasery_produkty xtool="<identyfikatory xTool>"]` lub `[lasery_produkty ids="<ID wpisów>"]` (do sześciu produktów, w podanej kolejności). Teksty listy i ramki pod artykułem edytuje się w **Wygląd → Personalizacja → Treść strony xTool**. Motyw nie wyświetla komentarzy, więc są one wyłączone. Treści wieloczęściowe (`<!--nextpage-->`) nie są obsługiwane.
 
-Pierwsze trzy artykuły w pięciu językach tworzy `wp eval-file scripts/seed-blog.php` (okładki w `scripts/blog/covers`). Skrypt pomija istniejące artykuły, także te w koszu, więc nie nadpisuje zmian z panelu.
+Artykuły w pięciu językach tworzy `wp eval-file scripts/seed-blog.php` z plików `scripts/blog/articles.php` i `scripts/blog/articles/*.php` (okładki w `scripts/blog/covers`). Skrypt pomija istniejące artykuły, także te w koszu, więc nie nadpisuje zmian z panelu. Jak przygotować kolejne artykuły (temat, fakty, SEO/GEO, wersje językowe, okładka, publikacja), opisuje [scripts/blog/README.md](scripts/blog/README.md).
 
 ## Wyszukiwarka
 

@@ -1,7 +1,7 @@
 /*
 Theme Name: Lasery xTool
 Description: Nowoczesny motyw katalogu urządzeń xTool dla laseryxtool.pl.
-Version: 0.5.0
+Version: 0.5.1
 Text Domain: lasery-xtool
 Requires at least: 6.5
 Requires PHP: 8.0
@@ -346,6 +346,10 @@ html:not(.js) .menu-toggle { display: none; }
 .prose blockquote { margin: 1.6em 0; padding: 4px 0 4px 20px; border-left: 3px solid var(--accent); font-size: 1.15rem; }
 .prose .wp-block-table { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
 .prose table { width: 100%; border-collapse: collapse; font-size: .95rem; line-height: 1.5; }
+/* Columns follow their content and words stay whole; a wide table scrolls sideways in its frame. */
+.prose .wp-block-table table { table-layout: auto; }
+.prose .wp-block-table :is(th, td) { overflow-wrap: normal; word-break: normal; hyphens: auto; }
+.prose .wp-block-table table:has(tr > :nth-child(4)) :is(th, td) { min-width: 8.5rem; }
 .prose th, .prose td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .prose th { background: var(--surface); font-family: var(--font-display); font-weight: 600; }
 .prose tr:last-child td { border-bottom: 0; }
@@ -420,7 +424,7 @@ html:not(.js) .menu-toggle { display: none; }
 .article-cover { margin: 0 0 clamp(32px, 5vw, 56px); overflow: hidden; border-radius: var(--radius-xl); background: var(--surface); }
 .article-cover img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
 .article-layout { display: grid; gap: 32px; }
-.article-content { max-width: 720px; font-size: 1.075rem; line-height: 1.75; }
+.article-content { min-width: 0; max-width: 720px; font-size: 1.075rem; line-height: 1.75; }
 .article-toc { padding: 20px; border-radius: var(--radius-lg); background: var(--surface); }
 .article-toc-title { margin-bottom: 10px; color: var(--accent-text); font: 600 .75rem/1.2 var(--font-display); letter-spacing: .14em; text-transform: uppercase; }
 .article-toc ol { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; counter-reset: toc; }

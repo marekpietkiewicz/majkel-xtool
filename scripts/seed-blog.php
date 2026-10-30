@@ -19,6 +19,10 @@ require_once ABSPATH . 'wp-admin/includes/file.php';
 require_once ABSPATH . 'wp-admin/includes/image.php';
 
 $articles = require __DIR__ . '/blog/articles.php';
+// Later articles have a file each: scripts/blog/articles/<key>.php.
+foreach ( glob( __DIR__ . '/blog/articles/*.php' ) as $file ) {
+    $articles[ basename( $file, '.php' ) ] = require $file;
+}
 
 /** Convert the compact article format into block editor markup. */
 $to_blocks = static function ( $blocks ) {
