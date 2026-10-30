@@ -71,30 +71,32 @@
     showCartCount();
     window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
-  // The order covers the saved cart, so changed quantities must be saved first.
-  const orderForm = document.querySelector('[data-order-submit]');
-  const orderButton = orderForm && orderForm.querySelector('button[type="submit"]');
-  const unsaved = orderForm && orderForm.querySelector('[data-cart-unsaved]');
+  // The order includes the quantities in the form; Enter in a quantity field recalculates the cart instead.
   document.querySelectorAll('[data-cart-form]').forEach((form) => {
-    form.addEventListener('input', (event) => {
-      if (!event.target.matches('[data-cart-quantity]') || !orderButton || !unsaved) return;
-      orderButton.disabled = true;
-      unsaved.hidden = false;
+    const update = form.querySelector('[data-cart-update]');
+    const send = form.querySelector('[data-cart-send]');
+    const unsaved = form.querySelector('[data-cart-unsaved]');
+    form.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' || !event.target.matches('[data-cart-quantity]')) return;
+      event.preventDefault();
+      update.click();
     });
-  });
-  // One order per click: a second submit would only hit the rate limit. Back restores the button.
-  if (orderForm && orderButton) {
+    form.addEventListener('input', (event) => {
+      if (event.target.matches('[data-cart-quantity]')) unsaved.hidden = false;
+    });
+    // One order per click: a second submit would only hit the rate limit. Back restores the button.
     let sending = false;
-    orderForm.addEventListener('submit', () => {
+    form.addEventListener('submit', (event) => {
+      if (event.submitter === update) return;
       sending = true;
-      orderButton.disabled = true;
+      send.disabled = true;
     });
     window.addEventListener('pageshow', () => {
       if (!sending) return;
       sending = false;
-      orderButton.disabled = false;
+      send.disabled = false;
     });
-  }
+  });
 
   /* Articles: reading progress and the current section in the table of contents. */
   const progress = document.querySelector('[data-reading-progress]');
