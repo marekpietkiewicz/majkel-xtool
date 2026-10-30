@@ -241,7 +241,7 @@ html:not(.js) .menu-toggle { display: none; }
 .product-card:hover .product-card-arrow { transform: translateX(3px); }
 .product-grid--featured > :first-child { grid-column: 1 / -1; }
 /* Below 960 px the featured card takes a full row, so 1 + 6 cards fill two and three columns. */
-@media (max-width: 959px) { .product-grid--featured > :nth-child(n + 8) { display: none; } }
+@media (max-width: 959.98px) { .product-grid--featured > :nth-child(n + 8) { display: none; } }
 .product-card--featured .product-card-media { aspect-ratio: 16 / 11; padding: 6%; }
 .product-card--featured .product-card-title { font-size: 1.35rem; }
 .product-card--featured .product-card-summary { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }

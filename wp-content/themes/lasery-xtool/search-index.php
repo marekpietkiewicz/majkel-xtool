@@ -56,9 +56,15 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-// The same folding as the dialog's script (no German "ae" for "ä", so "gerat" finds "Gerät").
+// The same folding as the dialog's script: lower case, combining marks removed (ё → е, й → и,
+// ä → a, so "gerat" finds "Gerät"), ł → l, ß → s.
 function lasery_xtool_search_normalize($text) {
-    return remove_accents(mb_strtolower((string) $text, 'UTF-8'), 'en_US');
+    $text = mb_strtolower((string) $text, 'UTF-8');
+    if (!class_exists('Normalizer')) {
+        return remove_accents($text, 'en_US');
+    }
+    $text = preg_replace('/[\x{0300}-\x{036f}]/u', '', (string) Normalizer::normalize($text, Normalizer::FORM_D));
+    return strtr($text, ['ł' => 'l', 'ß' => 's']);
 }
 
 /** Entries containing every word of the query: the results page for visitors without JavaScript. */

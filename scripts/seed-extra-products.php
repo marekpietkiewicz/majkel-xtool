@@ -1,7 +1,7 @@
 <?php
 /**
- * Publish selected machines from a private snapshot of https://www.xtool.eu/products.json
- * (all pages saved as *.json in one folder); existing products are skipped.
+ * Publish selected machines from a private snapshot of https://www.xtool.eu (meta.json and the
+ * products.json pages saved as products-<n>.json in one folder); existing products are skipped.
  * Usage: wp eval-file scripts/seed-extra-products.php <snapshot folder> <Unix fetch time>
  */
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
@@ -31,20 +31,26 @@ $ids = [
     '9420620202197', // WonderPress 3D
     '8941086245077', // OS1
 ];
+$folder = rtrim( $args[0], '/' );
+// The store's currency, as the sync reads it.
+$meta = is_readable( $folder . '/meta.json' ) ? json_decode( (string) file_get_contents( $folder . '/meta.json' ) ) : null;
+if ( ! is_object( $meta ) || ! isset( $meta->currency ) || ! is_string( $meta->currency ) || ! preg_match( '/^[A-Z]{3}$/D', $meta->currency ) ) {
+    WP_CLI::error( 'The snapshot needs meta.json with the store currency.' );
+}
 $snapshot = [];
-foreach ( glob( rtrim( $args[0], '/' ) . '/*.json' ) as $file ) {
+foreach ( glob( $folder . '/products-*.json' ) as $file ) {
     $raw = lasery_xtool_decode_products( (string) file_get_contents( $file ), LASERY_XTOOL_MAX_PRODUCTS );
     if ( false === $raw ) {
         WP_CLI::error( 'Invalid snapshot ' . basename( $file ) );
     }
     foreach ( $raw as $entry ) {
-        $id = is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
+        $id = lasery_xtool_raw_product_id( $entry );
         if ( in_array( $id, $ids, true ) && ! isset( $snapshot[ $id ] ) ) {
             $product = lasery_xtool_parse_product( $entry );
             if ( false === $product ) {
                 WP_CLI::error( 'Invalid data for product ' . $id );
             }
-            $snapshot[ $id ] = $product + [ 'currency' => 'EUR', 'fetched_at' => $timestamp ];
+            $snapshot[ $id ] = $product + [ 'currency' => $meta->currency, 'fetched_at' => $timestamp ];
         }
     }
 }

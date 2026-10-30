@@ -27,7 +27,7 @@ function lasery_xtool_featured_page() {
 	?>
 	<div class="wrap">
 		<h1>Wyróżnione produkty</h1>
-		<p>Wybierz maksymalnie cztery opublikowane produkty, w kolejności wyświetlania na stronie głównej. Aby wrócić do automatycznego wyboru, pozostaw wszystkie pola puste.</p>
+		<p>Wybierz maksymalnie cztery opublikowane produkty w kolejności wyświetlania na stronie głównej. Produkty z oznaczeniem demo są zawsze pokazywane jako pierwsze; w obu grupach obowiązuje kolejność wyboru. Aby wrócić do automatycznego wyboru, pozostaw wszystkie pola puste.</p>
 		<?php if ( 'saved' === $result ) : ?><div class="notice notice-success"><p>Zapisano wybór produktów.</p></div><?php endif; ?>
 		<?php if ( 'invalid' === $result ) : ?><div class="notice notice-error"><p>Nie zapisano wyboru. Wybierz różne, opublikowane produkty.</p></div><?php endif; ?>
 		<?php if ( 'save_failed' === $result ) : ?><div class="notice notice-error"><p>Nie udało się zapisać wyboru. Spróbuj ponownie.</p></div><?php endif; ?>

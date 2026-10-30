@@ -172,6 +172,9 @@ function lasery_xtool_import_page() {
 		<?php if ( is_array( $last_sync ) && isset( $last_sync['time'], $last_sync['result'] ) && is_numeric( $last_sync['time'] ) && is_string( $last_sync['result'] ) ) : ?>
 			<p><?php echo esc_html( 'Ostatnia synchronizacja: ' . wp_date( 'Y-m-d H:i', (int) $last_sync['time'] ) . '. ' . ( isset( $messages[ $last_sync['result'] ] ) ? $messages[ $last_sync['result'] ] : 'Nieznany wynik.' ) ); ?>
 			<?php if ( isset( $last_sync['updated'], $last_sync['failed'] ) ) : ?><?php printf( ' Zaktualizowano: %d, błędy: %d.', absint( $last_sync['updated'] ), absint( $last_sync['failed'] ) ); ?><?php endif; ?></p>
+			<?php if ( ! empty( $last_sync['stale'] ) && is_array( $last_sync['stale'] ) ) : ?>
+				<p>Bez aktualnej oferty (brak w katalogu xTool lub błędne dane): <?php echo esc_html( implode( ', ', array_map( function ( $id ) { return lasery_xtool_plain_text( get_the_title( absint( $id ) ) ); }, $last_sync['stale'] ) ) ); ?>.</p>
+			<?php endif; ?>
 		<?php endif; ?>
 		<?php if ( get_option( 'lasery_xtool_fetch_paused' ) ) : ?>
 			<p>Pobieranie wstrzymano po odpowiedzi 429. Wznów dopiero po ustaniu ograniczenia źródła.</p>
@@ -248,6 +251,11 @@ function lasery_xtool_parse_product( $product ) {
 		$item['image_url'] = $item['image_urls'] ? $item['image_urls'][0] : '';
 	}
 	return $item;
+}
+
+/** The ID of a raw products.json entry as a string, '' when it has none. */
+function lasery_xtool_raw_product_id( $entry ) {
+	return is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
 }
 
 /** The raw products of a products.json document with at most $limit entries, or false. */
@@ -481,7 +489,7 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 			// or one shifted between pages while xTool edits the catalogue cannot stop it.
 			// A product that is invalid or missing stays in $remaining and loses its offer.
 			foreach ( $raw as $entry ) {
-				$id = is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
+				$id = lasery_xtool_raw_product_id( $entry );
 				$product = isset( $remaining[ $id ] ) ? lasery_xtool_parse_product( $entry ) : false;
 				if ( $product ) {
 					$products[ $id ] = $product + $source;
@@ -552,13 +560,15 @@ function lasery_xtool_sync_existing() {
 		unset( $targets[ $product['id'] ] );
 	}
 	// An absent product must not retain a fresh availability or price.
+	$stale = array();
 	foreach ( $targets as $post_ids ) {
 		foreach ( $post_ids as $post_id ) {
 			update_post_meta( $post_id, '_lasery_source_updated_at', '' );
+			$stale[] = $post_id;
 			++$failed;
 		}
 	}
-	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $fetched['result'], 'updated' => $updated, 'failed' => $failed ), false );
+	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $fetched['result'], 'updated' => $updated, 'failed' => $failed, 'stale' => $stale ), false );
 	lasery_xtool_release_import_lock();
 }
 

@@ -157,7 +157,8 @@ add_action('wp_head', function () {
         }
     }
     if ($description !== '') {
-        printf('<meta name="description" content="%s">' . "\n", esc_attr(wp_html_excerpt($description, 160, '…')));
+        // Descriptions are plain text, so they are shortened without stripping tags (which would cut "<5 mm").
+        printf('<meta name="description" content="%s">' . "\n", esc_attr(mb_strimwidth($description, 0, 160, '…')));
     }
     if (is_string($url) && $url !== '') {
         $url = remove_query_arg('lang', $url);
