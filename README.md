@@ -1,6 +1,6 @@
 # laseryxtool.pl
 
-Projekt witryny o produktach xTool na WordPressie i hostingu Hostido. Motyw prezentuje katalog, rezerwację demonstracji i formularz zgłoszenia zamówienia. Wtyczka importuje dane produktów z xTool.
+Projekt witryny o produktach xTool na WordPressie i hostingu Hostido. Motyw prezentuje katalog, rezerwację demonstracji, koszyk i formularz zamówienia. Wtyczka importuje dane produktów z xTool.
 
 Kod znajduje się w `wp-content/themes/lasery-xtool` i `wp-content/plugins/lasery-xtool`. [Instrukcja importu](wp-content/plugins/lasery-xtool/README.md) opisuje aktualny zakres i ograniczenia wtyczki.
 
@@ -41,7 +41,7 @@ Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie si
 ## Założenia
 
 - Prosta, czytelna strona w stylu landing page, z produktami, możliwością zakupu oraz kontaktem w sprawie demonstracji. Inspiracje: https://xtool.systems/en/ i https://www.xtool.eu/; strona główna powinna mieć mniej treści niż pierwsza z nich.
-- Zakup ma odbywać się przez formularz zamówienia wysyłany do Michała. Michał ręcznie obsługuje zamówienie w xTool i następnie przekazuje klientowi link do płatności. Formularz ma zawierać produkt i cenę oraz przypominać pola faktycznego formularza xTool.
+- Zakup odbywa się przez koszyk i zbiorcze zamówienie wysyłane e-mailem do Michała (bez linku do kasy xTool). Michał składa zamówienie w xTool, bo tylko wtedy otrzymuje prowizję (albo gdy klient wcześniej odbył demo przez stronę xTool), i wysyła klientowi link do płatności.
 - Demo wykorzystuje stronę gospodarza xTool: `https://support.xtool.com/demo-room/host-instruction?id=1252&type=demoPreSale`, osadzoną w iframe i dostępną przez bezpośredni link.
 - Opcjonalna ramka demo i zewnętrzne materiały w opisach ładują się po zgodzie; decyzję można zmienić w stopce. Wybrane zdjęcia produktów są zapisywane lokalnie jako WebP.
 - Własny motyw i wtyczka do importowania oraz aktualizacji produktów. Źródłem jest katalog Shopify xTool; zakres danych wymaga doprecyzowania. Użytkownik potwierdził, że umowa zezwala na automatyczne pobieranie, publikowanie i tłumaczenie materiałów.

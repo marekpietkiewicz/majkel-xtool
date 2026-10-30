@@ -18,7 +18,7 @@ const LASERY_XTOOL_MAX_PRODUCTS = 500;
 const LASERY_XTOOL_PAGE_SIZE    = 250;
 const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
-const LASERY_XTOOL_SCHEMA       = '4';
+const LASERY_XTOOL_SCHEMA       = '5';
 
 add_action( 'init', 'lasery_xtool_register_product_type' );
 function lasery_xtool_register_product_type() {
@@ -88,9 +88,11 @@ function lasery_xtool_install() {
 			}
 		}
 	}
-	// The theme renders the blog listing on this page (page-blog.php).
-	if ( ! get_page_by_path( 'blog' ) ) {
-		wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Blog', 'post_name' => 'blog', 'comment_status' => 'closed' ) );
+	// The theme renders the blog listing and the cart on these pages (page-<slug>.php).
+	foreach ( array( 'blog' => 'Blog', 'koszyk' => 'Koszyk' ) as $slug => $title ) {
+		if ( ! get_page_by_path( $slug ) ) {
+			wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'comment_status' => 'closed' ) );
+		}
 	}
 	// Left over from the per-product sync replaced in schema 4.
 	delete_post_meta_by_key( '_lasery_source_handle' );
@@ -110,6 +112,7 @@ function lasery_xtool_deactivate() {
 require_once __DIR__ . '/product-kind.php';
 require_once __DIR__ . '/product-badges.php';
 require_once __DIR__ . '/order-form.php';
+require_once __DIR__ . '/cart.php';
 require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';
 require_once __DIR__ . '/product-translations.php';

@@ -51,6 +51,26 @@
     });
   });
 
+  /* Cart: the number of items comes from the cart cookie, so pages stay cacheable for everyone. */
+  const cartCount = document.querySelector('[data-cart-count]');
+  const cartCookie = document.cookie.split('; ').find((part) => part.startsWith('lasery_cart='));
+  if (cartCount && cartCookie) {
+    const count = decodeURIComponent(cartCookie.slice('lasery_cart='.length)).split('|').reduce((sum, item) => sum + (Number(item.split(':')[2]) || 0), 0);
+    if (count) {
+      cartCount.textContent = String(count);
+      cartCount.hidden = false;
+    }
+  }
+  // A changed quantity updates the cart at once (without JavaScript the button does it).
+  document.querySelectorAll('[data-cart-form]').forEach((form) => {
+    const update = form.querySelector('[data-cart-update]');
+    form.addEventListener('change', (event) => {
+      if (!event.target.matches('[data-cart-quantity]')) return;
+      if (form.requestSubmit) form.requestSubmit(update);
+      else update.click();
+    });
+  });
+
   /* Articles: reading progress and the current section in the table of contents. */
   const progress = document.querySelector('[data-reading-progress]');
   const articleContent = document.querySelector('.article-content');
