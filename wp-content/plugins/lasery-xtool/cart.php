@@ -10,10 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const LASERY_XTOOL_CART_COOKIE    = 'lasery_cart';
 const LASERY_XTOOL_CART_MAX_LINES = 30;
+const LASERY_XTOOL_CART_PAGE      = 'koszyk';
 
-/** The cart page (slug "koszyk") in the given language, or '' before it exists. */
+/** The cart page in the given language, or '' before it exists. */
 function lasery_xtool_cart_url( $language ) {
-	$page = get_page_by_path( 'koszyk' );
+	$page = get_page_by_path( LASERY_XTOOL_CART_PAGE );
 	return $page && 'publish' === $page->post_status ? add_query_arg( 'lang', $language, get_permalink( $page ) ) : '';
 }
 
@@ -116,9 +117,9 @@ function lasery_xtool_cart_total( $lines, $text, $language ) {
 	return $parts ? implode( ' + ', $parts ) : $text['no_price'];
 }
 
-/** Ties the order form to the prices the customer saw. */
+/** Ties the order form to the products and prices the customer saw; quantities come with the order. */
 function lasery_xtool_cart_snapshot( $lines ) {
-	$data = array_map( function ( $line ) { return array( $line['key'], $line['quantity'], $line['amount'], $line['error'] ); }, $lines );
+	$data = array_map( function ( $line ) { return array( $line['key'], $line['amount'], $line['error'] ); }, $lines );
 	return hash_hmac( 'sha256', wp_json_encode( $data ), wp_salt( 'nonce' ) );
 }
 
@@ -150,9 +151,10 @@ function lasery_xtool_posted_language() {
 	return isset( lasery_xtool_description_languages()[ $language ] ) ? $language : 'pl';
 }
 
-/** Another site's form must not empty or replace a visitor's cart. */
+/** Another site's form must not empty or replace a visitor's cart (Origin covers browsers without Sec-Fetch-Site). */
 function lasery_xtool_cart_check_site( $language ) {
-	if ( isset( $_SERVER['HTTP_SEC_FETCH_SITE'] ) && 'cross-site' === $_SERVER['HTTP_SEC_FETCH_SITE'] ) {
+	$origin = isset( $_SERVER['HTTP_ORIGIN'] ) && is_string( $_SERVER['HTTP_ORIGIN'] ) ? wp_parse_url( $_SERVER['HTTP_ORIGIN'], PHP_URL_HOST ) : null;
+	if ( ( isset( $_SERVER['HTTP_SEC_FETCH_SITE'] ) && 'cross-site' === $_SERVER['HTTP_SEC_FETCH_SITE'] ) || ( is_string( $origin ) && strtolower( $origin ) !== strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) ) ) {
 		lasery_xtool_cart_redirect( $language, array() );
 	}
 }
@@ -192,10 +194,11 @@ function lasery_xtool_cart_add() {
 
 add_action( 'admin_post_lasery_xtool_cart_update', 'lasery_xtool_cart_update' );
 add_action( 'admin_post_nopriv_lasery_xtool_cart_update', 'lasery_xtool_cart_update' );
-/** Quantities and removals refer to lines by key, so they apply to the right line whatever the cookie holds now. */
-function lasery_xtool_cart_update() {
-	$language = lasery_xtool_posted_language();
-	lasery_xtool_cart_check_site( $language );
+/**
+ * The cart with the posted quantities (quantity[key], 0 removes) and removal (remove=key). Lines are
+ * referred to by key, so changes apply to the right line whatever the cookie holds now.
+ */
+function lasery_xtool_cart_posted_items() {
 	$quantities = isset( $_POST['quantity'] ) && is_array( $_POST['quantity'] ) ? wp_unslash( $_POST['quantity'] ) : array();
 	$remove = isset( $_POST['remove'] ) && is_string( $_POST['remove'] ) ? wp_unslash( $_POST['remove'] ) : '';
 	$items = array();
@@ -206,14 +209,20 @@ function lasery_xtool_cart_update() {
 			$items[] = array( $item[0], $item[1], $quantity );
 		}
 	}
-	lasery_xtool_cart_save( $items );
+	return $items;
+}
+
+function lasery_xtool_cart_update() {
+	$language = lasery_xtool_posted_language();
+	lasery_xtool_cart_check_site( $language );
+	lasery_xtool_cart_save( lasery_xtool_cart_posted_items() );
 	lasery_xtool_cart_redirect( $language, array( 'cart' => 'updated' ) );
 }
 
 // The cart page shows one visitor's cart and the order form with a nonce.
 add_action( 'template_redirect', 'lasery_xtool_cart_page_headers', 0 );
 function lasery_xtool_cart_page_headers() {
-	if ( ! is_page( 'koszyk' ) ) {
+	if ( ! is_page( LASERY_XTOOL_CART_PAGE ) ) {
 		return;
 	}
 	if ( ! defined( 'DONOTCACHEPAGE' ) ) {
@@ -230,12 +239,12 @@ function lasery_xtool_cart_page_headers() {
 
 add_filter( 'wp_robots', 'lasery_xtool_cart_robots' );
 function lasery_xtool_cart_robots( $robots ) {
-	return is_page( 'koszyk' ) ? array( 'noindex' => true, 'follow' => true ) : $robots;
+	return is_page( LASERY_XTOOL_CART_PAGE ) ? array( 'noindex' => true, 'follow' => true ) : $robots;
 }
 
 add_filter( 'wp_sitemaps_posts_query_args', 'lasery_xtool_cart_sitemap', 10, 2 );
 function lasery_xtool_cart_sitemap( $args, $post_type ) {
-	$page = 'page' === $post_type ? get_page_by_path( 'koszyk' ) : null;
+	$page = 'page' === $post_type ? get_page_by_path( LASERY_XTOOL_CART_PAGE ) : null;
 	if ( $page ) {
 		$args['post__not_in'] = array_merge( isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array(), array( $page->ID ) );
 	}
@@ -268,96 +277,98 @@ function lasery_xtool_render_cart() {
 			return;
 		endif;
 		?>
-		<?php // Removing uses its own form, so Enter in a quantity field submits "update". ?>
+		<?php // Removal buttons belong to their own form, so they are never the default button below. ?>
 		<form id="cart-remove" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="lasery_xtool_cart_update">
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 		</form>
-		<form class="cart-items" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-cart-form>
-			<input type="hidden" name="action" value="lasery_xtool_cart_update">
-			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
-			<ul class="cart-lines">
-				<?php foreach ( $lines as $index => $line ) : ?>
-					<?php $title = lasery_xtool_order_product_title( $line['product'], $language ); ?>
-					<?php $link = add_query_arg( 'lang', $language, get_permalink( $line['product'] ) ); ?>
-					<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>">
-						<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
-						<div class="cart-line-body">
-							<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></p>
-							<?php if ( $line['variant'] ) : ?><p class="cart-line-variant"><?php echo esc_html( lasery_xtool_variant_label( $line['variant'] ) ); ?></p><?php endif; ?>
-							<?php if ( $line['error'] ) : ?><p class="cart-line-error"><?php echo esc_html( $text[ 'cart_' . $line['error'] ] ); ?></p><?php endif; ?>
-							<p class="cart-line-price"><?php echo esc_html( $line['error'] ? '' : lasery_xtool_cart_line_price( $line, $text, $language ) ); ?></p>
-						</div>
-						<div class="cart-line-actions">
-							<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
-							<input id="cart-quantity-<?php echo esc_attr( $index ); ?>" name="quantity[<?php echo esc_attr( $line['key'] ); ?>]" type="number" min="0" max="100" value="<?php echo esc_attr( $line['quantity'] ); ?>" data-cart-quantity>
-							<button type="submit" form="cart-remove" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $line['key'] ); ?>"><?php echo esc_html( $text['remove'] ); ?><span class="visually-hidden">: <?php echo esc_html( $title ); ?></span></button>
-						</div>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-			<p class="cart-items-actions">
-				<button type="submit" class="btn btn-secondary"><?php echo esc_html( $text['update'] ); ?></button>
-				<a class="btn btn-secondary" href="<?php echo esc_url( $archive ); ?>"><?php echo esc_html( $text['continue'] ); ?></a>
-			</p>
-		</form>
-		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-order-submit>
-			<input type="hidden" name="action" value="lasery_xtool_order">
+		<?php // One form, so the order includes changed quantities even when the cart was not updated. ?>
+		<form method="post" action="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_order', admin_url( 'admin-post.php' ) ) ); ?>" data-cart-form>
+			<?php // The first submit button is the default for Enter: it sends the order (the script makes Enter in a quantity field update the cart). ?>
+			<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true" <?php disabled( ! $orderable ); ?>><?php echo esc_html( $text['submit'] ); ?></button>
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 			<input type="hidden" name="snapshot" value="<?php echo esc_attr( lasery_xtool_cart_snapshot( $lines ) ); ?>">
 			<?php wp_nonce_field( 'lasery_xtool_order' ); ?>
 			<div class="order-form-trap" aria-hidden="true"><label for="order-website">Website</label><input id="order-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-			<div class="order-form-steps">
-				<fieldset class="order-step">
-					<legend><span class="order-step-number" aria-hidden="true">1</span><?php echo esc_html( $text['contact'] ); ?></legend>
-					<div class="field-grid">
-						<p class="field"><label for="order-first-name"><?php echo esc_html( $text['first_name'] ); ?></label><input id="order-first-name" name="first_name" type="text" maxlength="150" autocomplete="given-name" required></p>
-						<p class="field"><label for="order-last-name"><?php echo esc_html( $text['last_name'] ); ?></label><input id="order-last-name" name="last_name" type="text" maxlength="150" autocomplete="family-name" required></p>
-						<p class="field"><label for="order-email"><?php echo esc_html( $text['email'] ); ?></label><input id="order-email" name="email" type="email" maxlength="254" autocomplete="email" required></p>
-						<p class="field"><label for="order-phone"><?php echo esc_html( $text['phone'] ); ?></label><input id="order-phone" name="phone" type="tel" maxlength="50" autocomplete="tel"></p>
-					</div>
-				</fieldset>
-				<fieldset class="order-step">
-					<legend><span class="order-step-number" aria-hidden="true">2</span><?php echo esc_html( $text['address'] ); ?></legend>
-					<div class="field-grid">
-						<p class="field field-full"><label for="order-address1"><?php echo esc_html( $text['address1'] ); ?></label><input id="order-address1" name="address1" type="text" maxlength="250" autocomplete="address-line1" required></p>
-						<p class="field field-full"><label for="order-address2"><?php echo esc_html( $text['address2'] ); ?></label><input id="order-address2" name="address2" type="text" maxlength="250" autocomplete="address-line2"></p>
-						<p class="field"><label for="order-zip"><?php echo esc_html( $text['zip'] ); ?></label><input id="order-zip" name="zip" type="text" maxlength="30" autocomplete="postal-code" required></p>
-						<p class="field"><label for="order-city"><?php echo esc_html( $text['city'] ); ?></label><input id="order-city" name="city" type="text" maxlength="150" autocomplete="address-level2" required></p>
-						<p class="field field-full"><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
-							<select id="order-country" name="country" autocomplete="country" required>
-								<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
-								<?php foreach ( array_keys( lasery_xtool_shipping_countries() ) as $code ) : ?>
-									<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( lasery_xtool_country_name( $code, $language ) ); ?></option>
-								<?php endforeach; ?>
-							</select>
-						</p>
-					</div>
-				</fieldset>
-				<fieldset class="order-step">
-					<legend><span class="order-step-number" aria-hidden="true">3</span><?php echo esc_html( $text['extras'] ); ?></legend>
-					<div class="field-grid">
-						<p class="field field-full"><label for="order-invoice"><?php echo esc_html( $text['invoice'] ); ?></label><textarea id="order-invoice" name="invoice" maxlength="1000" rows="3"></textarea></p>
-						<p class="field field-full"><label for="order-notes"><?php echo esc_html( $text['notes'] ); ?></label><textarea id="order-notes" name="notes" maxlength="1000" rows="3"></textarea></p>
-					</div>
-				</fieldset>
-			</div>
-			<aside class="order-summary" aria-labelledby="order-summary-title">
-				<h2 id="order-summary-title"><?php echo esc_html( $text['summary'] ); ?></h2>
-				<dl class="order-summary-list">
-					<?php foreach ( $lines as $line ) : ?>
-						<dt><?php echo esc_html( $line['quantity'] . ' × ' . lasery_xtool_order_product_title( $line['product'], $language ) ); ?></dt>
-						<dd><?php echo esc_html( $line['amount'] ? lasery_xtool_format_cents( lasery_xtool_cents( $line['amount'][0] ) * $line['quantity'], $line['amount'][1], $language ) : $text['no_price'] ); ?></dd>
+			<div class="cart-items">
+				<ul class="cart-lines">
+					<?php foreach ( $lines as $index => $line ) : ?>
+						<?php $title = lasery_xtool_order_product_title( $line['product'], $language ); ?>
+						<?php $link = add_query_arg( 'lang', $language, get_permalink( $line['product'] ) ); ?>
+						<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>">
+							<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
+							<div class="cart-line-body">
+								<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></p>
+								<?php if ( $line['variant'] ) : ?><p class="cart-line-variant"><?php echo esc_html( lasery_xtool_variant_label( $line['variant'] ) ); ?></p><?php endif; ?>
+								<?php if ( $line['error'] ) : ?><p class="cart-line-error"><?php echo esc_html( $text[ 'cart_' . $line['error'] ] ); ?></p><?php endif; ?>
+								<p class="cart-line-price"><?php echo esc_html( $line['error'] ? '' : lasery_xtool_cart_line_price( $line, $text, $language ) ); ?></p>
+							</div>
+							<div class="cart-line-actions">
+								<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
+								<input id="cart-quantity-<?php echo esc_attr( $index ); ?>" name="quantity[<?php echo esc_attr( $line['key'] ); ?>]" type="number" min="1" max="100" value="<?php echo esc_attr( $line['quantity'] ); ?>" data-cart-quantity>
+								<button type="submit" form="cart-remove" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $line['key'] ); ?>"><?php echo esc_html( $text['remove'] ); ?><span class="visually-hidden">: <?php echo esc_html( $title ); ?></span></button>
+							</div>
+						</li>
 					<?php endforeach; ?>
-					<dt class="order-summary-total"><?php echo esc_html( $text['total'] ); ?></dt>
-					<dd class="order-summary-price"><?php echo esc_html( lasery_xtool_cart_total( $lines, $text, $language ) ); ?></dd>
-				</dl>
-				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
-				<p class="order-form-notice order-form-notice--error" data-cart-unsaved hidden><?php echo esc_html( $text['cart_unsaved'] ); ?></p>
-				<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?>><?php echo esc_html( $text['submit'] ); ?></button>
-				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
-				<p class="order-summary-privacy"><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><a href="<?php echo esc_url( add_query_arg( 'lang', $language, $privacy_url ) ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
-			</aside>
+				</ul>
+				<p class="cart-items-actions">
+					<button type="submit" class="btn btn-secondary" formaction="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_cart_update', admin_url( 'admin-post.php' ) ) ); ?>" formnovalidate data-cart-update><?php echo esc_html( $text['update'] ); ?></button>
+					<a class="btn btn-secondary" href="<?php echo esc_url( $archive ); ?>"><?php echo esc_html( $text['continue'] ); ?></a>
+				</p>
+			</div>
+			<div class="order-form-grid">
+				<div class="order-form-steps">
+					<fieldset class="order-step">
+						<legend><span class="order-step-number" aria-hidden="true">1</span><?php echo esc_html( $text['contact'] ); ?></legend>
+						<div class="field-grid">
+							<p class="field"><label for="order-first-name"><?php echo esc_html( $text['first_name'] ); ?></label><input id="order-first-name" name="first_name" type="text" maxlength="150" autocomplete="given-name" required></p>
+							<p class="field"><label for="order-last-name"><?php echo esc_html( $text['last_name'] ); ?></label><input id="order-last-name" name="last_name" type="text" maxlength="150" autocomplete="family-name" required></p>
+							<p class="field"><label for="order-email"><?php echo esc_html( $text['email'] ); ?></label><input id="order-email" name="email" type="email" maxlength="254" autocomplete="email" required></p>
+							<p class="field"><label for="order-phone"><?php echo esc_html( $text['phone'] ); ?></label><input id="order-phone" name="phone" type="tel" maxlength="50" autocomplete="tel"></p>
+						</div>
+					</fieldset>
+					<fieldset class="order-step">
+						<legend><span class="order-step-number" aria-hidden="true">2</span><?php echo esc_html( $text['address'] ); ?></legend>
+						<div class="field-grid">
+							<p class="field field-full"><label for="order-address1"><?php echo esc_html( $text['address1'] ); ?></label><input id="order-address1" name="address1" type="text" maxlength="250" autocomplete="address-line1" required></p>
+							<p class="field field-full"><label for="order-address2"><?php echo esc_html( $text['address2'] ); ?></label><input id="order-address2" name="address2" type="text" maxlength="250" autocomplete="address-line2"></p>
+							<p class="field"><label for="order-zip"><?php echo esc_html( $text['zip'] ); ?></label><input id="order-zip" name="zip" type="text" maxlength="30" autocomplete="postal-code" required></p>
+							<p class="field"><label for="order-city"><?php echo esc_html( $text['city'] ); ?></label><input id="order-city" name="city" type="text" maxlength="150" autocomplete="address-level2" required></p>
+							<p class="field field-full"><label for="order-country"><?php echo esc_html( $text['country'] ); ?></label>
+								<select id="order-country" name="country" autocomplete="country" required>
+									<option value=""><?php echo esc_html( $text['select_country'] ); ?></option>
+									<?php foreach ( array_keys( lasery_xtool_shipping_countries() ) as $code ) : ?>
+										<option value="<?php echo esc_attr( $code ); ?>"><?php echo esc_html( lasery_xtool_country_name( $code, $language ) ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</p>
+						</div>
+					</fieldset>
+					<fieldset class="order-step">
+						<legend><span class="order-step-number" aria-hidden="true">3</span><?php echo esc_html( $text['extras'] ); ?></legend>
+						<div class="field-grid">
+							<p class="field field-full"><label for="order-invoice"><?php echo esc_html( $text['invoice'] ); ?></label><textarea id="order-invoice" name="invoice" maxlength="1000" rows="3"></textarea></p>
+							<p class="field field-full"><label for="order-notes"><?php echo esc_html( $text['notes'] ); ?></label><textarea id="order-notes" name="notes" maxlength="1000" rows="3"></textarea></p>
+						</div>
+					</fieldset>
+				</div>
+				<aside class="order-summary" aria-labelledby="order-summary-title">
+					<h2 id="order-summary-title"><?php echo esc_html( $text['summary'] ); ?></h2>
+					<dl class="order-summary-list">
+						<?php foreach ( $lines as $line ) : ?>
+							<dt><?php echo esc_html( $line['quantity'] . ' × ' . lasery_xtool_order_product_title( $line['product'], $language ) ); ?><?php if ( $line['variant'] ) : ?><span class="order-summary-variant"><?php echo esc_html( lasery_xtool_variant_label( $line['variant'] ) ); ?></span><?php endif; ?></dt>
+							<dd><?php echo esc_html( $line['amount'] ? lasery_xtool_format_cents( lasery_xtool_cents( $line['amount'][0] ) * $line['quantity'], $line['amount'][1], $language ) : $text['no_price'] ); ?></dd>
+						<?php endforeach; ?>
+						<dt class="order-summary-total"><?php echo esc_html( $text['total'] ); ?></dt>
+						<dd class="order-summary-price"><?php echo esc_html( lasery_xtool_cart_total( $lines, $text, $language ) ); ?></dd>
+					</dl>
+					<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
+					<p class="order-form-notice" data-cart-unsaved hidden><?php echo esc_html( $text['cart_unsaved'] ); ?></p>
+					<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>
+					<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
+					<p class="order-summary-privacy"><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><a href="<?php echo esc_url( add_query_arg( 'lang', $language, $privacy_url ) ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
+				</aside>
+			</div>
 		</form>
 	</section>
 	<?php
@@ -367,12 +378,16 @@ add_action( 'admin_post_lasery_xtool_order', 'lasery_xtool_handle_order' );
 add_action( 'admin_post_nopriv_lasery_xtool_order', 'lasery_xtool_handle_order' );
 function lasery_xtool_handle_order() {
 	$language = lasery_xtool_posted_language();
+	lasery_xtool_cart_check_site( $language );
 	if ( ! isset( $_POST['_wpnonce'] ) || ! is_string( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'lasery_xtool_order' ) ) {
 		lasery_xtool_cart_redirect( $language, array( 'cart' => 'invalid' ) );
 	}
 	if ( ! isset( $_POST['website'] ) || ! is_string( $_POST['website'] ) || '' !== trim( wp_unslash( $_POST['website'] ) ) ) {
 		lasery_xtool_cart_redirect( $language, array( 'cart' => 'failed' ) );
 	}
+	// The order uses the quantities in the form, and the cart keeps them if the order is refused.
+	$items = lasery_xtool_cart_posted_items();
+	lasery_xtool_cart_save( $items );
 	$fields = array();
 	$limits = array( 'first_name' => 600, 'last_name' => 600, 'email' => 254, 'phone' => 200, 'address1' => 1000, 'address2' => 1000, 'city' => 600, 'zip' => 120, 'country' => 600, 'invoice' => 4000, 'notes' => 4000 );
 	foreach ( $limits as $field => $limit ) {
@@ -388,7 +403,7 @@ function lasery_xtool_handle_order() {
 		lasery_xtool_cart_redirect( $language, array( 'cart' => 'invalid' ) );
 	}
 	// The order covers exactly what the customer saw: no line may have changed or become unavailable.
-	$lines = lasery_xtool_cart_lines( lasery_xtool_cart_items() );
+	$lines = lasery_xtool_cart_lines( $items );
 	$snapshot = isset( $_POST['snapshot'] ) && is_string( $_POST['snapshot'] ) ? wp_unslash( $_POST['snapshot'] ) : '';
 	if ( ! $lines || array_filter( array_column( $lines, 'error' ) ) || ! hash_equals( lasery_xtool_cart_snapshot( $lines ), $snapshot ) ) {
 		lasery_xtool_cart_redirect( $language, array( 'cart' => 'changed' ) );

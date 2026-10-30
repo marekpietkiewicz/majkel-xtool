@@ -83,7 +83,6 @@ msgstr "Der Produktkatalog wird vorbereitet. Kontaktieren Sie uns für Fragen zu
 msgid "Kontakt"
 msgstr "Kontakt"
 
-
 msgid "LASERY I URZĄDZENIA XTOOL"
 msgstr "XTOOL LASER UND GERÄTE"
 

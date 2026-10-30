@@ -89,7 +89,7 @@ function lasery_xtool_install() {
 		}
 	}
 	// The theme renders the blog listing and the cart on these pages (page-<slug>.php).
-	foreach ( array( 'blog' => 'Blog', 'koszyk' => 'Koszyk' ) as $slug => $title ) {
+	foreach ( array( 'blog' => 'Blog', LASERY_XTOOL_CART_PAGE => 'Koszyk' ) as $slug => $title ) {
 		if ( ! get_page_by_path( $slug ) ) {
 			wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'comment_status' => 'closed' ) );
 		}

@@ -383,7 +383,8 @@ html:not(.js) .menu-toggle { display: none; }
 .cart-line-remove { min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--muted); font: 600 .9rem/1 var(--font-text); text-decoration: underline; cursor: pointer; }
 .cart-line-remove:hover { color: var(--ink); }
 .cart-items-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-.order-summary-total { color: var(--ink) !important; font-weight: 700; }
+.order-summary-list .order-summary-total { color: var(--ink); font-weight: 700; }
+.order-summary-variant { display: block; font-size: .8rem; }
 @media (min-width: 640px) {
   .cart-line { grid-template-columns: 88px minmax(0, 1fr) auto; padding: 16px 20px 16px 16px; }
   .cart-line-media { width: 88px; height: 88px; }
@@ -577,7 +578,7 @@ html:not(.js) .menu-toggle { display: none; }
 .cart .order-summary-list { grid-template-columns: minmax(0, 1fr) auto; }
 .order-summary-list dt { color: var(--muted); }
 .order-summary-list dd { font-weight: 600; text-align: right; }
-.order-summary-price { font: 700 1.35rem/1.2 var(--font-display) !important; }
+.order-summary-list .order-summary-price { font: 700 1.35rem/1.2 var(--font-display); }
 /* A narrow summary puts each value under its label, so long prices and variants never overflow. */
 @container order-summary (max-width: 299.98px) {
   .order-summary-list, .cart .order-summary-list { grid-template-columns: minmax(0, 1fr); gap: 2px; }
