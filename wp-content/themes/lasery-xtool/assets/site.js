@@ -88,6 +88,134 @@
     window.addEventListener('resize', () => { measure(); schedule(); }, { passive: true });
   }
 
+  /* Search: the small index of the current language is fetched once and searched in the browser. */
+  const searchDialog = document.querySelector('[data-search]');
+  const searchOpeners = document.querySelectorAll('[data-search-open]');
+  if (searchDialog && searchOpeners.length && typeof searchDialog.showModal === 'function') {
+    const input = searchDialog.querySelector('input[type="search"]');
+    const results = searchDialog.querySelector('[data-search-results]');
+    const status = searchDialog.querySelector('[data-search-status]');
+    const labels = searchDialog.dataset;
+    let entries = null;
+    let loading = null;
+
+    // Case- and accent-insensitive, so "laser swiatlowodowy" finds "Laser światłowodowy".
+    const normalize = (text) => String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ł/g, 'l');
+    const load = () => {
+      loading = loading || fetch(labels.endpoint, { credentials: 'omit' })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+        .then((index) => {
+          entries = index.map((item) => ({ item, title: normalize(item[1]), text: normalize(`${item[1]} ${item[2]} ${item[6]}`) }));
+        })
+        .catch(() => { loading = null; });
+      return loading;
+    };
+    // Every word must match; words at the start of the title rank highest.
+    const score = (entry, terms) => {
+      let total = 0;
+      for (const term of terms) {
+        if (!entry.text.includes(term)) return 0;
+        if (entry.title.startsWith(term)) total += 8;
+        else if (entry.title.includes(` ${term}`)) total += 5;
+        else if (entry.title.includes(term)) total += 3;
+        else total += 1;
+      }
+      return total;
+    };
+    const element = (tag, className, text) => {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text) node.textContent = text;
+      return node;
+    };
+    const resultLink = ([type, title, , url, image, price, label]) => {
+      const link = element('a', `search-result search-result--${type === 'p' ? 'product' : 'article'}`);
+      link.href = url;
+      const media = element('span', 'search-result-media');
+      if (image) {
+        const img = element('img');
+        img.src = image;
+        img.alt = '';
+        img.loading = 'lazy';
+        media.append(img);
+      }
+      const body = element('span', 'search-result-body');
+      body.append(element('span', 'search-result-title', title), element('span', 'search-result-meta', [label, price].filter(Boolean).join(' · ')));
+      link.append(media, body);
+      return link;
+    };
+    const render = () => {
+      if (!entries) return;
+      const terms = normalize(input.value).split(/\s+/).filter(Boolean);
+      results.replaceChildren();
+      if (!terms.length) {
+        status.textContent = '';
+        return;
+      }
+      const matches = entries
+        .map((entry) => ({ item: entry.item, score: score(entry, terms) }))
+        .filter((match) => match.score > 0)
+        .sort((a, b) => b.score - a.score);
+      let shown = 0;
+      [['p', labels.labelProducts, 8], ['a', labels.labelArticles, 4]].forEach(([type, heading, limit]) => {
+        const items = matches.filter((match) => match.item[0] === type).slice(0, limit);
+        if (!items.length) return;
+        const group = element('section', 'search-group');
+        group.append(element('p', 'search-group-title', heading), ...items.map((match) => resultLink(match.item)));
+        results.append(group);
+        shown += items.length;
+      });
+      if (!shown) results.append(element('p', 'search-empty', labels.labelEmpty.replace('%s', input.value.trim())));
+      status.textContent = labels.labelCount.replace('%d', String(shown));
+    };
+    const open = (event) => {
+      if (event) event.preventDefault();
+      if (searchDialog.open) return;
+      searchDialog.showModal();
+      input.focus();
+      input.select();
+      load().then(render);
+    };
+
+    searchOpeners.forEach((opener) => {
+      opener.addEventListener('click', open);
+      // Start downloading the index before the first click.
+      opener.addEventListener('pointerenter', load, { once: true });
+      opener.addEventListener('focus', load, { once: true });
+    });
+    input.addEventListener('input', render);
+    // Enter opens the best match; without one, the form shows the results page.
+    searchDialog.querySelector('form').addEventListener('submit', (event) => {
+      const first = results.querySelector('a');
+      if (first) {
+        event.preventDefault();
+        window.location.href = first.href;
+      }
+    });
+    searchDialog.querySelector('[data-search-close]').addEventListener('click', () => searchDialog.close());
+    searchDialog.addEventListener('click', (event) => {
+      if (event.target === searchDialog) searchDialog.close();
+    });
+    searchDialog.addEventListener('keydown', (event) => {
+      // A search field would first clear its text on Escape; the dialog closes at once instead.
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        searchDialog.close();
+        return;
+      }
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const items = [input, ...results.querySelectorAll('a')];
+      const next = items[(items.indexOf(document.activeElement) + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length];
+      event.preventDefault();
+      next.focus();
+    });
+    document.addEventListener('keydown', (event) => {
+      const typing = event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable="true"]');
+      const shortcut = (event.key === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey);
+      if (shortcut) open(event);
+    });
+  }
+
   /* Sliders (Swiper is loaded only on pages that use it). */
   const Swiper = window.Swiper;
   if (typeof Swiper !== 'function') return;

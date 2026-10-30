@@ -49,6 +49,21 @@ $email = lasery_xtool_contact_email();
         </div>
     </div>
 </footer>
+<dialog class="search-dialog" data-search aria-label="<?php esc_attr_e('Szukaj', 'lasery-xtool'); ?>"
+    data-endpoint="<?php echo esc_url(add_query_arg('lang', lasery_xtool_interface_language(), rest_url('lasery/v1/search'))); ?>"
+    data-label-products="<?php esc_attr_e('Produkty', 'lasery-xtool'); ?>"
+    data-label-articles="<?php esc_attr_e('Artykuły', 'lasery-xtool'); ?>"
+    data-label-empty="<?php esc_attr_e('Brak wyników dla „%s”.', 'lasery-xtool'); ?>"
+    data-label-count="<?php esc_attr_e('Wyniki: %d', 'lasery-xtool'); ?>">
+    <form class="search-form" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
+        <?php echo lasery_xtool_icon('search'); ?>
+        <input type="search" name="s" placeholder="<?php esc_attr_e('Szukaj urządzeń, akcesoriów i artykułów', 'lasery-xtool'); ?>" aria-label="<?php esc_attr_e('Szukaj', 'lasery-xtool'); ?>" aria-controls="search-results" autocomplete="off" enterkeyhint="search">
+        <input type="hidden" name="lang" value="<?php echo esc_attr(lasery_xtool_interface_language()); ?>">
+        <button type="button" class="search-close" data-search-close><span aria-hidden="true">Esc</span><span class="visually-hidden"><?php esc_html_e('Zamknij', 'lasery-xtool'); ?></span></button>
+    </form>
+    <p class="visually-hidden" role="status" data-search-status></p>
+    <div class="search-results" id="search-results" data-search-results></div>
+</dialog>
 <?php wp_footer(); ?>
 </body>
 </html>

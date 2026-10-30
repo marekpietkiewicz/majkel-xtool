@@ -17,6 +17,12 @@ $products = [
     '9187692970197' => 'xtool-f2-ultra-uv-5w-uv-laser-engraver',
     '9009695293653' => 'xtool-f2-ultra-60w-mopa-40w-diode-dual-laser-engraver',
     '8974447804629' => 'xtool-metalfab-laser-welder-and-cnc-cutter',
+    '9432562729173' => 'xtool-metalfab-laser-welder',
+    '8523126931669' => 'xtool-f1-ultra-20w-fiber-diode-dual-laser-engraver',
+    '9475369337045' => 'the-worlds-first-4-in-1-xtool-o1-omni-printer',
+    '9573828133077' => 'xtool-apparel-printer-plus-one-click-dtf-printer-effortless-customization-for-business',
+    '9420620202197' => 'xtool-wonderpress-modular-auto-heat-press-for-2d-transfers-and-3d-creations',
+    '8941086245077' => 'xtool-os1-automatic-shaker-oven-machine',
 ];
 $prepared = [];
 $exists = static function ( $id ) {

@@ -20,6 +20,9 @@ msgstr "xTool accessories"
 msgid "Akcesorium"
 msgstr "Accessory"
 
+msgid "Artykuły"
+msgstr "Articles"
+
 msgid "BLOG"
 msgstr "BLOG"
 
@@ -28,6 +31,9 @@ msgstr "Blog"
 
 msgid "Brak treści do wyświetlenia."
 msgstr "There is no content to display."
+
+msgid "Brak wyników dla „%s”."
+msgstr "No results for “%s”."
 
 msgid "Cena na zapytanie"
 msgstr "Price on request"
@@ -146,6 +152,9 @@ msgstr "Explore engraving and cutting machines. Choose a model or ask us about a
 msgid "Połącz się online z naszym ekspertem."
 msgstr "Join an online call with our expert."
 
+msgid "Produkty"
+msgstr "Products"
+
 msgid "Produkty xTool"
 msgstr "xTool products"
 
@@ -175,6 +184,12 @@ msgstr "Home"
 
 msgid "Strony bloga"
 msgstr "Blog pages"
+
+msgid "Szukaj"
+msgstr "Search"
+
+msgid "Szukaj urządzeń, akcesoriów i artykułów"
+msgstr "Search machines, accessories and articles"
 
 msgid "Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup."
 msgstr "We have this model in our workshop. Book an online demo and see it in action before you decide to buy."
@@ -218,11 +233,17 @@ msgstr "Pick a date and machine in the xTool calendar."
 msgid "Wyniki wyszukiwania: %s"
 msgstr "Search results: %s"
 
+msgid "Wyniki: %d"
+msgstr "Results: %d"
+
 msgid "Wyróżnione produkty"
 msgstr "Featured products"
 
 msgid "Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności."
 msgstr "Send the form – we will confirm the price and send you a payment link."
+
+msgid "Zamknij"
+msgstr "Close"
 
 msgid "Zamów"
 msgstr "Order"

@@ -20,6 +20,9 @@ msgstr "Аксессуары xTool"
 msgid "Akcesorium"
 msgstr "Аксессуар"
 
+msgid "Artykuły"
+msgstr "Статьи"
+
 msgid "BLOG"
 msgstr "БЛОГ"
 
@@ -28,6 +31,9 @@ msgstr "Блог"
 
 msgid "Brak treści do wyświetlenia."
 msgstr "Нет содержимого для отображения."
+
+msgid "Brak wyników dla „%s”."
+msgstr "Ничего не найдено по запросу «%s»."
 
 msgid "Cena na zapytanie"
 msgstr "Цена по запросу"
@@ -146,6 +152,9 @@ msgstr "Изучите оборудование для гравировки и �
 msgid "Połącz się online z naszym ekspertem."
 msgstr "Подключитесь онлайн к нашему эксперту."
 
+msgid "Produkty"
+msgstr "Товары"
+
 msgid "Produkty xTool"
 msgstr "Товары xTool"
 
@@ -175,6 +184,12 @@ msgstr "Главная"
 
 msgid "Strony bloga"
 msgstr "Страницы блога"
+
+msgid "Szukaj"
+msgstr "Поиск"
+
+msgid "Szukaj urządzeń, akcesoriów i artykułów"
+msgstr "Поиск устройств, аксессуаров и статей"
 
 msgid "Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup."
 msgstr "Эта модель есть в нашей мастерской. Запишитесь на онлайн-демо и посмотрите её в работе перед покупкой."
@@ -218,11 +233,17 @@ msgstr "Выберите дату и устройство в календаре 
 msgid "Wyniki wyszukiwania: %s"
 msgstr "Результаты поиска: %s"
 
+msgid "Wyniki: %d"
+msgstr "Результатов: %d"
+
 msgid "Wyróżnione produkty"
 msgstr "Рекомендуемые товары"
 
 msgid "Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności."
 msgstr "Отправьте форму — мы подтвердим цену и пришлём ссылку для оплаты."
+
+msgid "Zamknij"
+msgstr "Закрыть"
 
 msgid "Zamów"
 msgstr "Заказать"

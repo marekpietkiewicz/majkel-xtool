@@ -5,7 +5,8 @@ $selected_products = is_array($selected_products) ? array_slice(array_values(arr
 $slides = $selected_products
     ? get_posts(['post_type' => 'lasery_product', 'post_status' => 'publish', 'post__in' => $selected_products, 'orderby' => 'post__in', 'posts_per_page' => 4])
     : lasery_xtool_products('device', 4);
-$devices = lasery_xtool_products('device');
+// Eight cards fill the featured grid evenly; the catalogue lists the rest.
+$devices = lasery_xtool_products('device', 8);
 $accessories = lasery_xtool_products('accessory', 12);
 $demo_label = lasery_xtool_text('hero_demo_button');
 $demo_products = function_exists('lasery_xtool_demo_tax_query') ? lasery_xtool_products('device', -1, ['tax_query' => lasery_xtool_demo_tax_query()]) : [];
