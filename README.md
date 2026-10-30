@@ -47,7 +47,7 @@ Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie si
 - Własny motyw i wtyczka do importowania oraz aktualizacji produktów. Źródłem jest katalog Shopify xTool; zakres danych wymaga doprecyzowania. Użytkownik potwierdził, że umowa zezwala na automatyczne pobieranie, publikowanie i tłumaczenie materiałów.
 - Interfejs dostępny jest po polsku, angielsku, niemiecku, rosyjsku i ukraińsku. Nazwy i opisy produktów można edytować w każdym z tych języków; brakujący przekład wyświetla oryginał. Automatyczne tłumaczenie nowych produktów nie jest wdrożone.
 - Osobny staging nie został jeszcze skonfigurowany.
-- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (pięć zapytań). Po 429 pobieranie jest wstrzymywane do ręcznego wznowienia.
+- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (pięć zapytań w odstępach dwóch sekund). Po odpowiedzi 429 pobieranie produktów i zdjęć jest wstrzymywane na godzinę (albo tyle, ile poda `Retry-After`, najwyżej dobę) i wznawia się samo.
 
 Zakres katalogu oraz zasady aktualizowania ręcznych zmian wymagają dalszego doprecyzowania. Użytkownik potwierdził uprawnienia do używania materiałów xTool.
 

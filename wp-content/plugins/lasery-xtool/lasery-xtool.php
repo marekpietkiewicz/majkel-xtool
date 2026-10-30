@@ -137,7 +137,7 @@ function lasery_xtool_import_page() {
 		'file'     => 'Nie udało się odczytać pliku JSON. Limit pliku to 4 MB.',
 		'format'   => 'Nieprawidłowy format danych. Sprawdź wymagania pliku w dokumentacji wtyczki.',
 		'network'  => 'Nie udało się pobrać produktów. Sprawdź dostępność źródła i spróbuj ponownie.',
-		'paused'   => 'Pobieranie jest wstrzymane po odpowiedzi 429. Wznów je dopiero po ustaniu ograniczenia.',
+		'paused'   => 'Pobieranie jest chwilowo wstrzymane po odpowiedzi 429 i wznowi się samo.',
 		'locked'   => 'Inny import jest w trakcie. Spróbuj ponownie później.',
 		'locklost' => 'Import przerwany: utracono blokadę. Sprawdź szkice i ponów import.',
 		'complete' => 'Import zakończony.',
@@ -176,8 +176,8 @@ function lasery_xtool_import_page() {
 				<p>Bez aktualnej oferty (brak w katalogu xTool lub błędne dane): <?php echo esc_html( implode( ', ', array_map( function ( $id ) { return lasery_xtool_plain_text( get_the_title( absint( $id ) ) ); }, $last_sync['stale'] ) ) ); ?>.</p>
 			<?php endif; ?>
 		<?php endif; ?>
-		<?php if ( get_option( 'lasery_xtool_fetch_paused' ) ) : ?>
-			<p>Pobieranie wstrzymano po odpowiedzi 429. Wznów dopiero po ustaniu ograniczenia źródła.</p>
+		<?php if ( lasery_xtool_fetching_paused() ) : ?>
+			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'H:i', (int) get_option( 'lasery_xtool_fetch_paused' ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="lasery_xtool_resume_fetch">
 				<?php wp_nonce_field( 'lasery_xtool_resume_fetch' ); ?>
@@ -412,6 +412,19 @@ function lasery_xtool_handle_fetch() {
 	lasery_xtool_save_products( $fetched['products'], $fetched['result'] );
 }
 
+/**
+ * After HTTP 429 xtool.eu is left alone for an hour (or as long as Retry-After asks, up to a
+ * day); the hourly sync then resumes by itself. The import screen can resume earlier.
+ */
+function lasery_xtool_pause_fetching( $response ) {
+	$retry_after = (int) wp_remote_retrieve_header( $response, 'retry-after' );
+	update_option( 'lasery_xtool_fetch_paused', time() + min( DAY_IN_SECONDS, max( HOUR_IN_SECONDS, $retry_after ) ), false );
+}
+
+function lasery_xtool_fetching_paused() {
+	return (int) get_option( 'lasery_xtool_fetch_paused' ) > time();
+}
+
 /** Refuse compressed bodies, which could exceed the limit when decompressed. */
 function lasery_xtool_identity_response( $response ) {
 	$encoding = wp_remote_retrieve_header( $response, 'content-encoding' );
@@ -420,7 +433,7 @@ function lasery_xtool_identity_response( $response ) {
 
 /** Return a complete bounded snapshot, without writes to product records. */
 function lasery_xtool_fetch_source( $target_ids = null ) {
-	if ( get_option( 'lasery_xtool_fetch_paused' ) ) {
+	if ( lasery_xtool_fetching_paused() ) {
 		return new WP_Error( 'paused' );
 	}
 	if ( is_array( $target_ids ) && ! $target_ids ) {
@@ -435,7 +448,7 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 		array( 'timeout' => 15, 'redirection' => 0, 'limit_response_size' => 32769, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) )
 	);
 	if ( ! is_wp_error( $meta_response ) && 429 === wp_remote_retrieve_response_code( $meta_response ) ) {
-		update_option( 'lasery_xtool_fetch_paused', 1, false );
+		lasery_xtool_pause_fetching( $meta_response );
 		return new WP_Error( 'paused' );
 	}
 	if ( ! is_wp_error( $meta_response ) && 200 === wp_remote_retrieve_response_code( $meta_response ) && lasery_xtool_identity_response( $meta_response ) ) {
@@ -449,6 +462,8 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 	$result   = 'complete';
 	$source   = array( 'currency' => $currency, 'fetched_at' => time() );
 	for ( $page = 1; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
+		// A short pause between pages keeps the requests within the storefront's rate limit.
+		sleep( 2 );
 		$url = add_query_arg( array( 'limit' => LASERY_XTOOL_PAGE_SIZE, 'page' => $page ), 'https://www.xtool.eu/products.json' );
 		$response = wp_safe_remote_get(
 			$url,
@@ -461,7 +476,7 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 			)
 		);
 		if ( ! is_wp_error( $response ) && 429 === wp_remote_retrieve_response_code( $response ) ) {
-			update_option( 'lasery_xtool_fetch_paused', 1, false );
+			lasery_xtool_pause_fetching( $response );
 			return new WP_Error( 'paused' );
 		}
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! lasery_xtool_identity_response( $response ) ) {

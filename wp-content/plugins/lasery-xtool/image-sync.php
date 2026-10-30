@@ -78,7 +78,7 @@ function lasery_xtool_set_source_thumbnail( $post_id, $url, $attachment ) {
 /** Called by a scheduler or manually via WP-CLI; never schedules itself. */
 add_action( 'lasery_xtool_sync_images', 'lasery_xtool_sync_images' );
 function lasery_xtool_sync_images() {
-	if ( get_option( 'lasery_xtool_fetch_paused' ) ) {
+	if ( lasery_xtool_fetching_paused() ) {
 		update_option( 'lasery_xtool_last_image_sync', array( 'time' => time(), 'result' => 'paused' ), false );
 		return;
 	}
@@ -171,7 +171,7 @@ function lasery_xtool_import_image( $post_id, $url ) {
 	$max_bytes = 8 * 1024 * 1024;
 	$response = wp_safe_remote_get( $url, array( 'timeout' => 20, 'redirection' => 0, 'limit_response_size' => $max_bytes + 1, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) ) );
 	if ( ! is_wp_error( $response ) && 429 === wp_remote_retrieve_response_code( $response ) ) {
-		update_option( 'lasery_xtool_fetch_paused', 1, false );
+		lasery_xtool_pause_fetching( $response );
 		return new WP_Error( 'paused' );
 	}
 	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
