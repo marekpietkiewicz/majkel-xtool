@@ -1,7 +1,9 @@
 <?php
 /**
- * Publish selected machines from a private snapshot of https://www.xtool.eu (meta.json and the
- * products.json pages saved as products-<n>.json in one folder); existing products are skipped.
+ * Publish the machines below and the accessories in scripts/accessories.php from a private
+ * snapshot of https://www.xtool.eu (meta.json and the products.json pages saved as
+ * products-<n>.json in one folder); existing products are skipped. Accessories get the
+ * "akcesoria" type and the machines they fit, unless the fit was already set in the panel.
  * Usage: wp eval-file scripts/seed-extra-products.php <snapshot folder> <Unix fetch time>
  */
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
@@ -31,6 +33,8 @@ $ids = [
     '9420620202197', // WonderPress 3D
     '8941086245077', // OS1
 ];
+$accessories = require __DIR__ . '/accessories.php';
+$ids = array_merge( $ids, array_map( 'strval', array_keys( $accessories ) ) );
 $folder = rtrim( $args[0], '/' );
 // The store's currency, as the sync reads it.
 $meta = is_readable( $folder . '/meta.json' ) ? json_decode( (string) file_get_contents( $folder . '/meta.json' ) ) : null;
@@ -95,3 +99,14 @@ foreach ( $prepared as $id => $product ) {
     WP_CLI::success( 'Published product ' . $id );
 }
 lasery_xtool_release_import_lock();
+foreach ( $accessories as $id => $accessory ) {
+    foreach ( get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => (string) $id, 'fields' => 'ids', 'posts_per_page' => -1 ] ) as $post_id ) {
+        wp_set_object_terms( $post_id, LASERY_XTOOL_ACCESSORY_TERM, LASERY_XTOOL_KIND_TAXONOMY, true );
+        if ( ! metadata_exists( 'post', $post_id, LASERY_XTOOL_FITS ) ) {
+            foreach ( $accessory['fits'] as $machine ) {
+                add_post_meta( $post_id, LASERY_XTOOL_FITS, (string) $machine );
+            }
+        }
+    }
+}
+WP_CLI::success( 'Accessory types and fits set for ' . count( $accessories ) . ' accessories.' );
