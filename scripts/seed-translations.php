@@ -169,6 +169,15 @@ $titles = [
 $to_html = static function ( $items ) {
     return wp_kses_post( '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>' );
 };
+// Accessories keep their texts next to their compatibility in scripts/accessories.php.
+foreach ( require __DIR__ . '/accessories.php' as $source_id => $accessory ) {
+    if ( isset( $accessory['features'] ) ) {
+        $translations[ $source_id ] = $accessory['features'];
+    }
+    if ( isset( $accessory['titles'] ) ) {
+        $titles[ $source_id ] = $accessory['titles'];
+    }
+}
 foreach ( $translations as $source_id => $languages ) {
     $posts = get_posts( [ 'post_type' => 'lasery_product', 'post_status' => 'publish', 'meta_key' => '_lasery_shopify_id', 'meta_value' => (string) $source_id, 'posts_per_page' => 2, 'fields' => 'ids' ] );
     if ( count( $posts ) !== 1 ) {
