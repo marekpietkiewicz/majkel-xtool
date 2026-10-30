@@ -10,7 +10,11 @@
     $home = lasery_xtool_language_url(home_url('/'));
     $archive = get_post_type_archive_link('lasery_product');
     $description = function_exists('lasery_xtool_product_description') ? lasery_xtool_product_description($post_id, lasery_xtool_interface_language()) : get_the_content();
-    $related = lasery_xtool_products($is_accessory ? 'device' : 'accessory', 12, ['post__not_in' => [$post_id]]);
+    // A machine lists its accessories, an accessory the machines it fits (set in the panel).
+    $related_query = function_exists('lasery_xtool_related_meta_query') ? lasery_xtool_related_meta_query($post_id) : null;
+    $related = $related_query ? lasery_xtool_products($is_accessory ? 'device' : 'accessory', 12, ['post__not_in' => [$post_id], 'meta_query' => $related_query]) : [];
+    $articles_query = function_exists('lasery_xtool_product_articles_meta_query') ? lasery_xtool_product_articles_meta_query($post_id) : null;
+    $articles = $articles_query ? lasery_xtool_blog_query(['posts_per_page' => 3, 'no_found_rows' => true, 'meta_query' => $articles_query]) : null;
     ?>
     <div class="wrap">
         <nav class="breadcrumbs" aria-label="<?php esc_attr_e('Ścieżka nawigacji', 'lasery-xtool'); ?>">
@@ -122,13 +126,26 @@
         <section class="section" aria-labelledby="related-heading" data-rail-section>
             <div class="wrap">
                 <header class="section-head">
-                    <h2 id="related-heading" class="section-title section-title--sm"><?php echo esc_html($is_accessory ? __('Urządzenia xTool', 'lasery-xtool') : __('Akcesoria xTool', 'lasery-xtool')); ?></h2>
+                    <h2 id="related-heading" class="section-title section-title--sm"><?php echo esc_html($is_accessory ? __('Pasuje do urządzeń', 'lasery-xtool') : __('Akcesoria do tego urządzenia', 'lasery-xtool')); ?></h2>
                     <div class="slider-buttons" data-slider-controls hidden>
                         <button type="button" class="icon-btn" data-slider-prev><?php echo lasery_xtool_icon('chevron-left'); ?></button>
                         <button type="button" class="icon-btn" data-slider-next><?php echo lasery_xtool_icon('chevron-right'); ?></button>
                     </div>
                 </header>
                 <?php get_template_part('template-parts/product-rail', null, ['products' => $related]); ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($articles && $articles->have_posts()) : ?>
+        <section class="section section--muted" aria-labelledby="product-articles-heading">
+            <div class="wrap">
+                <header class="section-head"><h2 id="product-articles-heading" class="section-title section-title--sm"><?php esc_html_e('Artykuły o tym produkcie', 'lasery-xtool'); ?></h2></header>
+                <div class="post-grid post-grid--compact">
+                    <?php while ($articles->have_posts()) : $articles->the_post(); ?>
+                        <?php get_template_part('template-parts/post-card'); ?>
+                    <?php endwhile; wp_reset_postdata(); ?>
+                </div>
             </div>
         </section>
     <?php endif; ?>
