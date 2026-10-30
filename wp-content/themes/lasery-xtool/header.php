@@ -18,7 +18,7 @@
                 <ul>
                     <li><a href="<?php echo esc_url(lasery_xtool_language_url(home_url('/')) . '#produkty'); ?>"><?php esc_html_e('Produkty', 'lasery-xtool'); ?></a></li>
                     <li><a href="<?php echo esc_url(lasery_xtool_language_url(home_url('/')) . '#demo'); ?>"><?php esc_html_e('Demo', 'lasery-xtool'); ?></a></li>
-                    <li><a href="mailto:Michal@laseryxtool.pl"><?php esc_html_e('Kontakt', 'lasery-xtool'); ?></a></li>
+                    <li><a href="<?php echo esc_url('mailto:' . lasery_xtool_contact_email()); ?>"><?php esc_html_e('Kontakt', 'lasery-xtool'); ?></a></li>
                 </ul>
             <?php endif; ?>
         </nav>
@@ -27,7 +27,7 @@
                 <a href="<?php echo esc_url(add_query_arg('lang', $language)); ?>" lang="<?php echo esc_attr($language); ?>"<?php if (lasery_xtool_interface_language() === $language) : ?> aria-current="page"<?php endif; ?>><?php echo esc_html(strtoupper($language)); ?></a>
             <?php endforeach; ?>
         </nav>
-        <a class="header-cta" href="<?php echo esc_url(lasery_xtool_language_url(home_url('/')) . '#demo'); ?>"><?php esc_html_e('Zapytaj o demo', 'lasery-xtool'); ?> <span aria-hidden="true">↗</span></a>
+        <a class="header-cta" href="<?php echo esc_url(lasery_xtool_language_url(home_url('/')) . '#demo'); ?>"><?php echo esc_html(lasery_xtool_text('hero_demo_button', __('Zapytaj o demo', 'lasery-xtool'))); ?> <span aria-hidden="true">↗</span></a>
     </div>
 </header>
 <main id="tresc" class="<?php echo is_front_page() ? 'home-content' : 'wrap content'; ?>">

@@ -114,3 +114,14 @@ msgstr "Фотографії товару"
 
 msgid "Zdjęcie produktu %d"
 msgstr "Фотографія товару %d"
+msgid "Wstrzymaj"
+msgstr "Пауза"
+
+msgid "Odtwórz"
+msgstr "Відтворити"
+
+msgid "Poprzednie zdjęcie"
+msgstr "Попереднє фото"
+
+msgid "Następne zdjęcie"
+msgstr "Наступне фото"

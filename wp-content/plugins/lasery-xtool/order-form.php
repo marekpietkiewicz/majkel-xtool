@@ -121,6 +121,18 @@ function lasery_xtool_order_price_error_notice() {
 	}
 }
 
+/** The theme may expose an editable contact; validate it before using it in email. */
+function lasery_xtool_order_contact_email() {
+	$email = function_exists( 'lasery_xtool_contact_email' ) ? lasery_xtool_contact_email() : '';
+	return is_string( $email ) && is_email( $email ) ? $email : 'Michal@laseryxtool.pl';
+}
+
+/** Use the reviewed translation when available; email bodies remain plain text. */
+function lasery_xtool_order_product_title( $post_id, $language ) {
+	$title = function_exists( 'lasery_xtool_product_title' ) ? lasery_xtool_product_title( $post_id, $language ) : get_the_title( $post_id );
+	return sanitize_text_field( html_entity_decode( wp_strip_all_tags( $title, true ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+}
+
 /** Texts are kept together until the site has a configured multilingual plugin. */
 function lasery_xtool_order_texts( $language ) {
 	$texts = array(
@@ -155,7 +167,11 @@ function lasery_xtool_order_texts( $language ) {
 			'owner_subject' => 'Нова заявка на замовлення: %s', 'customer_subject' => 'Ми отримали вашу заявку: %s', 'customer_body' => 'Дякуємо за заявку. Ми зв’яжемося з вами, щоб підтвердити деталі замовлення та надати посилання для оплати.', 'product' => 'Товар', 'details' => 'Дані замовлення', 'price' => 'Орієнтовна ціна', 'no_price' => 'Ціна уточнюється', 'price_note' => 'Остаточна ціна, ПДВ і вартість доставки можуть відрізнятися.',
 		),
 	);
-	return isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
+	$text = isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
+	foreach ( array( 'failed', 'sent_no_receipt' ) as $key ) {
+		$text[ $key ] = str_replace( 'Michal@laseryxtool.pl', lasery_xtool_order_contact_email(), $text[ $key ] );
+	}
+	return $text;
 }
 
 function lasery_xtool_order_language() {
@@ -402,8 +418,13 @@ function lasery_xtool_handle_order() {
 	}
 	$text = lasery_xtool_order_texts( $fields['language'] );
 	$owner_text = lasery_xtool_order_texts( 'pl' );
-	$product = sanitize_text_field( html_entity_decode( wp_strip_all_tags( get_the_title( $post_id ), true ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+	$product = lasery_xtool_order_product_title( $post_id, 'pl' );
+	$customer_product = lasery_xtool_order_product_title( $post_id, $fields['language'] );
+	$source_product = lasery_xtool_order_product_title( $post_id, '' );
 	$body = $owner_text['details'] . "\n\n" . $owner_text['product'] . ': ' . $product . "\nJęzyk klienta: " . $fields['language'] . "\n";
+	if ( $source_product !== $product ) {
+		$body .= 'Nazwa źródłowa: ' . $source_product . "\n";
+	}
 	$price = $selected_variant ? lasery_xtool_source_variant_price( $post_id, $selected_variant ) : lasery_xtool_order_price( $post_id );
 	$body .= $owner_text['price'] . ': ' . ( $price ? $price : $owner_text['no_price'] ) . "\n" . $owner_text['price_note'] . "\n";
 	foreach ( array( 'first_name', 'last_name', 'email', 'phone', 'address1', 'address2', 'city', 'zip', 'country', 'variant', 'quantity', 'invoice', 'notes' ) as $field ) {
@@ -433,6 +454,6 @@ function lasery_xtool_handle_order() {
 		}
 		lasery_xtool_order_redirect( $post_id, 'failed' );
 	}
-	$receipt_sent = lasery_xtool_order_mail( $fields['email'], sprintf( $text['customer_subject'], $product ), $text['customer_body'], array( 'Reply-To: Michal@laseryxtool.pl' ) );
+	$receipt_sent = lasery_xtool_order_mail( $fields['email'], sprintf( $text['customer_subject'], $customer_product ), $text['customer_body'], array( 'Reply-To: ' . lasery_xtool_order_contact_email() ) );
 	lasery_xtool_order_redirect( $post_id, $receipt_sent ? 'sent' : 'sent_no_receipt' );
 }

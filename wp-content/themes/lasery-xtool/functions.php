@@ -5,6 +5,9 @@ if (!defined('ABSPATH')) {
 
 require_once get_template_directory() . '/cookie-consent.php';
 
+require_once __DIR__ . '/privacy-defaults.php';
+require_once __DIR__ . '/customizer.php';
+
 add_action('after_setup_theme', function () {
     load_theme_textdomain('lasery-xtool', get_template_directory() . '/languages');
     add_theme_support('title-tag');
@@ -35,6 +38,19 @@ function lasery_xtool_interface_language() {
 function lasery_xtool_language_url($url) {
     return add_query_arg('lang', lasery_xtool_interface_language(), $url);
 }
+
+function lasery_xtool_display_product_title($post_id) {
+    return function_exists('lasery_xtool_product_title')
+        ? lasery_xtool_product_title($post_id, lasery_xtool_interface_language())
+        : get_the_title($post_id);
+}
+
+add_filter('document_title_parts', function ($parts) {
+    if (is_singular('lasery_product')) {
+        $parts['title'] = lasery_xtool_display_product_title(get_queried_object_id());
+    }
+    return $parts;
+});
 
 add_filter('locale', function ($locale) {
     if (is_admin() && (!isset($_POST['action']) || !is_string($_POST['action']) || $_POST['action'] !== 'lasery_xtool_order')) {

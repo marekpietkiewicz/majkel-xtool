@@ -114,3 +114,14 @@ msgstr "Product images"
 
 msgid "Zdjęcie produktu %d"
 msgstr "Product image %d"
+msgid "Wstrzymaj"
+msgstr "Pause"
+
+msgid "Odtwórz"
+msgstr "Play"
+
+msgid "Poprzednie zdjęcie"
+msgstr "Previous image"
+
+msgid "Następne zdjęcie"
+msgstr "Next image"

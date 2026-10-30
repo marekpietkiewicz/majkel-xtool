@@ -2,7 +2,7 @@
 <footer class="site-footer">
     <div class="wrap footer-inner">
         <div><a class="footer-brand" href="<?php echo esc_url(lasery_xtool_language_url(home_url('/'))); ?>"><?php bloginfo('name'); ?><span class="brand-dot" aria-hidden="true">.</span></a><p><?php esc_html_e('Produkty xTool i kontakt w sprawie demo.', 'lasery-xtool'); ?></p></div>
-        <div class="footer-contact"><span><?php esc_html_e('MASZ PYTANIA?', 'lasery-xtool'); ?></span><a href="mailto:Michal@laseryxtool.pl">Michal@laseryxtool.pl</a></div>
+        <div class="footer-contact"><span><?php esc_html_e('MASZ PYTANIA?', 'lasery-xtool'); ?></span><a href="<?php echo esc_url('mailto:' . lasery_xtool_contact_email()); ?>"><?php echo esc_html(lasery_xtool_contact_email()); ?></a></div>
     </div>
     <div class="wrap footer-bottom">
         <span>&copy; <?php echo esc_html(wp_date('Y')); ?> <?php bloginfo('name'); ?></span>

@@ -26,6 +26,14 @@ function lasery_xtool_source_image_urls( $post_id ) {
 
 /** Return validated source URLs and any corresponding local images, in source order. */
 function lasery_xtool_product_gallery_items( $post_id ) {
+	$manual = function_exists( 'lasery_xtool_get_manual_gallery' ) ? lasery_xtool_get_manual_gallery( $post_id ) : null;
+	if ( null !== $manual ) {
+		$items = array();
+		foreach ( $manual as $id ) {
+			$items[] = array( 'id' => $id, 'url' => '' );
+		}
+		return $items;
+	}
 	$urls = lasery_xtool_source_image_urls( $post_id );
 	$images = get_post_meta( $post_id, '_lasery_local_gallery', true );
 	$images = is_array( $images ) ? $images : array();

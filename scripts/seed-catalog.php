@@ -7,14 +7,16 @@ if ( ! isset( $args[0], $args[1] ) || ! is_readable( $args[0] ) || ! ctype_digit
     WP_CLI::error( 'Supply the private JSON snapshot path and its Unix fetch timestamp.' );
 }
 $fetched_at = (int) $args[1];
-if ( $fetched_at > time() || $fetched_at < time() - HOUR_IN_SECONDS ) {
-    WP_CLI::error( 'The snapshot must be less than one hour old.' );
+if ( $fetched_at > time() || $fetched_at < time() - 3 * HOUR_IN_SECONDS ) {
+    WP_CLI::error( 'The snapshot must be less than three hours old.' );
 }
 $products = lasery_xtool_parse_products( file_get_contents( $args[0] ) );
 if ( false === $products ) {
     WP_CLI::error( 'Invalid product snapshot.' );
 }
-$wanted = [ '15473430692053', '15452856942805' ];
+$wanted = isset( $args[2] ) && $args[2] === 'accessories'
+    ? [ '15473439604949', '15478215934165', '15478164095189', '15467535794389', '15457292452053', '15453351542997', '15430697255125' ]
+    : [ '15473430692053', '15452856942805' ];
 $selected = [];
 foreach ( $products as $product ) {
     if ( in_array( $product['id'], $wanted, true ) ) {
@@ -24,7 +26,13 @@ foreach ( $products as $product ) {
 if ( count( $selected ) !== count( $wanted ) ) {
     WP_CLI::error( 'The snapshot does not contain every selected product.' );
 }
+if ( ! lasery_xtool_lock_import() ) {
+    WP_CLI::error( 'Another import is running.' );
+}
 foreach ( $wanted as $id ) {
+    if ( ! lasery_xtool_refresh_import_lock() ) {
+        WP_CLI::error( 'Lost the import lock.' );
+    }
     $product = $selected[ $id ];
     $existing = get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private', 'trash' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => $id, 'fields' => 'ids', 'posts_per_page' => 1 ] );
     if ( $existing ) {
@@ -42,8 +50,10 @@ foreach ( $wanted as $id ) {
         WP_CLI::error( 'Could not save source data for product ' . $id );
     }
     $published = wp_update_post( [ 'ID' => $post_id, 'post_status' => 'publish' ], true );
-    if ( is_wp_error( $published ) || ! $published ) {
+    if ( is_wp_error( $published ) || ! $published || get_post_status( $post_id ) !== 'publish' ) {
+        wp_delete_post( $post_id, true );
         WP_CLI::error( 'Could not publish product ' . $id );
     }
     WP_CLI::success( 'Published product ' . $id );
 }
+lasery_xtool_release_import_lock();
