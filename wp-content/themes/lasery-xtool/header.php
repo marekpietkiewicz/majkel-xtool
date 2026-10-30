@@ -14,6 +14,7 @@ $home = lasery_xtool_language_url(home_url('/'));
 $current_language = lasery_xtool_interface_language();
 $languages = lasery_xtool_languages();
 $demo_label = lasery_xtool_text('hero_demo_button');
+$blog = lasery_xtool_blog_url();
 ?>
 <header class="site-header" data-site-header>
     <div class="wrap header-bar">
@@ -26,6 +27,7 @@ $demo_label = lasery_xtool_text('hero_demo_button');
                     <li><a href="<?php echo esc_url($home . '#urzadzenia'); ?>"><?php esc_html_e('Urządzenia', 'lasery-xtool'); ?></a></li>
                     <li><a href="<?php echo esc_url($home . '#akcesoria'); ?>"><?php esc_html_e('Akcesoria', 'lasery-xtool'); ?></a></li>
                     <li><a href="<?php echo esc_url($home . '#demo'); ?>"><?php esc_html_e('Demo', 'lasery-xtool'); ?></a></li>
+                    <?php if ($blog !== '') : ?><li><a href="<?php echo esc_url($blog); ?>"<?php if (is_page('blog') || is_singular('post')) : ?> aria-current="page"<?php endif; ?>><?php esc_html_e('Blog', 'lasery-xtool'); ?></a></li><?php endif; ?>
                     <li><a href="#kontakt"><?php esc_html_e('Kontakt', 'lasery-xtool'); ?></a></li>
                 </ul>
             <?php endif; ?>
@@ -38,7 +40,7 @@ $demo_label = lasery_xtool_text('hero_demo_button');
                 </summary>
                 <ul class="lang-menu-list">
                     <?php foreach ($languages as $language => $name) : ?>
-                        <li><a href="<?php echo esc_url(add_query_arg('lang', $language, remove_query_arg('order_result'))); ?>" lang="<?php echo esc_attr($language); ?>" hreflang="<?php echo esc_attr($language); ?>"<?php if ($current_language === $language) : ?> aria-current="true"<?php endif; ?>><?php echo esc_html($name); ?><?php if ($current_language === $language) : ?><?php echo lasery_xtool_icon('check'); ?><?php endif; ?></a></li>
+                        <li><a href="<?php echo esc_url(lasery_xtool_language_switch_url($language)); ?>" lang="<?php echo esc_attr($language); ?>" hreflang="<?php echo esc_attr($language); ?>"<?php if ($current_language === $language) : ?> aria-current="true"<?php endif; ?>><?php echo esc_html($name); ?><?php if ($current_language === $language) : ?><?php echo lasery_xtool_icon('check'); ?><?php endif; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </details>

@@ -116,3 +116,68 @@ function lasery_xtool_requested_kind() {
     $kind = isset($_GET['kind']) && is_string($_GET['kind']) ? sanitize_key(wp_unslash($_GET['kind'])) : '';
     return in_array($kind, ['device', 'accessory'], true) ? $kind : '';
 }
+
+/** The blog page in the current language, or '' before the page exists. */
+function lasery_xtool_blog_url() {
+    $page = get_page_by_path('blog');
+    return $page && $page->post_status === 'publish' ? lasery_xtool_language_url(get_permalink($page)) : '';
+}
+
+/** Blog posts written in the current language. */
+function lasery_xtool_blog_query($args = []) {
+    $args += ['post_type' => 'post', 'post_status' => 'publish', 'ignore_sticky_posts' => true];
+    if (function_exists('lasery_xtool_language_meta_query')) {
+        $args['meta_query'] = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
+    }
+    return new WP_Query($args);
+}
+
+function lasery_xtool_reading_time($post_id) {
+    $words = count(preg_split('/\s+/u', trim(wp_strip_all_tags(get_post_field('post_content', $post_id))), -1, PREG_SPLIT_NO_EMPTY));
+    /* translators: %d: minutes of reading. */
+    return sprintf(__('%d min czytania', 'lasery-xtool'), max(1, (int) round($words / 200)));
+}
+
+/** Publication date in the interface language (core month names follow the site locale). */
+function lasery_xtool_post_date($post_id) {
+    $locale = function_exists('lasery_xtool_icu_locale') ? lasery_xtool_icu_locale(lasery_xtool_interface_language()) : '';
+    if ($locale !== '' && class_exists('IntlDateFormatter')) {
+        $formatted = (new IntlDateFormatter($locale, IntlDateFormatter::LONG, IntlDateFormatter::NONE, wp_timezone()))->format(get_post_timestamp($post_id));
+        if (is_string($formatted)) {
+            return $formatted;
+        }
+    }
+    return get_the_date('', $post_id);
+}
+
+/** Add anchors to H2 headings and list them for the table of contents. */
+function lasery_xtool_article_toc($html) {
+    $toc = [];
+    $html = preg_replace_callback('~<h2([^>]*)>(.*?)</h2>~is', function ($match) use (&$toc) {
+        $text = trim(wp_strip_all_tags($match[2]));
+        if (preg_match('~\sid="([^"]+)"~', $match[1], $id)) {
+            $anchor = $id[1];
+            $attributes = $match[1];
+        } else {
+            $anchor = sanitize_title($text) ?: 'sekcja-' . (count($toc) + 1);
+            $attributes = $match[1] . ' id="' . esc_attr($anchor) . '"';
+        }
+        $toc[] = [$anchor, $text];
+        return '<h2' . $attributes . '>' . $match[2] . '</h2>';
+    }, $html);
+    return [$html, $toc];
+}
+
+/** Where a language link points: an article's translation, the blog, or the current page. */
+function lasery_xtool_language_switch_url($language) {
+    if (is_singular('post') && function_exists('lasery_xtool_post_translations')) {
+        $translations = lasery_xtool_post_translations(get_queried_object_id());
+        if (isset($translations[$language])) {
+            return get_permalink($translations[$language]);
+        }
+        $blog = get_page_by_path('blog');
+        return add_query_arg('lang', $language, $blog ? get_permalink($blog) : home_url('/'));
+    }
+    return add_query_arg('lang', $language, remove_query_arg(['order_result', 'strona']));
+}
+

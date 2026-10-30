@@ -30,7 +30,7 @@
                 <?php if (get_post_type() === 'lasery_product') : ?>
                     <?php get_template_part('template-parts/product-card', null, ['heading' => 'h2']); ?>
                 <?php else : ?>
-                    <article <?php post_class('post-card'); ?>><h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2><?php the_excerpt(); ?></article>
+                    <?php get_template_part('template-parts/post-card', null, ['heading' => 'h2']); ?>
                 <?php endif; ?>
             <?php endwhile; ?>
         </div>

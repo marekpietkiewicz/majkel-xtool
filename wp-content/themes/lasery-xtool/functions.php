@@ -29,12 +29,18 @@ add_action('wp_enqueue_scripts', function () {
     if (is_singular('lasery_product')) {
         wp_enqueue_script_module('lasery-xtool-lightbox', $assets . 'lightbox.js', [], $version);
     }
-    // The theme renders no block content and no emoji images.
-    wp_dequeue_style('wp-block-library');
-    wp_dequeue_style('classic-theme-styles');
+    // Only blog articles render block content edited in the block editor.
+    if (!is_singular('post')) {
+        wp_dequeue_style('wp-block-library');
+        wp_dequeue_style('classic-theme-styles');
+    }
 }, 100);
-remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
-remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+add_action('wp', function () {
+    if (!is_singular('post')) {
+        remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
+        remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+    }
+});
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
 
@@ -97,9 +103,26 @@ add_action('wp_head', function () {
     } elseif (is_singular('lasery_product')) {
         $description = lasery_xtool_display_summary(get_queried_object_id());
         $url = get_permalink(get_queried_object_id());
+    } elseif (is_singular('post')) {
+        $description = get_the_excerpt(get_queried_object_id());
+    } elseif (is_page('blog')) {
+        $description = lasery_xtool_text('blog_description');
+        $url = get_permalink(get_queried_object_id());
     } elseif (is_post_type_archive('lasery_product')) {
         $kind = lasery_xtool_requested_kind();
         $url = $kind === '' ? get_post_type_archive_link('lasery_product') : add_query_arg('kind', $kind, get_post_type_archive_link('lasery_product'));
+    }
+    // Articles link their translations, which have their own URLs.
+    if (is_singular('post') && function_exists('lasery_xtool_post_translations')) {
+        $translations = lasery_xtool_post_translations(get_queried_object_id());
+        if (count($translations) > 1) {
+            foreach ($translations as $language => $id) {
+                printf('<link rel="alternate" hreflang="%s" href="%s">' . "\n", esc_attr($language), esc_url(get_permalink($id)));
+            }
+            if (isset($translations['pl'])) {
+                printf('<link rel="alternate" hreflang="x-default" href="%s">' . "\n", esc_url(get_permalink($translations['pl'])));
+            }
+        }
     }
     if ($description !== '') {
         printf('<meta name="description" content="%s">' . "\n", esc_attr(wp_html_excerpt($description, 160, '…')));

@@ -5,6 +5,9 @@ msgstr ""
 msgid "%1$s – zdjęcie %2$d"
 msgstr "%1$s – Foto %2$d"
 
+msgid "%d min czytania"
+msgstr "%d Min. Lesezeit"
+
 msgid "AKCESORIA"
 msgstr "ZUBEHÖR"
 
@@ -17,6 +20,12 @@ msgstr "xTool-Zubehör"
 msgid "Akcesorium"
 msgstr "Zubehör"
 
+msgid "BLOG"
+msgstr "BLOG"
+
+msgid "Blog"
+msgstr "Blog"
+
 msgid "Brak treści do wyświetlenia."
 msgstr "Es gibt keine Inhalte zum Anzeigen."
 
@@ -28,6 +37,12 @@ msgstr "Unverbindlicher Preis aus dem offiziellen xTool-Shop. Vor der Zahlung be
 
 msgid "Chcesz zobaczyć urządzenie w akcji?"
 msgstr "Möchten Sie ein Gerät in Aktion sehen?"
+
+msgid "Czytaj artykuł"
+msgstr "Artikel lesen"
+
+msgid "Czytaj także"
+msgstr "Weiterlesen"
 
 msgid "Demo"
 msgstr "Demo"
@@ -101,6 +116,12 @@ msgstr "Demo-Buchung öffnen"
 msgid "POZNAJ XTOOL"
 msgstr "XTOOL ENTDECKEN"
 
+msgid "Pierwsze artykuły pojawią się wkrótce."
+msgstr "Die ersten Artikel erscheinen in Kürze."
+
+msgid "Podpowiadamy, jak wybrać laser, co na nim tworzyć i jak rozwinąć pracownię."
+msgstr "Wie Sie den passenden Laser wählen, was Sie damit herstellen und wie Ihre Werkstatt wächst."
+
 msgid "Pomoc w wyborze"
 msgstr "Beratung bei der Auswahl"
 
@@ -109,6 +130,9 @@ msgstr "Vorheriges Produkt"
 
 msgid "Poprzednie zdjęcie"
 msgstr "Vorheriges Bild"
+
+msgid "Poradniki i inspiracje"
+msgstr "Ratgeber und Inspiration"
 
 msgid "Powiększ zdjęcie %d"
 msgstr "Foto %d vergrößern"
@@ -143,8 +167,14 @@ msgstr "Produktart"
 msgid "Rozbuduj swoje urządzenie."
 msgstr "Erweitern Sie Ihr Gerät."
 
+msgid "Spis treści"
+msgstr "Inhalt"
+
 msgid "Strona główna"
 msgstr "Startseite"
+
+msgid "Strony bloga"
+msgstr "Blogseiten"
 
 msgid "Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup."
 msgstr "Dieses Modell steht in unserer Werkstatt. Buchen Sie eine Online-Demo und sehen Sie es in Aktion, bevor Sie sich entscheiden."
@@ -154,6 +184,9 @@ msgstr "Mehr gestalten. Mit xTool."
 
 msgid "Umów demo"
 msgstr "Demo buchen"
+
+msgid "Umów demo online – pokażemy wybrane modele w naszej pracowni i odpowiemy na Twoje pytania."
+msgstr "Buchen Sie eine Online-Demo – wir zeigen Ihnen ausgewählte Modelle in unserer Werkstatt und beantworten Ihre Fragen."
 
 msgid "Urządzenia"
 msgstr "Geräte"
@@ -223,6 +256,12 @@ msgstr "Details ansehen"
 
 msgid "Zobacz ten model na żywo"
 msgstr "Dieses Modell live erleben"
+
+msgid "Zobacz urządzenia"
+msgstr "Geräte ansehen"
+
+msgid "Zobacz urządzenia xTool na żywo"
+msgstr "xTool-Geräte live erleben"
 
 msgid "Zobacz urządzenie w akcji podczas spotkania online i zadaj pytania."
 msgstr "Sehen Sie das Gerät in einem Online-Termin in Aktion und stellen Sie Fragen."
