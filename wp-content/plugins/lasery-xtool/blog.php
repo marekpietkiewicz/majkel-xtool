@@ -29,7 +29,7 @@ function lasery_xtool_post_translations( $post_id, $published_only = true ) {
 	$ids = get_posts(
 		array(
 			'post_type'      => 'post',
-			'post_status'    => $published_only ? 'publish' : array( 'publish', 'future', 'draft', 'pending', 'private' ),
+			'post_status'    => $published_only ? 'publish' : array( 'publish', 'future', 'draft', 'pending', 'private', 'trash' ),
 			'meta_key'       => '_lasery_translation_of',
 			'meta_value'     => $original,
 			'fields'         => 'ids',
@@ -86,10 +86,12 @@ function lasery_xtool_redirect_post_language() {
 // Core appends "embed/" to the permalink, which already ends with ?lang=…
 add_filter( 'post_embed_url', 'lasery_xtool_post_embed_url', 10, 2 );
 function lasery_xtool_post_embed_url( $url, $post ) {
-	if ( 'post' !== $post->post_type || ! get_option( 'permalink_structure' ) || false === strpos( $url, '?lang=' ) ) {
+	$suffix = user_trailingslashit( 'embed' );
+	// Only the "…/?lang=xx/embed/" form; core's "?embed=true" fallback stays as it is.
+	if ( 'post' !== $post->post_type || false === strpos( $url, '?lang=' ) || ! str_ends_with( $url, '/' . $suffix ) ) {
 		return $url;
 	}
-	return add_query_arg( 'lang', lasery_xtool_post_language( $post->ID ), trailingslashit( remove_query_arg( 'lang', get_permalink( $post ) ) ) . 'embed/' );
+	return add_query_arg( 'lang', lasery_xtool_post_language( $post->ID ), trailingslashit( remove_query_arg( 'lang', get_permalink( $post ) ) ) . $suffix );
 }
 
 /** [lasery_produkty xtool="source IDs" ids="post IDs"] shows product cards inside an article. */
@@ -97,14 +99,20 @@ add_shortcode( 'lasery_produkty', 'lasery_xtool_products_shortcode' );
 function lasery_xtool_products_shortcode( $attributes ) {
 	$attributes = shortcode_atts( array( 'ids' => '', 'xtool' => '' ), $attributes, 'lasery_produkty' );
 	$ids = array_filter( array_map( 'absint', explode( ',', $attributes['ids'] ) ) );
-	$source_ids = array_values( array_filter( array_map( 'trim', explode( ',', $attributes['xtool'] ) ), 'ctype_digit' ) );
+	$source_ids = array_filter( array_map( 'trim', explode( ',', $attributes['xtool'] ) ), 'ctype_digit' );
 	if ( $source_ids ) {
-		$found = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => $source_ids, 'meta_compare' => 'IN', 'posts_per_page' => count( $source_ids ) ) );
-		// Keep the order given in the shortcode.
-		usort( $found, function ( $a, $b ) use ( $source_ids ) {
-			return array_search( get_post_meta( $a->ID, LASERY_XTOOL_SOURCE_ID, true ), $source_ids, true ) <=> array_search( get_post_meta( $b->ID, LASERY_XTOOL_SOURCE_ID, true ), $source_ids, true );
-		} );
-		$ids = array_merge( $ids, wp_list_pluck( $found, 'ID' ) );
+		// One product per source ID (the oldest), in the order given in the shortcode.
+		$found = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => $source_ids, 'meta_compare' => 'IN', 'fields' => 'ids', 'posts_per_page' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) );
+		update_postmeta_cache( $found );
+		$by_source = array();
+		foreach ( $found as $id ) {
+			$by_source[ get_post_meta( $id, LASERY_XTOOL_SOURCE_ID, true ) ] ??= $id;
+		}
+		foreach ( $source_ids as $source_id ) {
+			if ( isset( $by_source[ $source_id ] ) ) {
+				$ids[] = $by_source[ $source_id ];
+			}
+		}
 	}
 	$products = $ids ? get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'post__in' => array_unique( $ids ), 'orderby' => 'post__in', 'posts_per_page' => 6 ) ) : array();
 	if ( ! $products ) {
@@ -141,7 +149,7 @@ function lasery_xtool_language_box( $post ) {
 	<p><label for="lasery-post-language"><strong>Język artykułu</strong></label></p>
 	<select id="lasery-post-language" name="lasery_language" class="widefat">
 		<?php foreach ( $languages as $code => $label ) : ?>
-			<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $language, $code ); ?> <?php disabled( 'auto-draft' !== $post->post_status && lasery_xtool_language_taken( $post->ID, $code ) ); ?>><?php echo esc_html( $label ); ?></option>
+			<option value="<?php echo esc_attr( $code ); ?>" <?php selected( $language, $code ); ?> <?php disabled( lasery_xtool_language_taken( $post->ID, $code ) ); ?>><?php echo esc_html( $label ); ?></option>
 		<?php endforeach; ?>
 	</select>
 	<?php
@@ -213,6 +221,9 @@ function lasery_xtool_translate_post() {
 		wp_die( 'Nie można utworzyć tłumaczenia.', '', array( 'response' => 403 ) );
 	}
 	$existing = lasery_xtool_post_translations( $original, false );
+	if ( isset( $existing[ $language ] ) && 'trash' === get_post_status( $existing[ $language ] ) ) {
+		wp_die( 'Tłumaczenie w tym języku jest w koszu. Przywróć je albo usuń na stałe.', '', array( 'response' => 409 ) );
+	}
 	if ( isset( $existing[ $language ] ) ) {
 		wp_safe_redirect( get_edit_post_link( $existing[ $language ], 'raw' ) );
 		exit;
@@ -229,7 +240,6 @@ function lasery_xtool_translate_post() {
 				'post_category'  => wp_get_post_categories( $original ),
 				'tags_input'     => wp_get_post_tags( $original, array( 'fields' => 'names' ) ),
 				'comment_status' => $post->comment_status,
-				'ping_status'    => $post->ping_status,
 				'meta_input'     => array( '_lasery_language' => $language, '_lasery_translation_of' => $original ),
 			)
 		),

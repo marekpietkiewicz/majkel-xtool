@@ -174,18 +174,20 @@ function lasery_xtool_article_toc($html) {
             return $match[0];
         }
         if (preg_match('~\sid=(["\'])(.*?)\1~', $match[1], $id)) {
-            $anchor = $id[2];
-            $attributes = $match[1];
+            $base = wp_specialchars_decode($id[2], ENT_QUOTES);
+            $attributes = str_replace($id[0], '', $match[1]);
         } else {
             // sanitize_title() percent-encodes Cyrillic and ₂; decoding keeps the ids readable.
-            $base = rawurldecode(sanitize_title($text)) ?: 'sekcja';
-            $anchor = $base;
-            for ($number = 2; isset($used[$anchor]); ++$number) {
-                $anchor = $base . '-' . $number;
-            }
-            $attributes = $match[1] . ' id="' . esc_attr($anchor) . '"';
+            $base = wp_check_invalid_utf8(rawurldecode(sanitize_title($text)));
+            $attributes = $match[1];
+        }
+        $base = $base !== '' ? $base : 'sekcja';
+        $anchor = $base;
+        for ($number = 2; isset($used[$anchor]); ++$number) {
+            $anchor = $base . '-' . $number;
         }
         $used[$anchor] = true;
+        $attributes .= ' id="' . esc_attr($anchor) . '"';
         $toc[] = [$anchor, $text];
         return '<h2' . $attributes . '>' . $match[2] . '</h2>';
     }, $html);
