@@ -31,7 +31,7 @@ function lasery_xtool_text_fields() {
         'demo_callout_text' => ['Produkt z demo: opis ramki', 'textarea', __('Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup.', 'lasery-xtool')],
         'demo_callout_button' => ['Produkt z demo: przycisk', 'text', __('Umów demo', 'lasery-xtool')],
         'demo_frame_note' => ['Demo: opis ramki', 'textarea', __('Formularz „Book a Service” znajduje się poniżej profilu na stronie xTool. Przewiń zawartość ramki, aby go zobaczyć.', 'lasery-xtool')],
-        'hero_products_link' => ['Blog: przycisk do urządzeń pod artykułem', 'text', __('Zobacz urządzenia', 'lasery-xtool')],
+        'blog_products_button' => ['Blog: przycisk do urządzeń pod artykułem', 'text', __('Zobacz urządzenia', 'lasery-xtool')],
         'blog_eyebrow' => ['Blog: mały nagłówek', 'text', __('BLOG', 'lasery-xtool')],
         'blog_title' => ['Blog: nagłówek', 'text', __('Poradniki i inspiracje', 'lasery-xtool')],
         'blog_description' => ['Blog: opis (także opis strony w wyszukiwarkach)', 'textarea', __('Podpowiadamy, jak wybrać laser, co na nim tworzyć i jak rozwinąć pracownię.', 'lasery-xtool')],

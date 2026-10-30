@@ -117,10 +117,13 @@ function lasery_xtool_requested_kind() {
     return in_array($kind, ['device', 'accessory'], true) ? $kind : '';
 }
 
-/** The blog page in the current language, or '' before the page exists. */
-function lasery_xtool_blog_url() {
+/** The published blog page in the given (default: current) language, or ''. */
+function lasery_xtool_blog_url($language = '') {
     $page = get_page_by_path('blog');
-    return $page && $page->post_status === 'publish' ? lasery_xtool_language_url(get_permalink($page)) : '';
+    if (!$page || $page->post_status !== 'publish') {
+        return '';
+    }
+    return add_query_arg('lang', $language !== '' ? $language : lasery_xtool_interface_language(), get_permalink($page));
 }
 
 /** Blog posts written in the current language. */
@@ -130,6 +133,16 @@ function lasery_xtool_blog_query($args = []) {
         $args['meta_query'] = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
     }
     return new WP_Query($args);
+}
+
+/** The blog listing page number (?strona) and its posts, shared by the redirect check, canonical URL and template. */
+function lasery_xtool_blog_listing() {
+    static $listing = null;
+    if ($listing === null) {
+        $page = isset($_GET['strona']) && is_string($_GET['strona']) ? absint($_GET['strona']) : 1;
+        $listing = [$page, lasery_xtool_blog_query(['posts_per_page' => 9, 'paged' => max(1, $page)])];
+    }
+    return $listing;
 }
 
 function lasery_xtool_reading_time($post_id) {
@@ -150,18 +163,29 @@ function lasery_xtool_post_date($post_id) {
     return get_the_date('', $post_id);
 }
 
-/** Add anchors to H2 headings and list them for the table of contents. */
+/** Add unique anchors to H2 headings and list them for the table of contents. */
 function lasery_xtool_article_toc($html) {
     $toc = [];
-    $html = preg_replace_callback('~<h2([^>]*)>(.*?)</h2>~is', function ($match) use (&$toc) {
+    // Ids of the article page layout, which headings must not take over (e.g. "Kontakt").
+    $used = array_fill_keys(['tresc', 'menu-glowne', 'article-toc-title', 'related-posts-heading', 'kontakt', 'footer-devices', 'footer-info', 'lasery-consent', 'lasery-consent-title'], true);
+    $html = preg_replace_callback('~<h2([^>]*)>(.*?)</h2>~is', function ($match) use (&$toc, &$used) {
         $text = trim(wp_strip_all_tags($match[2]));
-        if (preg_match('~\sid="([^"]+)"~', $match[1], $id)) {
-            $anchor = $id[1];
+        if ($text === '') {
+            return $match[0];
+        }
+        if (preg_match('~\sid=(["\'])(.*?)\1~', $match[1], $id)) {
+            $anchor = $id[2];
             $attributes = $match[1];
         } else {
-            $anchor = sanitize_title($text) ?: 'sekcja-' . (count($toc) + 1);
+            // sanitize_title() percent-encodes Cyrillic and ₂; decoding keeps the ids readable.
+            $base = rawurldecode(sanitize_title($text)) ?: 'sekcja';
+            $anchor = $base;
+            for ($number = 2; isset($used[$anchor]); ++$number) {
+                $anchor = $base . '-' . $number;
+            }
             $attributes = $match[1] . ' id="' . esc_attr($anchor) . '"';
         }
+        $used[$anchor] = true;
         $toc[] = [$anchor, $text];
         return '<h2' . $attributes . '>' . $match[2] . '</h2>';
     }, $html);
@@ -175,8 +199,8 @@ function lasery_xtool_language_switch_url($language) {
         if (isset($translations[$language])) {
             return get_permalink($translations[$language]);
         }
-        $blog = get_page_by_path('blog');
-        return add_query_arg('lang', $language, $blog ? get_permalink($blog) : home_url('/'));
+        $blog = lasery_xtool_blog_url($language);
+        return $blog !== '' ? $blog : add_query_arg('lang', $language, home_url('/'));
     }
     return add_query_arg('lang', $language, remove_query_arg(['order_result', 'strona']));
 }

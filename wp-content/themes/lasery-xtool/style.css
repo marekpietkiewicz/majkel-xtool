@@ -1,7 +1,7 @@
 /*
 Theme Name: Lasery xTool
 Description: Nowoczesny motyw katalogu urządzeń xTool dla laseryxtool.pl.
-Version: 0.3.0
+Version: 0.4.0
 Text Domain: lasery-xtool
 Requires at least: 6.5
 Requires PHP: 8.0
@@ -274,7 +274,8 @@ html:not(.js) .menu-toggle { display: none; }
 @media (min-width: 600px) { .product-rail .swiper-slide { width: 300px; } }
 
 /* Demo */
-.demo-card { position: relative; overflow: hidden; padding: clamp(28px, 5vw, 64px); border-radius: var(--radius-xl); background: var(--dark); color: #fff; isolation: isolate; }
+.demo-card, .article-cta { position: relative; overflow: hidden; border-radius: var(--radius-xl); background: var(--dark); color: #fff; isolation: isolate; }
+.demo-card { padding: clamp(28px, 5vw, 64px); }
 .demo-card::before, .article-cta::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(55% 70% at 100% 0%, rgb(255 90 31 / 34%), transparent 70%), radial-gradient(45% 60% at 0% 100%, rgb(88 101 242 / 22%), transparent 70%); }
 .demo-grid { display: grid; gap: 32px; }
 .demo-lead { max-width: 46ch; margin: 16px 0 28px; color: #c9cdd5; font-size: 1.05rem; }
@@ -323,7 +324,7 @@ html:not(.js) .menu-toggle { display: none; }
 .chip:hover { border-color: var(--ink); }
 .chip[aria-current] { background: var(--ink); border-color: var(--ink); color: #fff; }
 .product-grid--catalogue { margin-bottom: clamp(56px, 8vw, 112px); }
-.pagination .nav-links, nav.pagination { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 56px; }
+.pagination .nav-links { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 56px; }
 .pagination .page-numbers { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 999px; font-weight: 600; text-decoration: none; }
 .pagination .page-numbers.current { background: var(--ink); border-color: var(--ink); color: #fff; }
 .page-wrap { padding-block: clamp(32px, 6vw, 80px); }
@@ -391,7 +392,7 @@ html:not(.js) .menu-toggle { display: none; }
 .article-toc a { display: flex; gap: 10px; padding: 7px 10px; border-radius: 10px; color: var(--muted); font-size: .9rem; line-height: 1.4; text-decoration: none; transition: background-color .2s, color .2s; }
 .article-toc a::before { content: counter(toc, decimal-leading-zero); color: var(--accent-text); font: 700 .8rem/1.6 var(--font-display); }
 .article-toc a:hover, .article-toc a[aria-current] { background: #fff; color: var(--ink); }
-.article-cta { position: relative; display: grid; gap: 24px; margin: clamp(40px, 6vw, 72px) 0 clamp(56px, 8vw, 96px); padding: clamp(28px, 5vw, 56px); overflow: hidden; border-radius: var(--radius-xl); background: var(--dark); color: #fff; isolation: isolate; }
+.article-cta { display: grid; gap: 24px; margin: clamp(40px, 6vw, 72px) 0 clamp(56px, 8vw, 96px); padding: clamp(28px, 5vw, 56px); }
 .article-cta h2 { font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem); }
 .article-cta p:not(.eyebrow) { max-width: 52ch; margin-top: 12px; color: #c9cdd5; }
 .article-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; }
