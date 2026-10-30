@@ -53,23 +53,48 @@
 
   /* Cart: the number of items comes from the cart cookie, so pages stay cacheable for everyone. */
   const cartCount = document.querySelector('[data-cart-count]');
-  const cartCookie = document.cookie.split('; ').find((part) => part.startsWith('lasery_cart='));
-  if (cartCount && cartCookie) {
-    const count = decodeURIComponent(cartCookie.slice('lasery_cart='.length)).split('|').reduce((sum, item) => sum + (Number(item.split(':')[2]) || 0), 0);
-    if (count) {
-      cartCount.textContent = String(count);
-      cartCount.hidden = false;
+  const showCartCount = () => {
+    const cookie = document.cookie.split('; ').find((part) => part.startsWith('lasery_cart='));
+    let count = 0;
+    try {
+      // The same entries the server accepts: "product:variant:quantity", at most 30.
+      count = decodeURIComponent(cookie ? cookie.slice('lasery_cart='.length) : '').split('|').slice(0, 30)
+        .filter((item) => /^[1-9]\d{0,19}:(?:[1-9]\d{0,19})?:(?:[1-9]\d?|100)$/.test(item))
+        .reduce((sum, item) => sum + Number(item.split(':')[2]), 0);
+    } catch (error) {
+      count = 0;
     }
+    cartCount.textContent = String(count);
+    cartCount.hidden = !count;
+  };
+  if (cartCount) {
+    showCartCount();
+    window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
-  // A changed quantity updates the cart at once (without JavaScript the button does it).
+  // The order covers the saved cart, so changed quantities must be saved first.
+  const orderForm = document.querySelector('[data-order-submit]');
+  const orderButton = orderForm && orderForm.querySelector('button[type="submit"]');
+  const unsaved = orderForm && orderForm.querySelector('[data-cart-unsaved]');
   document.querySelectorAll('[data-cart-form]').forEach((form) => {
-    const update = form.querySelector('[data-cart-update]');
-    form.addEventListener('change', (event) => {
-      if (!event.target.matches('[data-cart-quantity]')) return;
-      if (form.requestSubmit) form.requestSubmit(update);
-      else update.click();
+    form.addEventListener('input', (event) => {
+      if (!event.target.matches('[data-cart-quantity]') || !orderButton || !unsaved) return;
+      orderButton.disabled = true;
+      unsaved.hidden = false;
     });
   });
+  // One order per click: a second submit would only hit the rate limit. Back restores the button.
+  if (orderForm && orderButton) {
+    let sending = false;
+    orderForm.addEventListener('submit', () => {
+      sending = true;
+      orderButton.disabled = true;
+    });
+    window.addEventListener('pageshow', () => {
+      if (!sending) return;
+      sending = false;
+      orderButton.disabled = false;
+    });
+  }
 
   /* Articles: reading progress and the current section in the table of contents. */
   const progress = document.querySelector('[data-reading-progress]');

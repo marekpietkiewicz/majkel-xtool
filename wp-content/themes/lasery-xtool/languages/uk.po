@@ -83,8 +83,6 @@ msgstr "Каталог товарів готується. Зв’яжіться 
 msgid "Kontakt"
 msgstr "Контакти"
 
-msgid "Koszyk"
-msgstr "Кошик"
 
 msgid "LASERY I URZĄDZENIA XTOOL"
 msgstr "ЛАЗЕРИ ТА ОБЛАДНАННЯ XTOOL"

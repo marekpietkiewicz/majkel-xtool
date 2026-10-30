@@ -83,8 +83,6 @@ msgstr "Our product catalogue is being prepared. Contact us to ask about our mac
 msgid "Kontakt"
 msgstr "Contact"
 
-msgid "Koszyk"
-msgstr "Cart"
 
 msgid "LASERY I URZĄDZENIA XTOOL"
 msgstr "XTOOL LASERS AND MACHINES"

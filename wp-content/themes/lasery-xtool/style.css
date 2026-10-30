@@ -118,9 +118,9 @@ address { font-style: normal; }
 .lang-menu-list a:hover { background: var(--surface); }
 .lang-menu-list a[aria-current] { color: var(--accent-text); }
 .lang-menu-list .icon { width: 18px; height: 18px; }
-.menu-toggle, .search-toggle { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; }
-.menu-toggle:hover, .search-toggle:hover { background: var(--surface); }
-.search-toggle .icon { width: 20px; height: 20px; }
+.menu-toggle, .header-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; }
+.menu-toggle:hover, .header-icon:hover { background: var(--surface); }
+.header-icon .icon { width: 20px; height: 20px; }
 .menu-toggle .icon-close, .menu-toggle[aria-expanded="true"] .icon-menu { display: none; }
 .menu-toggle[aria-expanded="true"] .icon-close { display: block; }
 .js .primary-nav { position: absolute; top: 100%; left: 0; right: 0; display: none; padding: 8px var(--gutter) 24px; background: #fff; border-bottom: 1px solid var(--line); box-shadow: 0 24px 40px -24px rgb(13 15 18 / 25%); }
@@ -361,7 +361,7 @@ html:not(.js) .menu-toggle { display: none; }
 /* Five header controls fit next to the logo on the narrowest phones. */
 @media (max-width: 379.98px) {
   .header-bar, .header-actions { gap: 2px; }
-  .menu-toggle, .search-toggle { width: 40px; height: 40px; }
+  .menu-toggle, .header-icon { width: 40px; height: 40px; }
   .lang-menu summary { gap: 4px; padding: 0 6px; }
   .lang-menu summary .icon-chevron-down { display: none; }
 }
@@ -383,7 +383,6 @@ html:not(.js) .menu-toggle { display: none; }
 .cart-line-remove { min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--muted); font: 600 .9rem/1 var(--font-text); text-decoration: underline; cursor: pointer; }
 .cart-line-remove:hover { color: var(--ink); }
 .cart-items-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-.js [data-cart-update] { display: none; }
 .order-summary-total { color: var(--ink) !important; font-weight: 700; }
 @media (min-width: 640px) {
   .cart-line { grid-template-columns: 88px minmax(0, 1fr) auto; padding: 16px 20px 16px 16px; }
@@ -574,7 +573,8 @@ html:not(.js) .menu-toggle { display: none; }
 .order-summary :is(h2, h3) { font-size: 1.15rem; }
 .order-summary-product { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); font-weight: 700; line-height: 1.35; }
 .order-summary-product img { width: 64px; height: 64px; flex-shrink: 0; border-radius: 12px; background: var(--surface); object-fit: contain; mix-blend-mode: multiply; }
-.order-summary-list { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; font-size: .9rem; }
+.order-summary-list { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; font-size: .9rem; }
+.cart .order-summary-list { grid-template-columns: minmax(0, 1fr) auto; }
 .order-summary-list dt { color: var(--muted); }
 .order-summary-list dd { font-weight: 600; text-align: right; }
 .order-summary-price { font: 700 1.35rem/1.2 var(--font-display) !important; }

@@ -17,23 +17,43 @@ function lasery_xtool_cart_url( $language ) {
 	return $page && 'publish' === $page->post_status ? add_query_arg( 'lang', $language, get_permalink( $page ) ) : '';
 }
 
+function lasery_xtool_cart_cookie() {
+	return isset( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) && is_string( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) ? wp_unslash( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) : '';
+}
+
 /** The cart as [product ID, variant ID ('' for products without source variants), quantity]. */
 function lasery_xtool_cart_items() {
-	$raw = isset( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) && is_string( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) ? wp_unslash( $_COOKIE[ LASERY_XTOOL_CART_COOKIE ] ) : '';
 	$items = array();
-	foreach ( array_slice( explode( '|', $raw ), 0, LASERY_XTOOL_CART_MAX_LINES ) as $part ) {
+	foreach ( array_slice( explode( '|', lasery_xtool_cart_cookie() ), 0, LASERY_XTOOL_CART_MAX_LINES ) as $part ) {
 		if ( preg_match( '/^([1-9][0-9]{0,19}):([1-9][0-9]{0,19})?:([1-9][0-9]?|100)$/D', $part, $match ) ) {
-			$items[ $match[1] . ':' . $match[2] ] = array( (int) $match[1], $match[2], (int) $match[3] );
+			$item = array( (int) $match[1], $match[2], (int) $match[3] );
+			$items[ lasery_xtool_cart_key( $item ) ] = $item;
 		}
 	}
 	return array_values( $items );
 }
 
+/** The key of an item or a line: "product ID:variant ID". */
+function lasery_xtool_cart_key( $item ) {
+	return $item[0] . ':' . $item[1];
+}
+
+/** The cookie value of cart items. */
+function lasery_xtool_cart_value( $items ) {
+	return implode( '|', array_map( function ( $item ) { return implode( ':', $item ); }, array_slice( $items, 0, LASERY_XTOOL_CART_MAX_LINES ) ) );
+}
+
 function lasery_xtool_cart_save( $items ) {
-	$value = implode( '|', array_map( function ( $item ) { return implode( ':', $item ); }, array_slice( $items, 0, LASERY_XTOOL_CART_MAX_LINES ) ) );
+	$value = lasery_xtool_cart_value( $items );
 	$_COOKIE[ LASERY_XTOOL_CART_COOKIE ] = $value;
-	// Not HttpOnly: the header shows the number of items from it. It holds no personal data.
-	setcookie( LASERY_XTOOL_CART_COOKIE, $value, array( 'expires' => '' === $value ? 1 : time() + 30 * DAY_IN_SECONDS, 'path' => '/', 'secure' => is_ssl(), 'httponly' => false, 'samesite' => 'Lax' ) );
+	// A session cookie, as a strictly necessary one should be. Not HttpOnly: the header shows
+	// the number of items from it. It holds no personal data.
+	setcookie( LASERY_XTOOL_CART_COOKIE, $value, array( 'expires' => '' === $value ? 1 : 0, 'path' => '/', 'secure' => is_ssl(), 'httponly' => false, 'samesite' => 'Lax' ) );
+}
+
+/** The cart items of lines, i.e. without products and variants that no longer exist. */
+function lasery_xtool_cart_line_items( $lines ) {
+	return array_map( function ( $line ) { return array( $line['product'], $line['variant'] ? $line['variant']['id'] : '', $line['quantity'] ); }, $lines );
 }
 
 /** Whole cents of a decimal price string such as "1234.5". */
@@ -42,7 +62,7 @@ function lasery_xtool_cents( $price ) {
 }
 
 /**
- * Current data of cart items: product, variant (null without source variants), quantity,
+ * Current data of cart items: key, product, variant (null without source variants), quantity,
  * price [amount, currency] or null, and an error ('stale' or 'unavailable') when the line
  * cannot be ordered now. Products and variants that no longer exist are left out.
  */
@@ -52,7 +72,7 @@ function lasery_xtool_cart_lines( $items ) {
 		if ( LASERY_XTOOL_PRODUCT_TYPE !== get_post_type( $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
 			continue;
 		}
-		$line = array( 'product' => $post_id, 'variant' => null, 'quantity' => $quantity, 'amount' => null, 'error' => '' );
+		$line = array( 'key' => lasery_xtool_cart_key( array( $post_id, $variant_id ) ), 'product' => $post_id, 'variant' => null, 'quantity' => $quantity, 'amount' => null, 'error' => '' );
 		if ( lasery_xtool_uses_source_variants( $post_id ) ) {
 			foreach ( lasery_xtool_order_variants( $post_id ) as $variant ) {
 				if ( is_array( $variant ) && isset( $variant['id'], $variant['title'] ) && $variant['id'] === $variant_id ) {
@@ -80,23 +100,25 @@ function lasery_xtool_cart_lines( $items ) {
 	return $lines;
 }
 
-/** [cents, currency] of all lines when every line has a price in one currency, else null. */
-function lasery_xtool_cart_total( $lines ) {
-	$cents = 0;
-	$currency = '';
+/** The total of all lines per currency ("1 234,00 € + 500,00 zł"), or the "to be confirmed" text. */
+function lasery_xtool_cart_total( $lines, $text, $language ) {
+	$totals = array();
 	foreach ( $lines as $line ) {
-		if ( ! $line['amount'] || ( '' !== $currency && $currency !== $line['amount'][1] ) ) {
-			return null;
+		if ( ! $line['amount'] ) {
+			return $text['no_price'];
 		}
-		$currency = $line['amount'][1];
-		$cents += lasery_xtool_cents( $line['amount'][0] ) * $line['quantity'];
+		$totals[ $line['amount'][1] ] = ( $totals[ $line['amount'][1] ] ?? 0 ) + lasery_xtool_cents( $line['amount'][0] ) * $line['quantity'];
 	}
-	return '' === $currency ? null : array( $cents, $currency );
+	$parts = array();
+	foreach ( $totals as $currency => $cents ) {
+		$parts[] = lasery_xtool_format_cents( $cents, $currency, $language );
+	}
+	return $parts ? implode( ' + ', $parts ) : $text['no_price'];
 }
 
 /** Ties the order form to the prices the customer saw. */
 function lasery_xtool_cart_snapshot( $lines ) {
-	$data = array_map( function ( $line ) { return array( $line['product'], $line['variant'] ? $line['variant']['id'] : '', $line['quantity'], $line['amount'], $line['error'] ); }, $lines );
+	$data = array_map( function ( $line ) { return array( $line['key'], $line['quantity'], $line['amount'], $line['error'] ); }, $lines );
 	return hash_hmac( 'sha256', wp_json_encode( $data ), wp_salt( 'nonce' ) );
 }
 
@@ -128,12 +150,20 @@ function lasery_xtool_posted_language() {
 	return isset( lasery_xtool_description_languages()[ $language ] ) ? $language : 'pl';
 }
 
+/** Another site's form must not empty or replace a visitor's cart. */
+function lasery_xtool_cart_check_site( $language ) {
+	if ( isset( $_SERVER['HTTP_SEC_FETCH_SITE'] ) && 'cross-site' === $_SERVER['HTTP_SEC_FETCH_SITE'] ) {
+		lasery_xtool_cart_redirect( $language, array() );
+	}
+}
+
 // Adding or changing items has no effect beyond the visitor's own cart, so no nonce is
 // needed, and product pages can stay in the page cache.
 add_action( 'admin_post_lasery_xtool_cart_add', 'lasery_xtool_cart_add' );
 add_action( 'admin_post_nopriv_lasery_xtool_cart_add', 'lasery_xtool_cart_add' );
 function lasery_xtool_cart_add() {
 	$language = lasery_xtool_posted_language();
+	lasery_xtool_cart_check_site( $language );
 	$post_id = isset( $_POST['product_id'] ) && is_scalar( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
 	$variant = isset( $_POST['variant'] ) && is_string( $_POST['variant'] ) ? sanitize_text_field( wp_unslash( $_POST['variant'] ) ) : '';
 	$quantity = isset( $_POST['quantity'] ) && is_string( $_POST['quantity'] ) && preg_match( '/^(?:[1-9][0-9]?|100)$/D', $_POST['quantity'] ) ? (int) $_POST['quantity'] : 0;
@@ -162,18 +192,22 @@ function lasery_xtool_cart_add() {
 
 add_action( 'admin_post_lasery_xtool_cart_update', 'lasery_xtool_cart_update' );
 add_action( 'admin_post_nopriv_lasery_xtool_cart_update', 'lasery_xtool_cart_update' );
+/** Quantities and removals refer to lines by key, so they apply to the right line whatever the cookie holds now. */
 function lasery_xtool_cart_update() {
+	$language = lasery_xtool_posted_language();
+	lasery_xtool_cart_check_site( $language );
 	$quantities = isset( $_POST['quantity'] ) && is_array( $_POST['quantity'] ) ? wp_unslash( $_POST['quantity'] ) : array();
-	$remove = isset( $_POST['remove'] ) && is_string( $_POST['remove'] ) && ctype_digit( $_POST['remove'] ) ? (int) $_POST['remove'] : -1;
+	$remove = isset( $_POST['remove'] ) && is_string( $_POST['remove'] ) ? wp_unslash( $_POST['remove'] ) : '';
 	$items = array();
-	foreach ( lasery_xtool_cart_items() as $index => $item ) {
-		$quantity = isset( $quantities[ $index ] ) && is_string( $quantities[ $index ] ) && preg_match( '/^(?:0|[1-9][0-9]?|100)$/D', trim( $quantities[ $index ] ) ) ? (int) $quantities[ $index ] : $item[2];
-		if ( $index !== $remove && $quantity > 0 ) {
+	foreach ( lasery_xtool_cart_items() as $item ) {
+		$key = lasery_xtool_cart_key( $item );
+		$quantity = isset( $quantities[ $key ] ) && is_string( $quantities[ $key ] ) && preg_match( '/^(?:0|[1-9][0-9]?|100)$/D', trim( $quantities[ $key ] ) ) ? (int) $quantities[ $key ] : $item[2];
+		if ( $key !== $remove && $quantity > 0 ) {
 			$items[] = array( $item[0], $item[1], $quantity );
 		}
 	}
 	lasery_xtool_cart_save( $items );
-	lasery_xtool_cart_redirect( lasery_xtool_posted_language(), array() );
+	lasery_xtool_cart_redirect( $language, array( 'cart' => 'updated' ) );
 }
 
 // The cart page shows one visitor's cart and the order form with a nonce.
@@ -187,6 +221,11 @@ function lasery_xtool_cart_page_headers() {
 	}
 	nocache_headers();
 	do_action( 'litespeed_control_set_nocache', 'Shopping cart' );
+	// Products and variants that no longer exist leave the cart, also from the header's count.
+	$items = lasery_xtool_cart_line_items( lasery_xtool_cart_lines( lasery_xtool_cart_items() ) );
+	if ( lasery_xtool_cart_cookie() !== lasery_xtool_cart_value( $items ) ) {
+		lasery_xtool_cart_save( $items );
+	}
 }
 
 add_filter( 'wp_robots', 'lasery_xtool_cart_robots' );
@@ -194,14 +233,22 @@ function lasery_xtool_cart_robots( $robots ) {
 	return is_page( 'koszyk' ) ? array( 'noindex' => true, 'follow' => true ) : $robots;
 }
 
+add_filter( 'wp_sitemaps_posts_query_args', 'lasery_xtool_cart_sitemap', 10, 2 );
+function lasery_xtool_cart_sitemap( $args, $post_type ) {
+	$page = 'page' === $post_type ? get_page_by_path( 'koszyk' ) : null;
+	if ( $page ) {
+		$args['post__not_in'] = array_merge( isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array(), array( $page->ID ) );
+	}
+	return $args;
+}
+
 function lasery_xtool_render_cart() {
 	$language = lasery_xtool_order_language();
 	$text = lasery_xtool_order_texts( $language );
 	$lines = lasery_xtool_cart_lines( lasery_xtool_cart_items() );
-	$total = lasery_xtool_cart_total( $lines );
 	$orderable = $lines && ! array_filter( array_column( $lines, 'error' ) );
 	$result = isset( $_GET['cart'] ) && is_string( $_GET['cart'] ) ? sanitize_key( wp_unslash( $_GET['cart'] ) ) : '';
-	$notices = array( 'added' => 'success', 'sent' => 'success', 'sent_no_receipt' => 'success', 'full' => 'error', 'failed' => 'error', 'invalid' => 'error', 'busy' => 'error', 'changed' => 'error' );
+	$notices = array( 'added' => 'success', 'updated' => 'success', 'sent' => 'success', 'sent_no_receipt' => 'success', 'full' => 'error', 'failed' => 'error', 'invalid' => 'error', 'busy' => 'error', 'changed' => 'error' );
 	$archive = get_post_type_archive_link( LASERY_XTOOL_PRODUCT_TYPE );
 	$archive = $archive ? add_query_arg( 'lang', $language, $archive ) : home_url( '/' );
 	?>
@@ -221,34 +268,40 @@ function lasery_xtool_render_cart() {
 			return;
 		endif;
 		?>
+		<?php // Removing uses its own form, so Enter in a quantity field submits "update". ?>
+		<form id="cart-remove" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="lasery_xtool_cart_update">
+			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
+		</form>
 		<form class="cart-items" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-cart-form>
 			<input type="hidden" name="action" value="lasery_xtool_cart_update">
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 			<ul class="cart-lines">
 				<?php foreach ( $lines as $index => $line ) : ?>
+					<?php $title = lasery_xtool_order_product_title( $line['product'], $language ); ?>
 					<?php $link = add_query_arg( 'lang', $language, get_permalink( $line['product'] ) ); ?>
 					<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>">
 						<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
 						<div class="cart-line-body">
-							<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( lasery_xtool_order_product_title( $line['product'], $language ) ); ?></a></p>
+							<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></p>
 							<?php if ( $line['variant'] ) : ?><p class="cart-line-variant"><?php echo esc_html( lasery_xtool_variant_label( $line['variant'] ) ); ?></p><?php endif; ?>
 							<?php if ( $line['error'] ) : ?><p class="cart-line-error"><?php echo esc_html( $text[ 'cart_' . $line['error'] ] ); ?></p><?php endif; ?>
 							<p class="cart-line-price"><?php echo esc_html( $line['error'] ? '' : lasery_xtool_cart_line_price( $line, $text, $language ) ); ?></p>
 						</div>
 						<div class="cart-line-actions">
-							<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] ); ?></label>
-							<input id="cart-quantity-<?php echo esc_attr( $index ); ?>" name="quantity[<?php echo esc_attr( $index ); ?>]" type="number" min="0" max="100" value="<?php echo esc_attr( $line['quantity'] ); ?>" data-cart-quantity>
-							<button type="submit" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['remove'] ); ?></button>
+							<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
+							<input id="cart-quantity-<?php echo esc_attr( $index ); ?>" name="quantity[<?php echo esc_attr( $line['key'] ); ?>]" type="number" min="0" max="100" value="<?php echo esc_attr( $line['quantity'] ); ?>" data-cart-quantity>
+							<button type="submit" form="cart-remove" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $line['key'] ); ?>"><?php echo esc_html( $text['remove'] ); ?><span class="visually-hidden">: <?php echo esc_html( $title ); ?></span></button>
 						</div>
 					</li>
 				<?php endforeach; ?>
 			</ul>
 			<p class="cart-items-actions">
-				<button type="submit" class="btn btn-secondary" data-cart-update><?php echo esc_html( $text['update'] ); ?></button>
+				<button type="submit" class="btn btn-secondary"><?php echo esc_html( $text['update'] ); ?></button>
 				<a class="btn btn-secondary" href="<?php echo esc_url( $archive ); ?>"><?php echo esc_html( $text['continue'] ); ?></a>
 			</p>
 		</form>
-		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-order-submit>
 			<input type="hidden" name="action" value="lasery_xtool_order">
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 			<input type="hidden" name="snapshot" value="<?php echo esc_attr( lasery_xtool_cart_snapshot( $lines ) ); ?>">
@@ -297,9 +350,10 @@ function lasery_xtool_render_cart() {
 						<dd><?php echo esc_html( $line['amount'] ? lasery_xtool_format_cents( lasery_xtool_cents( $line['amount'][0] ) * $line['quantity'], $line['amount'][1], $language ) : $text['no_price'] ); ?></dd>
 					<?php endforeach; ?>
 					<dt class="order-summary-total"><?php echo esc_html( $text['total'] ); ?></dt>
-					<dd class="order-summary-price"><?php echo esc_html( $total ? lasery_xtool_format_cents( $total[0], $total[1], $language ) : $text['no_price'] ); ?></dd>
+					<dd class="order-summary-price"><?php echo esc_html( lasery_xtool_cart_total( $lines, $text, $language ) ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
+				<p class="order-form-notice order-form-notice--error" data-cart-unsaved hidden><?php echo esc_html( $text['cart_unsaved'] ); ?></p>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?>><?php echo esc_html( $text['submit'] ); ?></button>
 				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
 				<p class="order-summary-privacy"><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><a href="<?php echo esc_url( add_query_arg( 'lang', $language, $privacy_url ) ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
@@ -382,8 +436,7 @@ function lasery_xtool_cart_email_rows( $lines, $text, $language, $owner ) {
 		$details[] = $text['quantity'] . ': ' . lasery_xtool_cart_line_price( $line, $text, $language );
 		$rows[] = array( ( $index + 1 ) . '. ' . lasery_xtool_order_product_title( $line['product'], $language ), implode( "\n", $details ) );
 	}
-	$total = lasery_xtool_cart_total( $lines );
-	$rows[] = array( $text['total'], $total ? lasery_xtool_format_cents( $total[0], $total[1], $language ) : $text['no_price'] );
+	$rows[] = array( $text['total'], lasery_xtool_cart_total( $lines, $text, $language ) );
 	return $rows;
 }
 
@@ -399,7 +452,6 @@ function lasery_xtool_order_emails_owner( $lines, $fields, $language ) {
 			array( 'heading' => $text['address'], 'rows' => array( array( $text['address1'], $fields['address1'] ), array( $text['address2'], $fields['address2'] ), array( $text['zip'], $fields['zip'] ), array( $text['city'], $fields['city'] ), array( $text['country'], lasery_xtool_country_name( $fields['country'], 'pl' ) . ' (' . $fields['country'] . ')' ) ) ),
 			array( 'heading' => $text['extras'], 'rows' => array( array( $text['invoice'], $fields['invoice'] ), array( $text['notes'], $fields['notes'] ) ) ),
 		),
-		'button'   => null,
 		'note'     => $text['price_note'],
 		'footer'   => lasery_xtool_mail_from_name(),
 	);
@@ -415,7 +467,6 @@ function lasery_xtool_order_emails_customer( $lines, $language ) {
 		'title'    => sprintf( $text['customer_subject'], lasery_xtool_cart_subject( $lines, $language ) ),
 		'intro'    => $text['customer_body'],
 		'sections' => array( array( 'heading' => $text['items'], 'rows' => lasery_xtool_cart_email_rows( $lines, $text, $language, false ) ) ),
-		'button'   => null,
 		'note'     => $text['price_note'] . "\n" . $text['reply_note'],
 		'footer'   => lasery_xtool_mail_from_name() . ' · ' . lasery_xtool_order_contact_email() . $company,
 	);
