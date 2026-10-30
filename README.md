@@ -26,9 +26,9 @@ Pierwsze trzy artykuły w pięciu językach tworzy `wp eval-file scripts/seed-bl
 
 ## Wyszukiwarka
 
-Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera okno wyszukiwania urządzeń, akcesoriów i artykułów w języku interfejsu. Przeglądarka pobiera raz mały indeks (`/wp-json/lasery/v1/search?lang=pl`, kilkanaście KB) i wyszukuje w nim od razu przy wpisywaniu, bez rozróżniania wielkości liter i polskich znaków; angielska nazwa ze sklepu xTool również znajduje produkt. Indeks jest odświeżany po zapisaniu produktu lub artykułu i po każdej synchronizacji cen. Bez JavaScriptu ten sam indeks obsługuje stronę wyników `/?s=…&lang=…`.
+Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera okno wyszukiwania urządzeń, akcesoriów i artykułów w języku interfejsu. Przeglądarka pobiera raz mały indeks (`/wp-json/lasery/v1/search?lang=pl`, kilkanaście–kilkadziesiąt KB, przeglądarka przechowuje go 10 minut) i wyszukuje w nim od razu przy wpisywaniu, bez rozróżniania wielkości liter i polskich znaków; angielska nazwa ze sklepu xTool również znajduje produkt. Indeks jest odświeżany po zapisaniu produktu lub artykułu i po każdej synchronizacji cen. Bez JavaScriptu ten sam indeks obsługuje stronę wyników `/?s=…&lang=…`.
 
-Strona główna pokazuje osiem pierwszych urządzeń według pola **Kolejność** (na telefonie siedem, żeby siatka była pełna); pozostałe są w katalogu `/produkty/`.
+Strona główna pokazuje osiem pierwszych urządzeń według pola **Kolejność** (na telefonie i tablecie siedem, żeby siatka była pełna); pozostałe są w katalogu `/produkty/`.
 
 ## Stan środowiska
 
@@ -47,7 +47,7 @@ Strona główna pokazuje osiem pierwszych urządzeń według pola **Kolejność*
 - Własny motyw i wtyczka do importowania oraz aktualizacji produktów. Źródłem jest katalog Shopify xTool; zakres danych wymaga doprecyzowania. Użytkownik potwierdził, że umowa zezwala na automatyczne pobieranie, publikowanie i tłumaczenie materiałów.
 - Interfejs dostępny jest po polsku, angielsku, niemiecku, rosyjsku i ukraińsku. Nazwy i opisy produktów można edytować w każdym z tych języków; brakujący przekład wyświetla oryginał. Automatyczne tłumaczenie nowych produktów nie jest wdrożone.
 - Osobny staging nie został jeszcze skonfigurowany.
-- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (cztery zapytania). Po 429 pobieranie jest wstrzymywane do ręcznego wznowienia.
+- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (pięć zapytań). Po 429 pobieranie jest wstrzymywane do ręcznego wznowienia.
 
 Zakres katalogu oraz zasady aktualizowania ręcznych zmian wymagają dalszego doprecyzowania. Użytkownik potwierdził uprawnienia do używania materiałów xTool.
 

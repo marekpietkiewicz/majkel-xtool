@@ -128,6 +128,9 @@ msgstr "Перші статті незабаром з’являться."
 msgid "Podpowiadamy, jak wybrać laser, co na nim tworzyć i jak rozwinąć pracownię."
 msgstr "Як обрати лазер, що на ньому робити та як розвивати майстерню."
 
+msgid "Pokaż wszystkie wyniki (%d)"
+msgstr "Показати всі результати (%d)"
+
 msgid "Pomoc w wyborze"
 msgstr "Допомога з вибором"
 

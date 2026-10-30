@@ -1,7 +1,14 @@
 <?php
-/** Publish selected machines from verified private Shopify snapshots; existing products are skipped. */
-if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! function_exists( 'lasery_xtool_merge_handle_documents' ) ) {
+/**
+ * Publish selected machines from a private snapshot of https://www.xtool.eu/products.json
+ * (all pages saved as *.json in one folder); existing products are skipped.
+ * Usage: wp eval-file scripts/seed-extra-products.php <snapshot folder> <Unix fetch time>
+ */
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
     return;
+}
+if ( ! function_exists( 'lasery_xtool_parse_product' ) ) {
+    WP_CLI::error( 'Activate the lasery-xtool plugin first.' );
 }
 if ( ! isset( $args[0], $args[1] ) || ! is_dir( $args[0] ) || ! ctype_digit( $args[1] ) ) {
     WP_CLI::error( 'Supply the private snapshot directory and its Unix fetch timestamp.' );
@@ -10,44 +17,50 @@ $timestamp = (int) $args[1];
 if ( $timestamp > time() || $timestamp < time() - HOUR_IN_SECONDS ) {
     WP_CLI::error( 'Snapshots must be less than one hour old.' );
 }
-$products = [
-    '9163846877397' => 'xtool-f2-5w-ir-15w-diode-portable-dual-laser-engraver',
-    '9089720189141' => 'xtool-p3-the-flagship-80w-co2-laser-cutters',
-    '8169201631445' => 'xtool-s1-laser-cutter',
-    '9187692970197' => 'xtool-f2-ultra-uv-5w-uv-laser-engraver',
-    '9009695293653' => 'xtool-f2-ultra-60w-mopa-40w-diode-dual-laser-engraver',
-    '8974447804629' => 'xtool-metalfab-laser-welder-and-cnc-cutter',
-    '9432562729173' => 'xtool-metalfab-laser-welder',
-    '8523126931669' => 'xtool-f1-ultra-20w-fiber-diode-dual-laser-engraver',
-    '9475369337045' => 'the-worlds-first-4-in-1-xtool-o1-omni-printer',
-    '9573828133077' => 'xtool-apparel-printer-plus-one-click-dtf-printer-effortless-customization-for-business',
-    '9420620202197' => 'xtool-wonderpress-modular-auto-heat-press-for-2d-transfers-and-3d-creations',
-    '8941086245077' => 'xtool-os1-automatic-shaker-oven-machine',
+$ids = [
+    '9163846877397', // F2
+    '9089720189141', // P3
+    '8169201631445', // S1
+    '9187692970197', // F2 Ultra UV
+    '9009695293653', // F2 Ultra
+    '8974447804629', // MetalFab Laser Welder and CNC Cutter
+    '9432562729173', // MetalFab Laser Welder
+    '8523126931669', // F1 Ultra
+    '9475369337045', // O1 Omni Printer
+    '9573828133077', // Apparel Printer Plus
+    '9420620202197', // WonderPress 3D
+    '8941086245077', // OS1
 ];
+$snapshot = [];
+foreach ( glob( rtrim( $args[0], '/' ) . '/*.json' ) as $file ) {
+    $raw = lasery_xtool_decode_products( (string) file_get_contents( $file ), LASERY_XTOOL_MAX_PRODUCTS );
+    if ( false === $raw ) {
+        WP_CLI::error( 'Invalid snapshot ' . basename( $file ) );
+    }
+    foreach ( $raw as $entry ) {
+        $id = is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
+        if ( in_array( $id, $ids, true ) && ! isset( $snapshot[ $id ] ) ) {
+            $product = lasery_xtool_parse_product( $entry );
+            if ( false === $product ) {
+                WP_CLI::error( 'Invalid data for product ' . $id );
+            }
+            $snapshot[ $id ] = $product + [ 'currency' => 'EUR', 'fetched_at' => $timestamp ];
+        }
+    }
+}
 $prepared = [];
 $exists = static function ( $id ) {
     return (bool) get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private', 'trash' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => (string) $id, 'fields' => 'ids', 'posts_per_page' => 1 ] );
 };
-foreach ( $products as $id => $handle ) {
+foreach ( $ids as $id ) {
     if ( $exists( $id ) ) {
         WP_CLI::log( 'Product ' . $id . ' already exists; skipped.' );
         continue;
     }
-    $json_path = $args[0] . '/' . $handle . '.json';
-    $js_path = $args[0] . '/' . $handle . '.js';
-    if ( ! is_readable( $json_path ) || ! is_readable( $js_path ) ) {
-        WP_CLI::error( 'Missing snapshots for ' . $handle );
+    if ( ! isset( $snapshot[ $id ] ) ) {
+        WP_CLI::error( 'Product ' . $id . ' is missing from the snapshot.' );
     }
-    $json = json_decode( file_get_contents( $json_path ), false, 512, JSON_BIGINT_AS_STRING );
-    $js = json_decode( file_get_contents( $js_path ), false, 512, JSON_BIGINT_AS_STRING );
-    if ( is_object( $json ) && isset( $json->products ) && is_array( $json->products ) && count( $json->products ) === 1 ) {
-        $json = (object) [ 'product' => $json->products[0] ];
-    }
-    $item = lasery_xtool_merge_handle_documents( (string) $id, $handle, 'EUR', $timestamp, $json, $js );
-    if ( is_wp_error( $item ) ) {
-        WP_CLI::error( 'Invalid snapshots for ' . $handle . ': ' . $item->get_error_code() );
-    }
-    $prepared[ (string) $id ] = $item;
+    $prepared[ $id ] = $snapshot[ $id ];
 }
 if ( ! lasery_xtool_lock_import() ) {
     WP_CLI::error( 'Another import is running.' );
