@@ -23,7 +23,7 @@
                 <?php if (has_excerpt()) : ?><p class="article-lead"><?php echo esc_html(get_the_excerpt()); ?></p><?php endif; ?>
             </header>
             <?php if (has_post_thumbnail()) : ?>
-                <figure class="article-cover"><?php the_post_thumbnail('full', ['sizes' => '(min-width: 1300px) 1240px, 100vw', 'loading' => 'eager', 'fetchpriority' => 'high']); ?></figure>
+                <figure class="article-cover"><?php the_post_thumbnail('full', ['alt' => '', 'sizes' => '(min-width: 1300px) 1240px, 100vw', 'loading' => 'eager', 'fetchpriority' => 'high']); ?></figure>
             <?php endif; ?>
             <div class="article-layout<?php echo count($toc) > 1 ? ' article-layout--toc' : ''; ?>">
                 <?php if (count($toc) > 1) : ?>
@@ -46,7 +46,7 @@
                 </div>
                 <div class="article-cta-actions">
                     <a class="btn btn-accent btn-lg" href="<?php echo esc_url(lasery_xtool_demo_url()); ?>" target="_blank" rel="noopener noreferrer"><?php echo lasery_xtool_icon('calendar'); ?><?php echo esc_html(lasery_xtool_text('demo_callout_button')); ?></a>
-                    <a class="btn btn-light btn-lg" href="<?php echo esc_url($home . '#urzadzenia'); ?>"><?php echo esc_html(lasery_xtool_text('hero_products_link')); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
+                    <a class="btn btn-light btn-lg" href="<?php echo esc_url($home . '#urzadzenia'); ?>"><?php echo esc_html(lasery_xtool_text('blog_products_button')); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
                 </div>
             </aside>
         </div>

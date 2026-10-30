@@ -65,8 +65,10 @@ function lasery_xtool_activate() {
 // Updates of an already active plugin do not run the activation hook.
 add_action( 'init', 'lasery_xtool_maybe_install', 20 );
 function lasery_xtool_maybe_install() {
-	if ( LASERY_XTOOL_SCHEMA !== get_option( 'lasery_xtool_schema' ) ) {
+	// The lock keeps concurrent first requests after an update from creating the blog page twice.
+	if ( LASERY_XTOOL_SCHEMA !== get_option( 'lasery_xtool_schema' ) && lasery_xtool_lock_import() ) {
 		lasery_xtool_install();
+		lasery_xtool_release_import_lock();
 	}
 }
 

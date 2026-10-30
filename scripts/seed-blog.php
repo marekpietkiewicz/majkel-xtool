@@ -3,8 +3,16 @@
  * Create the initial blog articles in five languages (wp eval-file scripts/seed-blog.php).
  * Existing articles are left untouched, so edits made in the panel are kept.
  */
-if ( ! defined( 'WP_CLI' ) || ! WP_CLI || ! function_exists( 'lasery_xtool_post_language' ) ) {
+if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
     return;
+}
+if ( ! function_exists( 'lasery_xtool_post_language' ) ) {
+    WP_CLI::error( 'Activate the lasery-xtool plugin first.' );
+}
+// Articles and covers belong to the first administrator unless --user is given.
+if ( ! get_current_user_id() ) {
+    $admins = get_users( [ 'role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'fields' => 'ID' ] );
+    wp_set_current_user( $admins ? (int) $admins[0] : 0 );
 }
 require_once ABSPATH . 'wp-admin/includes/media.php';
 require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -55,7 +63,7 @@ $to_blocks = static function ( $blocks ) {
 };
 
 $find = static function ( $key, $language ) {
-    return get_posts( [ 'post_type' => 'post', 'post_status' => 'any', 'meta_query' => [ [ 'key' => '_lasery_seed', 'value' => $key . ':' . $language ] ], 'fields' => 'ids', 'posts_per_page' => 1 ] );
+    return get_posts( [ 'post_type' => 'post', 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private', 'trash' ], 'meta_query' => [ [ 'key' => '_lasery_seed', 'value' => $key . ':' . $language ] ], 'fields' => 'ids', 'posts_per_page' => 1 ] );
 };
 
 foreach ( $articles as $key => $article ) {
@@ -66,6 +74,7 @@ foreach ( $articles as $key => $article ) {
         copy( __DIR__ . '/blog/covers/' . $article['cover'], $file );
         $cover = media_handle_sideload( [ 'name' => $article['cover'], 'tmp_name' => $file ], 0, $article['languages']['pl']['title'] );
         if ( is_wp_error( $cover ) ) {
+            wp_delete_file( $file );
             WP_CLI::error( 'Could not import the cover of ' . $key . ': ' . $cover->get_error_message() );
         }
         update_post_meta( $cover, '_lasery_seed', 'cover:' . $key );
@@ -76,7 +85,12 @@ foreach ( $articles as $key => $article ) {
     foreach ( $article['languages'] as $language => $text ) {
         $existing = $find( $key, $language );
         if ( $existing ) {
-            $original = 'pl' === $language ? $existing[0] : $original;
+            if ( 'pl' === $language ) {
+                $original = $existing[0];
+            } elseif ( $original ) {
+                // Re-link a translation whose original was deleted and created again.
+                update_post_meta( $existing[0], '_lasery_translation_of', $original );
+            }
             WP_CLI::log( $key . ' / ' . $language . ' already exists; skipped.' );
             continue;
         }

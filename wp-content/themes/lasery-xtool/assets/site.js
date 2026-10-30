@@ -55,30 +55,31 @@
   const progress = document.querySelector('[data-reading-progress]');
   const articleContent = document.querySelector('.article-content');
   if (progress && articleContent) {
-    const updateProgress = () => {
+    // The raw href matches the heading id, also for Cyrillic ids.
+    const tocLinks = Array.from(document.querySelectorAll('.article-toc a'));
+    const headings = tocLinks.map((link) => document.getElementById(link.getAttribute('href').slice(1)));
+    let frame = 0;
+    const update = () => {
+      frame = 0;
       const rect = articleContent.getBoundingClientRect();
       const value = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height - window.innerHeight * 0.6, 1)));
       progress.style.transform = `scaleX(${value})`;
-    };
-    updateProgress();
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    window.addEventListener('resize', updateProgress, { passive: true });
-  }
-  const tocLinks = Array.from(document.querySelectorAll('.article-toc a'));
-  if (tocLinks.length && 'IntersectionObserver' in window) {
-    const linkFor = new Map(tocLinks.map((link) => [decodeURIComponent(link.hash.slice(1)), link]));
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        tocLinks.forEach((link) => link.removeAttribute('aria-current'));
-        const link = linkFor.get(entry.target.id);
-        if (link) link.setAttribute('aria-current', 'true');
+      // The current section is the last one whose heading reached the sticky header
+      // (scroll-padding-top is where links from the table of contents stop).
+      const line = (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0) + 8;
+      let current = -1;
+      headings.forEach((heading, index) => {
+        if (heading && heading.getBoundingClientRect().top <= line) current = index;
       });
-    }, { rootMargin: '-15% 0px -70% 0px' });
-    linkFor.forEach((link, id) => {
-      const heading = document.getElementById(id);
-      if (heading) observer.observe(heading);
-    });
+      tocLinks.forEach((link, index) => {
+        if (index === current) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
+    };
+    const schedule = () => { frame = frame || requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
   }
 
   /* Sliders (Swiper is loaded only on pages that use it). */

@@ -16,6 +16,14 @@ Biblioteki aktualizuje się przez podmianę plików w `assets/lib` i numeru wers
 
 Treści strony głównej (hero, zalety, akcesoria, kroki demo, stopka) i dane firmy edytuje się w **Wygląd → Personalizacja → Treść strony xTool**.
 
+## Blog
+
+Lista artykułów jest na stronie o adresie `blog` (szablon `page-blog.php`, stronicowanie `?strona=2`), a artykuły mają adresy `/blog/<slug>/?lang=<język>` (struktura bezpośrednich odnośników `/blog/%postname%/`). Każda wersja językowa jest osobnym wpisem. W edycji wpisu ramka **Język i tłumaczenia** ustawia język i tworzy szkice tłumaczeń z kopią treści oryginału. Każdy język może mieć tylko jedną wersję artykułu, a po trwałym usunięciu oryginału jego rolę przejmuje najstarsze tłumaczenie. Lista, kanał RSS i archiwa pokazują artykuły w języku interfejsu.
+
+Karty produktów w treści wstawia blok „Shortcode” z `[lasery_produkty xtool="<identyfikatory xTool>"]` lub `[lasery_produkty ids="<ID wpisów>"]` (do sześciu produktów, w podanej kolejności). Teksty listy i ramki pod artykułem edytuje się w **Wygląd → Personalizacja → Treść strony xTool**. Motyw nie wyświetla komentarzy, więc są one wyłączone. Treści wieloczęściowe (`<!--nextpage-->`) nie są obsługiwane.
+
+Pierwsze trzy artykuły w pięciu językach tworzy `wp eval-file scripts/seed-blog.php` (okładki w `scripts/blog/covers`). Skrypt pomija istniejące artykuły, także te w koszu, więc nie nadpisuje zmian z panelu.
+
 ## Stan środowiska
 
 - Domena `https://laseryxtool.pl` działa przez HTTPS na WordPressie. Katalog obejmuje urządzenia xTool oraz akcesoria.

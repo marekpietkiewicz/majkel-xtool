@@ -43,6 +43,12 @@ add_action('wp', function () {
 });
 remove_action('wp_head', 'print_emoji_detection_script', 7);
 remove_action('wp_enqueue_scripts', 'wp_enqueue_emoji_styles');
+// Adjacent posts can be in another language.
+remove_action('wp_head', 'adjacent_posts_rel_link_wp_head');
+
+// The theme shows no comments, so none can be posted (this also stops comment spam and trackbacks).
+add_filter('comments_open', '__return_false');
+add_filter('pings_open', '__return_false');
 
 add_action('wp_head', function () {
     $fonts = get_template_directory_uri() . '/assets/fonts/';
@@ -93,6 +99,28 @@ add_filter('post_type_archive_link', function ($url, $post_type) {
     return $post_type === 'lasery_product' ? lasery_xtool_language_url($url) : $url;
 }, 10, 2);
 
+// Pages are translated in place, so each language version is its own canonical URL.
+add_filter('get_canonical_url', function ($url, $post) {
+    if ($post->post_type !== 'page') {
+        return $url;
+    }
+    $url = lasery_xtool_language_url($url);
+    $page = is_page('blog') ? lasery_xtool_blog_listing()[0] : 1;
+    return $page > 1 ? add_query_arg('strona', $page, $url) : $url;
+}, 10, 2);
+
+// One URL per blog listing page: ?strona=1 and pages past the end lead to the first page.
+add_action('template_redirect', function () {
+    if (!is_page('blog') || !isset($_GET['strona'])) {
+        return;
+    }
+    [$page, $posts] = lasery_xtool_blog_listing();
+    if ($page < 2 || $page > $posts->max_num_pages) {
+        wp_safe_redirect(remove_query_arg('strona'), $page < 2 ? 301 : 302);
+        exit;
+    }
+});
+
 /** Description and language alternates for the pages visitors land on. */
 add_action('wp_head', function () {
     $description = '';
@@ -136,10 +164,20 @@ add_action('wp_head', function () {
     }
 });
 
-// Listings show source prices, so the page cache keeps them for at most an hour.
+// Pages with source prices (also product cards inside articles) stay in the page cache for at most an hour.
 add_action('template_redirect', function () {
-    if (is_front_page() || is_post_type_archive('lasery_product')) {
+    if (is_front_page() || is_post_type_archive('lasery_product') || is_singular(['lasery_product', 'post'])) {
         do_action('litespeed_control_set_ttl', HOUR_IN_SECONDS);
+    }
+});
+
+// Post archives and feeds list the articles of the interface language only.
+add_action('pre_get_posts', function ($query) {
+    if (is_admin() || !$query->is_main_query() || $query->is_singular() || $query->is_search() || $query->is_comment_feed() || $query->is_post_type_archive() || !function_exists('lasery_xtool_language_meta_query')) {
+        return;
+    }
+    if ($query->is_home() || $query->is_archive() || $query->is_feed()) {
+        $query->set('meta_query', lasery_xtool_language_meta_query(lasery_xtool_interface_language()));
     }
 });
 
