@@ -34,13 +34,13 @@ $blog = lasery_xtool_blog_url();
             <a class="btn btn-primary primary-nav-cta" href="<?php echo esc_url($home . '#demo'); ?>"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html($demo_label); ?></a>
         </nav>
         <div class="header-actions">
-            <a class="search-toggle" href="<?php echo esc_url(add_query_arg(['s' => '', 'lang' => $current_language], home_url('/'))); ?>" data-search-open aria-keyshortcuts="Control+K Meta+K /">
+            <a class="header-icon" href="<?php echo esc_url(add_query_arg(['s' => '', 'lang' => $current_language], home_url('/'))); ?>" data-search-open aria-keyshortcuts="Control+K Meta+K /">
                 <span class="visually-hidden"><?php esc_html_e('Szukaj', 'lasery-xtool'); ?></span><?php echo lasery_xtool_icon('search'); ?>
             </a>
             <?php $cart = function_exists('lasery_xtool_cart_url') ? lasery_xtool_cart_url($current_language) : ''; ?>
             <?php if ($cart !== '') : ?>
-                <a class="search-toggle cart-link" href="<?php echo esc_url($cart); ?>"<?php if (is_page('koszyk')) : ?> aria-current="page"<?php endif; ?>>
-                    <span class="visually-hidden"><?php esc_html_e('Koszyk', 'lasery-xtool'); ?></span><?php echo lasery_xtool_icon('bag'); ?><span class="cart-count" data-cart-count hidden></span>
+                <a class="header-icon cart-link" href="<?php echo esc_url($cart); ?>"<?php if (is_page('koszyk')) : ?> aria-current="page"<?php endif; ?>>
+                    <span class="visually-hidden"><?php echo esc_html(lasery_xtool_order_texts($current_language)['cart_title']); ?></span><?php echo lasery_xtool_icon('bag'); ?><span class="cart-count" data-cart-count hidden></span>
                 </a>
             <?php endif; ?>
             <details class="lang-menu" data-lang-menu>
