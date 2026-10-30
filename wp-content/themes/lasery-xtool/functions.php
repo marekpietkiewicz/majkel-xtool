@@ -7,6 +7,7 @@ require_once __DIR__ . '/cookie-consent.php';
 require_once __DIR__ . '/privacy-defaults.php';
 require_once __DIR__ . '/customizer.php';
 require_once __DIR__ . '/template-tags.php';
+require_once __DIR__ . '/search-index.php';
 
 add_action('after_setup_theme', function () {
     load_theme_textdomain('lasery-xtool', get_template_directory() . '/languages');

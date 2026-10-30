@@ -12,8 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const LASERY_XTOOL_PRODUCT_TYPE = 'lasery_product';
 const LASERY_XTOOL_SOURCE_ID    = '_lasery_shopify_id';
-const LASERY_XTOOL_MAX_BYTES    = 2 * 1024 * 1024;
+const LASERY_XTOOL_MAX_BYTES    = 4 * 1024 * 1024;
 const LASERY_XTOOL_MAX_PRODUCTS = 500;
+const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
 const LASERY_XTOOL_SCHEMA       = '3';
 
@@ -129,14 +130,13 @@ function lasery_xtool_import_page() {
 		wp_die( esc_html__( 'Brak uprawnień.', 'lasery-xtool' ), '', array( 'response' => 403 ) );
 	}
 	$messages = array(
-		'file'     => 'Nie udało się odczytać pliku JSON. Limit pliku to 2 MB.',
+		'file'     => 'Nie udało się odczytać pliku JSON. Limit pliku to 4 MB.',
 		'format'   => 'Nieprawidłowy format danych. Sprawdź wymagania pliku w dokumentacji wtyczki.',
 		'network'  => 'Nie udało się pobrać produktów. Sprawdź dostępność źródła i spróbuj ponownie.',
 		'paused'   => 'Pobieranie jest wstrzymane po odpowiedzi 429. Wznów je dopiero po ustaniu ograniczenia.',
 		'locked'   => 'Inny import jest w trakcie. Spróbuj ponownie później.',
 		'locklost' => 'Import przerwany: utracono blokadę. Sprawdź szkice i ponów import.',
 		'complete' => 'Import zakończony.',
-		'batch'    => 'Zakończono partię synchronizacji. Pozostałe produkty zostaną sprawdzone w kolejnych przebiegach.',
 		'limit'    => 'Import zakończony. Osiągnięto limit pobierania — w źródle mogą być dalsze produkty.',
 		'incomplete' => 'Nie udało się zsynchronizować części produktów. Sprawdź ich dane źródłowe i ponów próbę.',
 	);
@@ -177,7 +177,7 @@ function lasery_xtool_import_page() {
 				<?php submit_button( 'Wznów pobieranie' ); ?>
 			</form>
 		<?php endif; ?>
-		<p>Ręczne pobranie z xtool.eu obejmuje maksymalnie 500 produktów. Nowe wpisy zostaną zapisane jako szkice.</p>
+		<p>Ręczne pobranie z xtool.eu obejmuje maksymalnie 2000 produktów. Nowe wpisy zostaną zapisane jako szkice.</p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="lasery_xtool_fetch">
 			<?php wp_nonce_field( 'lasery_xtool_fetch' ); ?>
@@ -394,7 +394,7 @@ function lasery_xtool_identity_response( $response ) {
 }
 
 /** Return a complete bounded snapshot, without writes to product records. */
-function lasery_xtool_fetch_source( $target_ids = null, $target_handles = array() ) {
+function lasery_xtool_fetch_source( $target_ids = null ) {
 	if ( get_option( 'lasery_xtool_fetch_paused' ) ) {
 		return new WP_Error( 'paused' );
 	}
@@ -423,36 +423,15 @@ function lasery_xtool_fetch_source( $target_ids = null, $target_handles = array(
 	$products = array();
 	$seen     = array();
 	$result   = 'complete';
-	$handle_errors = array();
 	$fetched_at = time();
-	if ( null !== $remaining && is_array( $target_handles ) ) {
-		foreach ( $target_handles as $id => $handle ) {
-			$id = (string) $id;
-			if ( ! isset( $remaining[ $id ] ) || ! lasery_xtool_valid_source_handle( $handle ) ) {
-				return new WP_Error( 'format' );
-			}
-			$product = lasery_xtool_fetch_known_handle( $id, $handle, $currency, $fetched_at );
-			if ( is_wp_error( $product ) ) {
-				if ( 'paused' === $product->get_error_code() ) {
-					return $product;
-				}
-				$handle_errors[ $id ] = $product->get_error_code();
-				unset( $remaining[ $id ] );
-				continue;
-			}
-			$products[] = $product;
-			unset( $remaining[ $id ] );
-		}
-		if ( ! $remaining ) {
-			return array( 'products' => $products, 'result' => $handle_errors ? 'incomplete' : 'complete', 'handle_errors' => $handle_errors );
-		}
-	}
-	for ( $page = 1; $page <= 5; ++$page ) {
-		$url = add_query_arg( array( 'limit' => 100, 'page' => $page ), 'https://www.xtool.eu/products.json' );
+	// Shopify's largest page; the whole catalogue (about 800 products) takes four requests.
+	$page_size = 250;
+	for ( $page = 1; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
+		$url = add_query_arg( array( 'limit' => $page_size, 'page' => $page ), 'https://www.xtool.eu/products.json' );
 		$response = wp_safe_remote_get(
 			$url,
 			array(
-				'timeout'             => 15,
+				'timeout'             => 30,
 				'redirection'         => 0,
 				'limit_response_size' => LASERY_XTOOL_MAX_BYTES + 1,
 				'decompress' => false,
@@ -471,7 +450,7 @@ function lasery_xtool_fetch_source( $target_ids = null, $target_handles = array(
 			return new WP_Error( 'network' );
 		}
 		$page_products = lasery_xtool_parse_products( $body );
-		if ( false === $page_products || count( $page_products ) > 100 ) {
+		if ( false === $page_products || count( $page_products ) > $page_size ) {
 			return new WP_Error( 'format' );
 		}
 		foreach ( $page_products as $product ) {
@@ -492,19 +471,19 @@ function lasery_xtool_fetch_source( $target_ids = null, $target_handles = array(
 		if ( null !== $remaining && ! $remaining ) {
 			break;
 		}
-		if ( count( $page_products ) < 100 ) {
+		if ( count( $page_products ) < $page_size ) {
 			$result = null !== $remaining ? 'incomplete' : 'complete';
 			break;
 		}
-		if ( 5 === $page ) {
+		if ( LASERY_XTOOL_MAX_PAGES === $page ) {
 			$result = null !== $remaining ? 'incomplete' : 'limit';
 		}
 	}
-	return array( 'products' => $products, 'result' => $handle_errors ? 'incomplete' : $result, 'handle_errors' => $handle_errors );
+	return array( 'products' => $products, 'result' => $result );
 }
 
 
-/** Called by a configured system scheduler; never creates product drafts. */
+/** Called hourly by a system scheduler; refreshes every existing product and never creates drafts. */
 add_action( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_existing' );
 function lasery_xtool_sync_existing() {
 	if ( ! lasery_xtool_lock_import() ) {
@@ -526,44 +505,7 @@ function lasery_xtool_sync_existing() {
 			$targets[ $id ][] = $post_id;
 		}
 	}
-	$handles = array();
-	$unresolved = 0;
-	foreach ( $targets as $id => $post_ids ) {
-		$source_handles = array();
-		$oldest = PHP_INT_MAX;
-		$retry_after = 0;
-		foreach ( $post_ids as $post_id ) {
-			$handle = get_post_meta( $post_id, '_lasery_source_handle', true );
-			if ( lasery_xtool_valid_source_handle( $handle ) ) {
-				$source_handles[ $handle ] = true;
-			}
-			$oldest = min( $oldest, (int) get_post_meta( $post_id, '_lasery_source_updated_at', true ) );
-			$retry_after = max( $retry_after, (int) get_post_meta( $post_id, '_lasery_handle_retry_after', true ) );
-		}
-		if ( 1 === count( $source_handles ) ) {
-			if ( $retry_after > time() ) {
-				unset( $targets[ $id ] );
-				++$unresolved;
-			} else {
-				$handles[ $id ] = array( 'handle' => key( $source_handles ), 'oldest' => $oldest );
-			}
-		} else {
-			foreach ( $post_ids as $post_id ) {
-				update_post_meta( $post_id, '_lasery_source_updated_at', '' );
-			}
-			unset( $targets[ $id ] );
-			++$unresolved;
-		}
-	}
-	uasort( $handles, function ( $a, $b ) { return $a['oldest'] <=> $b['oldest']; } );
-	// One known handle per run keeps each scheduled batch small (JSON + JS).
-	$deferred = array_slice( $handles, 1, null, true );
-	foreach ( $deferred as $id => $item ) {
-		unset( $targets[ $id ] );
-	}
-	$handles = array_slice( $handles, 0, 1, true );
-	$handles = array_map( function ( $item ) { return $item['handle']; }, $handles );
-	$fetched = lasery_xtool_fetch_source( array_keys( $targets ), $handles );
+	$fetched = lasery_xtool_fetch_source( array_keys( $targets ) );
 	if ( is_wp_error( $fetched ) ) {
 		// A failed batch does not invalidate unrelated observed offers. Their
 		// existing freshness limit still applies.
@@ -581,7 +523,6 @@ function lasery_xtool_sync_existing() {
 		}
 		foreach ( $targets[ $product['id'] ] as $post_id ) {
 			if ( lasery_xtool_save_source_data( $post_id, $product ) ) {
-				delete_post_meta( $post_id, '_lasery_handle_retry_after' );
 				++$updated;
 			} else {
 				++$failed;
@@ -593,12 +534,10 @@ function lasery_xtool_sync_existing() {
 	foreach ( $targets as $post_ids ) {
 		foreach ( $post_ids as $post_id ) {
 			update_post_meta( $post_id, '_lasery_source_updated_at', '' );
-			update_post_meta( $post_id, '_lasery_handle_retry_after', (string) ( time() + 6 * HOUR_IN_SECONDS ) );
 			++$failed;
 		}
 	}
-	$sync_result = $unresolved || $failed || 'incomplete' === $fetched['result'] ? 'incomplete' : ( $deferred ? 'batch' : $fetched['result'] );
-	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $sync_result, 'updated' => $updated, 'failed' => $failed ), false );
+	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $fetched['result'], 'updated' => $updated, 'failed' => $failed ), false );
 	lasery_xtool_release_import_lock();
 }
 

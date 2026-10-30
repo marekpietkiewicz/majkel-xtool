@@ -34,6 +34,9 @@ $blog = lasery_xtool_blog_url();
             <a class="btn btn-primary primary-nav-cta" href="<?php echo esc_url($home . '#demo'); ?>"><?php echo lasery_xtool_icon('video'); ?><?php echo esc_html($demo_label); ?></a>
         </nav>
         <div class="header-actions">
+            <a class="search-toggle" href="<?php echo esc_url(add_query_arg(['s' => '', 'lang' => $current_language], home_url('/'))); ?>" data-search-open aria-keyshortcuts="Control+K Meta+K /">
+                <span class="visually-hidden"><?php esc_html_e('Szukaj', 'lasery-xtool'); ?></span><?php echo lasery_xtool_icon('search'); ?>
+            </a>
             <details class="lang-menu" data-lang-menu>
                 <summary aria-label="<?php echo esc_attr(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>">
                     <?php echo lasery_xtool_icon('globe'); ?><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>

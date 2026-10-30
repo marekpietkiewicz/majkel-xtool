@@ -20,6 +20,9 @@ msgstr "xTool-Zubehör"
 msgid "Akcesorium"
 msgstr "Zubehör"
 
+msgid "Artykuły"
+msgstr "Artikel"
+
 msgid "BLOG"
 msgstr "BLOG"
 
@@ -28,6 +31,9 @@ msgstr "Blog"
 
 msgid "Brak treści do wyświetlenia."
 msgstr "Es gibt keine Inhalte zum Anzeigen."
+
+msgid "Brak wyników dla „%s”."
+msgstr "Keine Ergebnisse für „%s“."
 
 msgid "Cena na zapytanie"
 msgstr "Preis auf Anfrage"
@@ -146,6 +152,9 @@ msgstr "Entdecken Sie Geräte zum Gravieren und Schneiden. Wählen Sie ein Model
 msgid "Połącz się online z naszym ekspertem."
 msgstr "Verbinden Sie sich online mit unserem Experten."
 
+msgid "Produkty"
+msgstr "Produkte"
+
 msgid "Produkty xTool"
 msgstr "xTool Produkte"
 
@@ -175,6 +184,12 @@ msgstr "Startseite"
 
 msgid "Strony bloga"
 msgstr "Blogseiten"
+
+msgid "Szukaj"
+msgstr "Suchen"
+
+msgid "Szukaj urządzeń, akcesoriów i artykułów"
+msgstr "Geräte, Zubehör und Artikel suchen"
 
 msgid "Ten model mamy w naszej pracowni. Umów demo online i zobacz go w akcji, zanim zdecydujesz się na zakup."
 msgstr "Dieses Modell steht in unserer Werkstatt. Buchen Sie eine Online-Demo und sehen Sie es in Aktion, bevor Sie sich entscheiden."
@@ -218,11 +233,17 @@ msgstr "Wählen Sie Termin und Gerät im xTool-Kalender."
 msgid "Wyniki wyszukiwania: %s"
 msgstr "Suchergebnisse: %s"
 
+msgid "Wyniki: %d"
+msgstr "Ergebnisse: %d"
+
 msgid "Wyróżnione produkty"
 msgstr "Ausgewählte Produkte"
 
 msgid "Wyślij formularz – potwierdzimy cenę i prześlemy link do płatności."
 msgstr "Senden Sie das Formular – wir bestätigen den Preis und senden einen Zahlungslink."
+
+msgid "Zamknij"
+msgstr "Schließen"
 
 msgid "Zamów"
 msgstr "Bestellen"

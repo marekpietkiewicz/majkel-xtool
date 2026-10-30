@@ -30,6 +30,7 @@ function lasery_xtool_icon($name) {
         'zoom' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4M11 8v6M8 11h6"/>',
         'mail' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         'calendar' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+        'search' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
     ];
     if (!isset($paths[$name])) {
         return '';
