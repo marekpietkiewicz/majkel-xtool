@@ -623,4 +623,288 @@ return [
             'uk' => [ 'Трафарет виготовляється лазером xTool (продається окремо); для P3, S1 і серії F виберіть варіант «For P/F/S/D Series».', 'Кольорові принти вдома за хвилини, а не за дні.', 'Програма з ШІ-дизайном, розділенням кольорів в один клік, автоматичним CMYK-розділенням і растровими фільтрами.', 'Сітки з заводським покриттям і лазерні трафарети передають найдрібніші деталі.', 'Рама й сітка роз’єднуються, тож набір легко взяти із собою.' ],
         ],
     ],
+    // Spare parts and consumables of the site's machines.
+    // P3
+    '9096411119829' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Soczewka lasera do P3', 'de' => 'Laserlinse für P3', 'ru' => 'Линза лазера для P3', 'uk' => 'Лінза лазера для P3' ],
+        'features' => [
+            'pl' => [ 'Zamienna soczewka lasera do xTool P3.', 'Dostępna w wariantach 38 mm i 64 mm.' ],
+            'en' => [ 'Replacement laser lens for the xTool P3.', 'Available in 38 mm and 64 mm versions.' ],
+            'de' => [ 'Ersatz-Laserlinse für den xTool P3.', 'Erhältlich in den Varianten 38 mm und 64 mm.' ],
+            'ru' => [ 'Сменная линза лазера для xTool P3.', 'Доступна в вариантах 38 мм и 64 мм.' ],
+            'uk' => [ 'Змінна лінза лазера для xTool P3.', 'Доступна у варіантах 38 мм і 64 мм.' ],
+        ],
+    ],
+    '9096520171733' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Zestaw luster lasera do P3 (3 szt.)', 'de' => 'Laserspiegel-Set für P3 (3 Stk.)', 'ru' => 'Комплект зеркал лазера для P3 (3 шт.)', 'uk' => 'Комплект дзеркал лазера для P3 (3 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw 3 zamiennych luster lasera do xTool P3.', 'Oryginalna część zamienna marki xTool.' ],
+            'en' => [ 'Set of 3 replacement laser mirrors for the xTool P3.', 'Original xTool spare part.' ],
+            'de' => [ 'Set aus 3 Ersatz-Laserspiegeln für den xTool P3.', 'Original-Ersatzteil von xTool.' ],
+            'ru' => [ 'Комплект из 3 сменных зеркал лазера для xTool P3.', 'Оригинальная запасная часть xTool.' ],
+            'uk' => [ 'Комплект із 3 змінних дзеркал лазера для xTool P3.', 'Оригінальна запасна частина xTool.' ],
+        ],
+    ],
+    '9096554774741' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Okienko lasera do P3', 'de' => 'Laserfenster für P3', 'ru' => 'Окно лазера для P3', 'uk' => 'Вікно лазера для P3' ],
+        'features' => [
+            'pl' => [ 'Zamienne okienko lasera do xTool P3.', 'Oryginalna część zamienna marki xTool.' ],
+            'en' => [ 'Replacement laser window for the xTool P3.', 'Original xTool spare part.' ],
+            'de' => [ 'Ersatz-Laserfenster für den xTool P3.', 'Original-Ersatzteil von xTool.' ],
+            'ru' => [ 'Сменное окно лазера для xTool P3.', 'Оригинальная запасная часть xTool.' ],
+            'uk' => [ 'Змінне вікно лазера для xTool P3.', 'Оригінальна запасна частина xTool.' ],
+        ],
+    ],
+    '9300621918421' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Tuba laserowa 80 W do P3', 'de' => '80-W-Laserröhre für P3', 'ru' => 'Лазерная трубка 80 Вт для P3', 'uk' => 'Лазерна трубка 80 Вт для P3' ],
+        'features' => [
+            'pl' => [ 'Zamienna tuba laserowa 80 W do xTool P3.', 'Według xTool pasuje wyłącznie do P3.' ],
+            'de' => [ 'Ersatz-Laserröhre mit 80 W für den xTool P3.', 'Laut xTool nur mit dem P3 kompatibel.' ],
+            'ru' => [ 'Сменная лазерная трубка 80 Вт для xTool P3.', 'По данным xTool, подходит только для P3.' ],
+            'uk' => [ 'Змінна лазерна трубка 80 Вт для xTool P3.', 'За даними xTool, підходить лише для P3.' ],
+        ],
+    ],
+    '9297388634325' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Tłumik pompy powietrza do P3', 'de' => 'Luftpumpen-Schalldämpfer für P3', 'ru' => 'Глушитель воздушного насоса для P3', 'uk' => 'Глушник повітряного насоса для P3' ],
+        'features' => [
+            'pl' => [ 'Zamienny tłumik pompy powietrza do xTool P3: wycisza pompę i filtruje powietrze.', 'W standardowym wyposażeniu P3 są dwa takie tłumiki.' ],
+            'de' => [ 'Ersatz-Schalldämpfer für die Luftpumpe des xTool P3: dämpft das Pumpengeräusch und filtert die Luft.', 'Der P3 hat standardmäßig zwei davon.' ],
+            'ru' => [ 'Сменный глушитель воздушного насоса для xTool P3: снижает шум насоса и фильтрует воздух.', 'В стандартной комплектации P3 их два.' ],
+            'uk' => [ 'Змінний глушник повітряного насоса для xTool P3: знижує шум насоса й фільтрує повітря.', 'У стандартній комплектації P3 їх два.' ],
+        ],
+    ],
+    '9249425424597' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Filtry pompy powietrza do P3 (5 szt.)', 'de' => 'Luftpumpenfilter für P3 (5 Stk.)', 'ru' => 'Фильтры воздушного насоса для P3 (5 шт.)', 'uk' => 'Фільтри повітряного насоса для P3 (5 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zamienne filtry do pompy powietrza xTool P3 zatrzymują kurz i zanieczyszczenia, chroniąc układ przepływu powietrza.', 'W zestawie 5 filtrów o wymiarach 80 × 80 × 10 mm.' ],
+            'de' => [ 'Ersatzfilter für die Luftpumpe des xTool P3 halten Staub und Verunreinigungen zurück und schützen das Luftsystem.', 'Im Set sind 5 Filter mit je 80 × 80 × 10 mm.' ],
+            'ru' => [ 'Сменные фильтры для воздушного насоса xTool P3 задерживают пыль и загрязнения и защищают систему подачи воздуха.', 'В комплекте 5 фильтров размером 80 × 80 × 10 мм.' ],
+            'uk' => [ 'Змінні фільтри для повітряного насоса xTool P3 затримують пил і забруднення та захищають систему подачі повітря.', 'У комплекті 5 фільтрів розміром 80 × 80 × 10 мм.' ],
+        ],
+    ],
+    '9297388503253' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Lamela podporowa do P3', 'de' => 'Auflagelamelle für P3', 'ru' => 'Опорная ламель для P3', 'uk' => 'Опорна ламель для P3' ],
+        'features' => [
+            'pl' => [ 'Zamienna lamela do xTool P3, na której układa się obrabiany materiał.', 'P3 ma w standardzie 17 lamel, a można zamontować maksymalnie 35.' ],
+            'de' => [ 'Ersatzlamelle für den xTool P3, auf der das Werkstück aufliegt.', 'Der P3 hat standardmäßig 17 Lamellen, maximal lassen sich 35 einsetzen.' ],
+            'ru' => [ 'Сменная ламель для xTool P3, на которую укладывают обрабатываемый материал.', 'В стандартной комплектации P3 17 ламелей, всего можно установить до 35.' ],
+            'uk' => [ 'Змінна ламель для xTool P3, на яку кладуть оброблюваний матеріал.', 'У стандартній комплектації P3 17 ламелей, загалом можна встановити до 35.' ],
+        ],
+    ],
+    '9411018391765' => [
+        'fits' => [ '9089720189141' ],
+        'titles' => [ 'pl' => 'Zestaw lamel do P3 (18 szt.)', 'de' => 'Lamellen-Set für P3 (18 Stk.)', 'ru' => 'Комплект ламелей для P3 (18 шт.)', 'uk' => 'Комплект ламелей для P3 (18 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zapasowy zestaw 18 metalowych lamel do mocowania materiału w xTool P3; P3 ma już 17 lamel w komplecie.', 'Przy cięciu cienkich arkuszy do 1 mm rozłóż wszystkie lamele, by uniknąć drgań i falowania materiału.' ],
+            'de' => [ 'Ersatzset mit 18 Metalllamellen zum Fixieren des Materials im xTool P3; zum Lieferumfang des P3 gehören bereits 17.', 'Beim Schneiden dünner Platten bis 1 mm alle Lamellen auflegen, um Vibrationen und Welligkeit zu vermeiden.' ],
+            'ru' => [ 'Запасной комплект из 18 металлических ламелей для фиксации материала в xTool P3; в комплект P3 уже входят 17.', 'При резке тонких листов толщиной до 1 мм уложите все ламели, чтобы избежать вибрации и волнистости.' ],
+            'uk' => [ 'Запасний комплект із 18 металевих ламелей для фіксації матеріалу в xTool P3; до комплекту P3 вже входять 17.', 'Під час різання тонких листів завтовшки до 1 мм покладіть усі ламелі, щоб уникнути вібрації та хвилястості.' ],
+        ],
+    ],
+
+    // S1
+    '8943383478485' => [
+        'fits' => [ '8169201631445' ],
+        'titles' => [ 'pl' => 'Wentylator głowicy lasera 40 W do S1', 'de' => '40-W-Laserkopf-Lüfter für S1', 'ru' => 'Вентилятор лазерной головки 40 Вт для S1', 'uk' => 'Вентилятор лазерної головки 40 Вт для S1' ],
+        'features' => [
+            'pl' => [ 'Zamienny wentylator głowicy do modułu laserowego 40 W w xTool S1.', 'Chłodzi głowicę lasera podczas pracy i wydłuża jej żywotność.' ],
+            'de' => [ 'Ersatzlüfter für den Laserkopf des 40-W-Lasermoduls im xTool S1.', 'Kühlt den Laserkopf während der Arbeit und verlängert seine Lebensdauer.' ],
+            'ru' => [ 'Сменный вентилятор головки для лазерного модуля 40 Вт в xTool S1.', 'Охлаждает лазерную головку во время работы и продлевает срок её службы.' ],
+            'uk' => [ 'Змінний вентилятор головки для лазерного модуля 40 Вт у xTool S1.', 'Охолоджує лазерну головку під час роботи й подовжує термін її служби.' ],
+        ],
+    ],
+    '8943383380181' => [
+        'fits' => [ '8169201631445' ],
+        'titles' => [ 'pl' => 'Czujnik odległości do S1', 'de' => 'Abstandssensor für S1', 'ru' => 'Датчик расстояния для S1', 'uk' => 'Датчик відстані для S1' ],
+        'features' => [
+            'pl' => [ 'Zamienny czujnik odległości do xTool S1.', 'Odpowiada za funkcję automatycznego pomiaru (Auto-measure) w S1.' ],
+            'de' => [ 'Ersatz-Abstandssensor für den xTool S1.', 'Zuständig für die automatische Messfunktion (Auto-measure) des S1.' ],
+            'ru' => [ 'Сменный датчик расстояния для xTool S1.', 'Отвечает за функцию автоматического измерения (Auto-measure) в S1.' ],
+            'uk' => [ 'Змінний датчик відстані для xTool S1.', 'Відповідає за функцію автоматичного вимірювання (Auto-measure) в S1.' ],
+        ],
+    ],
+    '8943383216341' => [
+        'fits' => [ '8169201631445' ],
+        'titles' => [ 'pl' => 'Główna płyta sterująca do S1', 'de' => 'Hauptsteuerplatine für S1', 'ru' => 'Основная плата управления для S1', 'uk' => 'Основна плата керування для S1' ],
+        'features' => [
+            'pl' => [ 'Zamienna główna płyta sterująca do xTool S1.', 'xTool udostępnia film instruktażowy o jej wymianie w S1.' ],
+            'de' => [ 'Ersatz-Hauptsteuerplatine für den xTool S1.', 'xTool bietet ein Videotutorial zum Austausch im S1 an.' ],
+            'ru' => [ 'Сменная основная плата управления для xTool S1.', 'У xTool есть видеоинструкция по её замене в S1.' ],
+            'uk' => [ 'Змінна основна плата керування для xTool S1.', 'xTool має відеоінструкцію з її заміни в S1.' ],
+        ],
+    ],
+    '8943383281877' => [
+        'fits' => [ '8169201631445', '8523126931669' ],
+        'titles' => [ 'pl' => 'Kabel zestawu Smart Air Assist do S1', 'de' => 'Kabel für das Smart Air Assist Set am S1', 'ru' => 'Кабель комплекта Smart Air Assist для S1', 'uk' => 'Кабель комплекту Smart Air Assist для S1' ],
+        'features' => [
+            'pl' => [ 'Zamienny kabel do zestawu Smart Air Assist w xTool S1.', 'Pasuje też m.in. do S1 Fire Safety Set i przenośnika F1 Ultra Conveyor.' ],
+            'de' => [ 'Ersatzkabel für das Smart Air Assist Set des xTool S1.', 'Passt unter anderem auch zum S1 Fire Safety Set und zum F1 Ultra Conveyor.' ],
+            'ru' => [ 'Сменный кабель для комплекта Smart Air Assist в xTool S1.', 'Подходит также, в частности, к S1 Fire Safety Set и конвейеру F1 Ultra Conveyor.' ],
+            'uk' => [ 'Змінний кабель для комплекту Smart Air Assist у xTool S1.', 'Підходить також, зокрема, до S1 Fire Safety Set і конвеєра F1 Ultra Conveyor.' ],
+        ],
+    ],
+    '8945301913813' => [
+        'fits' => [ '8169201631445' ],
+        'titles' => [ 'pl' => 'Soczewka lasera do S1 i M1 Ultra', 'de' => 'Laserlinse für S1 und M1 Ultra', 'ru' => 'Линза лазера для S1 и M1 Ultra', 'uk' => 'Лінза лазера для S1 і M1 Ultra' ],
+        'features' => [
+            'pl' => [ 'Zamienna soczewka lasera do xTool S1 i M1 Ultra.', 'Zabrudzona soczewka obniża moc lasera; jeśli po czyszczeniu efekty nadal są słabe, soczewkę trzeba wymienić.' ],
+            'de' => [ 'Ersatz-Laserlinse für den xTool S1 und M1 Ultra.', 'Eine verschmutzte Linse senkt die Laserleistung; bleibt das Ergebnis nach der Reinigung schlecht, muss die Linse ersetzt werden.' ],
+            'ru' => [ 'Сменная линза лазера для xTool S1 и M1 Ultra.', 'Загрязнённая линза снижает мощность лазера; если после очистки результат всё ещё плохой, линзу нужно заменить.' ],
+            'uk' => [ 'Змінна лінза лазера для xTool S1 і M1 Ultra.', 'Забруднена лінза знижує потужність лазера; якщо після очищення результат усе ще поганий, лінзу треба замінити.' ],
+        ],
+    ],
+    '7763585990869' => [
+        'fits' => [ '8169201631445' ],
+        'titles' => [ 'pl' => 'Soczewki lasera do S1, M1 Ultra i D1 Pro (2 szt.)', 'de' => 'Laserlinsen für S1, M1 Ultra und D1 Pro (2 Stk.)', 'ru' => 'Линзы лазера для S1, M1 Ultra и D1 Pro (2 шт.)', 'uk' => 'Лінзи лазера для S1, M1 Ultra і D1 Pro (2 шт.)' ],
+        'features' => [
+            'pl' => [ 'Dwie zamienne soczewki lasera do xTool S1, M1 Ultra i D1 Pro.', 'Oryginalna część zamienna marki xTool.' ],
+            'en' => [ 'Two replacement laser lenses for the xTool S1, M1 Ultra and D1 Pro.', 'Original xTool spare part.' ],
+            'de' => [ 'Zwei Ersatz-Laserlinsen für den xTool S1, M1 Ultra und D1 Pro.', 'Original-Ersatzteil von xTool.' ],
+            'ru' => [ 'Две сменные линзы лазера для xTool S1, M1 Ultra и D1 Pro.', 'Оригинальная запасная часть xTool.' ],
+            'uk' => [ 'Дві змінні лінзи лазера для xTool S1, M1 Ultra і D1 Pro.', 'Оригінальна запасна частина xTool.' ],
+        ],
+    ],
+
+    // F series
+    '8943382855893' => [
+        'fits' => [ '8523126931669' ],
+        'titles' => [ 'pl' => 'Adapter rury wyciągowej do F1 Ultra', 'de' => 'Abluftrohr-Adapter für F1 Ultra', 'ru' => 'Адаптер вытяжной трубы для F1 Ultra', 'uk' => 'Адаптер витяжної труби для F1 Ultra' ],
+        'features' => [
+            'pl' => [ 'Zamienny adapter rury wyciągowej do xTool F1 Ultra.', 'Służy do podłączenia F1 Ultra do oczyszczacza powietrza AP2.' ],
+            'de' => [ 'Ersatz-Abluftrohr-Adapter für den xTool F1 Ultra.', 'Verbindet den F1 Ultra mit dem Luftreiniger AP2.' ],
+            'ru' => [ 'Сменный адаптер вытяжной трубы для xTool F1 Ultra.', 'Служит для подключения F1 Ultra к очистителю воздуха AP2.' ],
+            'uk' => [ 'Змінний адаптер витяжної труби для xTool F1 Ultra.', 'Служить для під’єднання F1 Ultra до очищувача повітря AP2.' ],
+        ],
+    ],
+    '9297379557589' => [
+        'fits' => [ '8523126931669' ],
+        'titles' => [ 'pl' => 'Blok pozycjonujący do F1 Ultra', 'de' => 'Positionierblock für F1 Ultra', 'ru' => 'Позиционирующий блок для F1 Ultra', 'uk' => 'Позиціювальний блок для F1 Ultra' ],
+        'features' => [
+            'pl' => [ 'Zamienny blok pozycjonujący do płyt bazowych xTool F1 Ultra używanych w obróbce seryjnej.', 'Unieruchamia obrabiany materiał, by się nie przesuwał.' ],
+            'de' => [ 'Ersatz-Positionierblock für die Bodenplatten des xTool F1 Ultra bei der Serienbearbeitung.', 'Fixiert das Werkstück, damit es nicht verrutscht.' ],
+            'ru' => [ 'Сменный позиционирующий блок для базовых плит xTool F1 Ultra при серийной обработке.', 'Фиксирует обрабатываемый материал, чтобы он не смещался.' ],
+            'uk' => [ 'Змінний позиціювальний блок для базових плит xTool F1 Ultra під час серійної обробки.', 'Фіксує оброблюваний матеріал, щоб він не зміщувався.' ],
+        ],
+    ],
+    '8943382626517' => [
+        'fits' => [ '8523126931669' ],
+        'titles' => [ 'pl' => 'Sterownik z ekranem dotykowym do F1 Ultra', 'de' => 'Touchscreen-Steuerung für F1 Ultra', 'ru' => 'Сенсорный контроллер для F1 Ultra', 'uk' => 'Сенсорний контролер для F1 Ultra' ],
+        'features' => [
+            'pl' => [ 'Zamienny sterownik z ekranem dotykowym do xTool F1 Ultra.', 'Według xTool pasuje wyłącznie do F1 Ultra.' ],
+            'de' => [ 'Ersatz-Touchscreen-Steuerung für den xTool F1 Ultra.', 'Laut xTool nur mit dem F1 Ultra kompatibel.' ],
+            'ru' => [ 'Сменный контроллер с сенсорным экраном для xTool F1 Ultra.', 'По данным xTool, совместим только с F1 Ultra.' ],
+            'uk' => [ 'Змінний контролер із сенсорним екраном для xTool F1 Ultra.', 'За даними xTool, сумісний лише з F1 Ultra.' ],
+        ],
+    ],
+
+    // MetalFab
+    '9098590126293' => [
+        'fits' => [ '8974447804629', '9432562729173' ],
+        'titles' => [ 'pl' => 'Soczewka czyszcząca do akcesorium MaxClean™ (MetalFab)', 'de' => 'Reinigungslinse für den MaxClean™-Aufsatz (MetalFab)', 'ru' => 'Линза для очистки к насадке MaxClean™ (MetalFab)', 'uk' => 'Лінза для очищення до насадки MaxClean™ (MetalFab)' ],
+        'features' => [
+            'pl' => [ 'Zapasowa soczewka czyszcząca, którą trzeba zamontować przy pracy z akcesorium MaxClean™ do xTool MetalFab; jedna jest już w zestawie akcesorium.', 'Różni się od standardowej soczewki ochronnej spawarki laserowej.' ],
+            'de' => [ 'Ersatz-Reinigungslinse, die beim Einsatz des MaxClean™-Aufsatzes für den xTool MetalFab eingesetzt sein muss; eine liegt dem Aufsatz bereits bei.', 'Sie unterscheidet sich von der Standard-Schutzlinse des Laserschweißgeräts.' ],
+            'ru' => [ 'Запасная линза для очистки, которую обязательно устанавливают при работе с насадкой MaxClean™ для xTool MetalFab; одна уже входит в комплект насадки.', 'Отличается от стандартной защитной линзы лазерного сварочного аппарата.' ],
+            'uk' => [ 'Запасна лінза для очищення, яку обов’язково встановлюють під час роботи з насадкою MaxClean™ для xTool MetalFab; одна вже входить до комплекту насадки.', 'Відрізняється від стандартної захисної лінзи лазерного зварювального апарата.' ],
+        ],
+    ],
+    '9297403740373' => [
+        'fits' => [ '8974447804629', '9432562729173' ],
+        'titles' => [ 'pl' => 'Soczewka skupiająca do spawarki laserowej xTool MetalFab', 'de' => 'Fokussierlinse für das xTool MetalFab Laserschweißgerät', 'ru' => 'Фокусирующая линза для лазерного сварочного аппарата xTool MetalFab', 'uk' => 'Фокусувальна лінза для лазерного зварювального апарата xTool MetalFab' ],
+        'features' => [
+            'pl' => [ 'Zamienna soczewka skupiająca do spawarki laserowej xTool MetalFab.', 'Oryginalna część zamienna marki xTool.' ],
+            'de' => [ 'Ersatz-Fokussierlinse für das xTool MetalFab Laserschweißgerät.', 'Original-Ersatzteil von xTool.' ],
+            'ru' => [ 'Сменная фокусирующая линза для лазерного сварочного аппарата xTool MetalFab.', 'Оригинальная запасная часть xTool.' ],
+            'uk' => [ 'Змінна фокусувальна лінза для лазерного зварювального апарата xTool MetalFab.', 'Оригінальна запасна частина xTool.' ],
+        ],
+    ],
+    '9297403609301' => [
+        'fits' => [ '8974447804629', '9432562729173' ],
+        'titles' => [ 'pl' => 'Soczewka ochronna do spawarki laserowej xTool MetalFab', 'de' => 'Schutzlinse für das xTool MetalFab Laserschweißgerät', 'ru' => 'Защитная линза для лазерного сварочного аппарата xTool MetalFab', 'uk' => 'Захисна лінза для лазерного зварювального апарата xTool MetalFab' ],
+        'features' => [
+            'pl' => [ 'Zamienna soczewka ochronna do spawarki laserowej xTool MetalFab, chroniąca soczewkę skupiającą.', 'Jedno urządzenie wymaga dwóch takich soczewek.' ],
+            'de' => [ 'Ersatz-Schutzlinse für das xTool MetalFab Laserschweißgerät; sie schützt die Fokussierlinse.', 'Pro Gerät werden zwei davon benötigt.' ],
+            'ru' => [ 'Сменная защитная линза для лазерного сварочного аппарата xTool MetalFab, защищает фокусирующую линзу.', 'Для одного аппарата нужны две такие линзы.' ],
+            'uk' => [ 'Змінна захисна лінза для лазерного зварювального апарата xTool MetalFab, захищає фокусувальну лінзу.', 'Для одного апарата потрібні дві такі лінзи.' ],
+        ],
+    ],
+    '8987271037141' => [
+        'fits' => [ '8974447804629', '9432562729173' ],
+        'titles' => [ 'pl' => 'Zestaw soczewek ochronnych do xTool MetalFab (10 szt.)', 'de' => 'Schutzlinsen-Set für xTool MetalFab (10 Stk.)', 'ru' => 'Комплект защитных линз для xTool MetalFab (10 шт.)', 'uk' => 'Комплект захисних лінз для xTool MetalFab (10 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zapasowy zestaw 10 soczewek ochronnych do pistoletu spawalniczego xTool MetalFab; spawarka MetalFab ma go już w komplecie.', 'Soczewkę ochronną warto sprawdzić, wyczyścić lub wymienić po 3–6 dniach ciągłej pracy.' ],
+            'de' => [ 'Ersatzset mit 10 Schutzlinsen für die Schweißpistole des xTool MetalFab; beim MetalFab-Laserschweißgerät ist es bereits enthalten.', 'Die Schutzlinse sollte nach 3–6 Tagen Dauerbetrieb geprüft, gereinigt oder ersetzt werden.' ],
+            'ru' => [ 'Запасной комплект из 10 защитных линз для сварочного пистолета xTool MetalFab; в поставку лазерного сварочного аппарата MetalFab он уже входит.', 'Защитную линзу рекомендуется проверять, чистить или менять после 3–6 дней непрерывной работы.' ],
+            'uk' => [ 'Запасний комплект із 10 захисних лінз для зварювального пістолета xTool MetalFab; до постачання лазерного зварювального апарата MetalFab він уже входить.', 'Захисну лінзу варто перевіряти, чистити або замінювати після 3–6 днів безперервної роботи.' ],
+        ],
+    ],
+    '9300621459669' => [
+        'fits' => [ '8974447804629', '9432562729173' ],
+        'titles' => [ 'pl' => 'Dysza do spawania z podawaniem drutu do spawarki xTool MetalFab', 'de' => 'Drahtvorschub-Schweißdüse für das xTool MetalFab Laserschweißgerät', 'ru' => 'Сопло для сварки с подачей проволоки для xTool MetalFab', 'uk' => 'Сопло для зварювання з подаванням дроту для xTool MetalFab' ],
+        'features' => [
+            'pl' => [ 'Zamienna dysza do spawarki laserowej xTool MetalFab.', 'Jest niezbędna przy spawaniu z podawaniem drutu.' ],
+            'de' => [ 'Ersatzdüse für das xTool MetalFab Laserschweißgerät.', 'Beim Schweißen mit Drahtzufuhr ist sie erforderlich.' ],
+            'ru' => [ 'Сменное сопло для лазерного сварочного аппарата xTool MetalFab.', 'Необходимо при сварке с подачей проволоки.' ],
+            'uk' => [ 'Змінне сопло для лазерного зварювального апарата xTool MetalFab.', 'Потрібне під час зварювання з подаванням дроту.' ],
+        ],
+    ],
+    '9300621525205' => [
+        'fits' => [ '8974447804629' ],
+        'titles' => [ 'pl' => 'Głowica tnąca do wycinarki CNC xTool MetalFab', 'de' => 'Schneidkopf für den xTool MetalFab CNC-Schneider', 'ru' => 'Режущая головка для ЧПУ-резака xTool MetalFab', 'uk' => 'Різальна головка для ЧПК-різака xTool MetalFab' ],
+        'features' => [
+            'pl' => [ 'Zamienna głowica tnąca do wycinarki CNC xTool MetalFab.', 'Służy do cięcia blach metalowych.' ],
+            'de' => [ 'Ersatz-Schneidkopf für den xTool MetalFab CNC-Schneider.', 'Zum Schneiden von Metallblechen.' ],
+            'ru' => [ 'Сменная режущая головка для ЧПУ-резака xTool MetalFab.', 'Используется для резки металлических листов.' ],
+            'uk' => [ 'Змінна різальна головка для ЧПК-різака xTool MetalFab.', 'Використовується для різання металевих листів.' ],
+        ],
+    ],
+    '9300621557973' => [
+        'fits' => [ '8974447804629' ],
+        'titles' => [ 'pl' => 'Rdzeń ceramiczny wysokiej częstotliwości do xTool MetalFab', 'de' => 'Hochfrequenz-Keramikkern für xTool MetalFab', 'ru' => 'Высокочастотный керамический сердечник для xTool MetalFab', 'uk' => 'Високочастотне керамічне осердя для xTool MetalFab' ],
+        'features' => [
+            'pl' => [ 'Zamienny rdzeń ceramiczny wysokiej częstotliwości do xTool MetalFab.', 'Używa się go razem z dyszą tnącą SaveGas™.' ],
+            'de' => [ 'Ersatz-Hochfrequenz-Keramikkern für den xTool MetalFab.', 'Wird zusammen mit der SaveGas™-Schneiddüse verwendet.' ],
+            'ru' => [ 'Сменный высокочастотный керамический сердечник для xTool MetalFab.', 'Используется вместе с режущим соплом SaveGas™.' ],
+            'uk' => [ 'Змінне високочастотне керамічне осердя для xTool MetalFab.', 'Використовується разом із різальним соплом SaveGas™.' ],
+        ],
+    ],
+    '8987318255829' => [
+        'fits' => [ '8974447804629' ],
+        'titles' => [ 'pl' => 'Zestaw lamel do wycinarki CNC xTool MetalFab (5 szt.)', 'de' => 'Lamellen-Set für den xTool MetalFab CNC-Schneider (5 Stk.)', 'ru' => 'Комплект ламелей для ЧПУ-резака xTool MetalFab (5 шт.)', 'uk' => 'Комплект ламелей для ЧПК-різака xTool MetalFab (5 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zapasowy zestaw 5 metalowych lamel do mocowania arkuszy w wycinarce CNC xTool MetalFab; wycinarka ma go już w komplecie.', 'Przy cięciu cienkich arkuszy do 1 mm rozłóż wszystkie lamele, by uniknąć drgań i falowania materiału.' ],
+            'de' => [ 'Ersatzset mit 5 Metalllamellen zum Fixieren der Platten im xTool MetalFab CNC-Schneider; beim CNC-Schneider ist es bereits enthalten.', 'Beim Schneiden dünner Platten bis 1 mm alle Lamellen auflegen, um Vibrationen und Welligkeit zu vermeiden.' ],
+            'ru' => [ 'Запасной комплект из 5 металлических ламелей для фиксации листов в ЧПУ-резаке xTool MetalFab; в поставку резака он уже входит.', 'При резке тонких листов толщиной до 1 мм уложите все ламели, чтобы избежать вибрации и волнистости.' ],
+            'uk' => [ 'Запасний комплект із 5 металевих ламелей для фіксації листів у ЧПК-різаку xTool MetalFab; до постачання різака він уже входить.', 'Під час різання тонких листів завтовшки до 1 мм покладіть усі ламелі, щоб уникнути вібрації та хвилястості.' ],
+        ],
+    ],
+
+    // General
+    '8943383445717' => [
+        'fits' => [ '8169201631445', '8523126931669' ],
+        'titles' => [ 'pl' => 'Moduł Bluetooth do xTool AP2 / IF2', 'de' => 'Bluetooth-Modul für xTool AP2 / IF2', 'ru' => 'Модуль Bluetooth для xTool AP2 / IF2', 'uk' => 'Модуль Bluetooth для xTool AP2 / IF2' ],
+        'features' => [
+            'pl' => [ 'Zamienny moduł Bluetooth do oczyszczacza xTool AP2 i wentylatora IF2; umożliwia ich inteligentne współdziałanie z laserem.', 'Według xTool działa z S1, F1 Ultra, M1 Ultra i P2S, ale nie z P2, D1, M1 i F1.' ],
+            'de' => [ 'Ersatz-Bluetooth-Modul für den Luftreiniger xTool AP2 und den Rohrventilator IF2; ermöglicht die intelligente Kopplung mit dem Laser.', 'Laut xTool kompatibel mit S1, F1 Ultra, M1 Ultra und P2S, nicht aber mit P2, D1, M1 und F1.' ],
+            'ru' => [ 'Сменный модуль Bluetooth для очистителя xTool AP2 и канального вентилятора IF2; обеспечивает их интеллектуальную связь с лазером.', 'По данным xTool, совместим с S1, F1 Ultra, M1 Ultra и P2S, но не с P2, D1, M1 и F1.' ],
+            'uk' => [ 'Змінний модуль Bluetooth для очищувача xTool AP2 і канального вентилятора IF2; забезпечує їхню інтелектуальну взаємодію з лазером.', 'За даними xTool, сумісний з S1, F1 Ultra, M1 Ultra і P2S, але не з P2, D1, M1 та F1.' ],
+        ],
+    ],
+    '8151594107093' => [
+        'fits' => [ '8169201631445', '8523126931669' ],
+        'titles' => [ 'pl' => 'Kabel do przystawki obrotowej xTool RA2 Pro (S1, F1 Ultra)', 'de' => 'Kabel für den xTool RA2 Pro Rotationsaufsatz (S1, F1 Ultra)', 'ru' => 'Кабель для ротационной насадки xTool RA2 Pro (S1, F1 Ultra)', 'uk' => 'Кабель для ротаційної насадки xTool RA2 Pro (S1, F1 Ultra)' ],
+        'features' => [
+            'pl' => [ 'Zamienny kabel łączący przystawkę obrotową RA2 Pro z laserami xTool S1, F1, F1 Ultra i M1 Ultra.', 'To inny kabel niż wersja RA2 Pro do M1, D1 Pro i P2.' ],
+            'de' => [ 'Ersatzkabel zur Verbindung des RA2 Pro Rotationsaufsatzes mit den xTool-Lasern S1, F1, F1 Ultra und M1 Ultra.', 'Es unterscheidet sich vom RA2-Pro-Kabel für M1, D1 Pro und P2.' ],
+            'ru' => [ 'Сменный кабель для подключения ротационной насадки RA2 Pro к лазерам xTool S1, F1, F1 Ultra и M1 Ultra.', 'Отличается от кабеля RA2 Pro для M1, D1 Pro и P2.' ],
+            'uk' => [ 'Змінний кабель для під’єднання ротаційної насадки RA2 Pro до лазерів xTool S1, F1, F1 Ultra і M1 Ultra.', 'Відрізняється від кабелю RA2 Pro для M1, D1 Pro і P2.' ],
+        ],
+    ],
 ];
