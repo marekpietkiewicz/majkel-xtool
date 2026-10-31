@@ -49,7 +49,7 @@ return [
                     ] ],
                     [ 'h2', 'Na co jeszcze zwrócić uwagę?' ],
                     [ 'ul', [
-                        'Bezpieczeństwo: zamknięta obudowa klasy 1 i czujniki płomienia ułatwiają pracę w biurze, sklepie czy szkole.',
+                        'Bezpieczeństwo: sprawdź klasę urządzenia wraz z akcesoriami oraz wymagania producenta dotyczące ochrony oczu, miejsca pracy i nadzoru.',
                         'Pole robocze: większy stół skraca czas przy seriach i dużych formatach.',
                         'Odciąg dymu: przy cięciu drewna i akrylu potrzebny jest wyciąg albo oczyszczacz powietrza.',
                         'Kamery i oprogramowanie: podgląd z kamery ułatwia precyzyjne ustawienie projektu na materiale.',
@@ -91,7 +91,7 @@ return [
                     ] ],
                     [ 'h2', 'What else should you look at?' ],
                     [ 'ul', [
-                        'Safety: a Class 1 enclosure and flame detection make it easier to work in an office, shop or school.',
+                        'Safety: check the classification of the device with its accessories and the manufacturer’s requirements for eye protection, location and supervision.',
                         'Working area: a larger bed saves time on batches and large formats.',
                         'Fume extraction: cutting wood and acrylic requires an exhaust or an air purifier.',
                         'Cameras and software: a camera preview makes it easy to position your design precisely on the material.',
@@ -133,7 +133,7 @@ return [
                     ] ],
                     [ 'h2', 'Worauf sollten Sie noch achten?' ],
                     [ 'ul', [
-                        'Sicherheit: Ein Gehäuse der Klasse 1 und Flammenerkennung erleichtern die Arbeit im Büro, im Laden oder in der Schule.',
+                        'Sicherheit: Prüfen Sie die Klasse des Geräts mit Zubehör sowie die Herstellervorgaben zu Augenschutz, Arbeitsort und Aufsicht.',
                         'Arbeitsfläche: Ein größerer Tisch spart Zeit bei Serien und großen Formaten.',
                         'Rauchabsaugung: Beim Schneiden von Holz und Acryl brauchen Sie eine Absaugung oder einen Luftreiniger.',
                         'Kameras und Software: Eine Kameravorschau hilft, das Design präzise auf dem Material zu platzieren.',
@@ -175,7 +175,7 @@ return [
                     ] ],
                     [ 'h2', 'На что ещё обратить внимание?' ],
                     [ 'ul', [
-                        'Безопасность: закрытый корпус класса 1 и датчики пламени упрощают работу в офисе, магазине или школе.',
+                        'Безопасность: проверьте класс устройства с принадлежностями и требования производителя к защите глаз, месту работы и надзору.',
                         'Рабочая область: стол побольше экономит время при серийной работе и больших форматах.',
                         'Вытяжка дыма: при резке дерева и акрила нужна вытяжка или очиститель воздуха.',
                         'Камеры и программа: предпросмотр с камеры помогает точно расположить макет на материале.',
@@ -217,7 +217,7 @@ return [
                     ] ],
                     [ 'h2', 'На що ще звернути увагу?' ],
                     [ 'ul', [
-                        'Безпека: закритий корпус класу 1 і датчики полум’я спрощують роботу в офісі, магазині чи школі.',
+                        'Безпека: перевірте клас пристрою з приладдям та вимоги виробника до захисту очей, місця роботи й нагляду.',
                         'Робоча зона: більший стіл заощаджує час під час серійної роботи та великих форматів.',
                         'Витяжка диму: для різання деревини й акрилу потрібна витяжка або очищувач повітря.',
                         'Камери та програма: попередній перегляд із камери допомагає точно розмістити макет на матеріалі.',

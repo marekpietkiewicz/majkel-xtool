@@ -83,7 +83,7 @@ return [
                 [ 'h3', 'Ile miejsca potrzebuje grawerka laserowa?' ],
                 [ 'p', 'Więcej niż samo pole robocze: dolicz otwartą pokrywę, rurę odciągu lub oczyszczacz i miejsce na materiał. S1 ma pole 608 × 385 mm, P3 stół 914 × 457 mm, a do P3 xTool oferuje nawet mobilny stojak roboczy. Przenośny F2 po pracy schowasz.' ],
                 [ 'h2', 'Zobacz grawerki na żywo przed zakupem' ],
-                [ 'p', 'W naszym zestawie demonstracyjnym są xTool M2, F2 i P3. Umów bezpłatne demo online: pokażemy na żywo grawerowanie i cięcie, opowiemy o odciągu dymu i pomożemy dobrać maszynę do Twojego mieszkania, domu lub pracowni.' ],
+                [ 'p', 'Nasz zestaw demonstracyjny obejmuje M2, F2 i P3. Podczas bezpłatnego demo online omówimy funkcje i wymagania producenta dla wybranej konfiguracji, w tym miejsce pracy i odciąg.' ],
             ],
         ],
         'en' => [
@@ -165,7 +165,7 @@ return [
                 [ 'h3', 'How much space does a laser engraver need?' ],
                 [ 'p', 'More than its working area: allow for the open lid, the exhaust hose or purifier and somewhere to put material. The S1 has a 608 × 385 mm working area and the P3 a 914 × 457 mm bed, and xTool even offers a mobile work stand for the P3. The portable F2 can be put away after work.' ],
                 [ 'h2', 'See the engravers live before you buy' ],
-                [ 'p', 'Our demo set includes the xTool M2, F2 and P3. Book a free online demo: we will show engraving and cutting live, talk you through fume extraction and help you pick the right machine for your flat, house or workshop.' ],
+                [ 'p', 'Our demo set includes the M2, F2 and P3. In a free online demo we can discuss the features and manufacturer’s requirements for the chosen setup, including location and extraction.' ],
             ],
         ],
         'de' => [
@@ -247,7 +247,7 @@ return [
                 [ 'h3', 'Wie viel Platz braucht ein Lasergravierer?' ],
                 [ 'p', 'Mehr als die Arbeitsfläche: Rechnen Sie den geöffneten Deckel, den Abluftschlauch oder Luftreiniger und eine Ablage für Material hinzu. Der S1 hat eine Arbeitsfläche von 608 × 385 mm, der P3 einen Tisch von 914 × 457 mm, und für den P3 bietet xTool sogar ein mobiles Arbeitsgestell an. Den tragbaren F2 räumen Sie nach der Arbeit weg.' ],
                 [ 'h2', 'Lasergravierer vor dem Kauf live sehen' ],
-                [ 'p', 'Zu unserem Demo-Set gehören der xTool M2, F2 und P3. Buchen Sie eine kostenlose Online-Demo: Wir zeigen Gravieren und Schneiden live, sprechen über die Rauchabsaugung und helfen Ihnen, die passende Maschine für Ihre Wohnung, Ihr Haus oder Ihre Werkstatt zu finden.' ],
+                [ 'p', 'Zu unserem Demo-Set gehören M2, F2 und P3. In einer kostenlosen Online-Demo besprechen wir Funktionen und Herstellervorgaben für die gewählte Konfiguration, einschließlich Arbeitsort und Absaugung.' ],
             ],
         ],
         'ru' => [
@@ -329,7 +329,7 @@ return [
                 [ 'h3', 'Сколько места нужно лазерному граверу?' ],
                 [ 'p', 'Больше, чем рабочее поле: учтите открытую крышку, шланг вытяжки или очиститель и место для материалов. У S1 рабочее поле 608 × 385 мм, у P3 стол 914 × 457 мм, а для P3 xTool предлагает даже мобильную рабочую стойку. Портативный F2 после работы можно убрать.' ],
                 [ 'h2', 'Посмотрите граверы вживую до покупки' ],
-                [ 'p', 'В нашем демонстрационном наборе есть xTool M2, F2 и P3. Запишитесь на бесплатное онлайн-демо: мы вживую покажем гравировку и резку, расскажем о вытяжке и поможем подобрать машину для вашей квартиры, дома или мастерской.' ],
+                [ 'p', 'В наш демонстрационный набор входят M2, F2 и P3. На бесплатной онлайн-демонстрации обсудим функции и требования производителя к выбранной конфигурации, включая место работы и вытяжку.' ],
             ],
         ],
         'uk' => [
@@ -411,7 +411,7 @@ return [
                 [ 'h3', 'Скільки місця потрібно лазерному граверу?' ],
                 [ 'p', 'Більше, ніж робоче поле: врахуйте відкриту кришку, шланг витяжки або очищувач і місце для матеріалів. У S1 робоче поле 608 × 385 мм, у P3 стіл 914 × 457 мм, а для P3 xTool пропонує навіть мобільну робочу стійку. Портативний F2 після роботи можна прибрати.' ],
                 [ 'h2', 'Подивіться гравери наживо до покупки' ],
-                [ 'p', 'У нашому демонстраційному наборі є xTool M2, F2 і P3. Запишіться на безкоштовне онлайн-демо: ми наживо покажемо гравіювання й різання, розповімо про витяжку й допоможемо підібрати машину для вашої квартири, будинку чи майстерні.' ],
+                [ 'p', 'До нашого демонстраційного набору входять M2, F2 та P3. На безкоштовній онлайн-демонстрації обговоримо функції та вимоги виробника до обраної конфігурації, зокрема місце роботи й витяжку.' ],
             ],
         ],
     ],

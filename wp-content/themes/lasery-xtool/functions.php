@@ -5,6 +5,8 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/cookie-consent.php';
 require_once __DIR__ . '/privacy-defaults.php';
+require_once __DIR__ . '/safety-info.php';
+require_once __DIR__ . '/purchase-info.php';
 require_once __DIR__ . '/customizer.php';
 require_once __DIR__ . '/template-tags.php';
 require_once __DIR__ . '/search-index.php';
@@ -256,6 +258,10 @@ add_filter('document_title_parts', function ($parts) {
         }
     } elseif (is_privacy_policy()) {
         $parts['title'] = lasery_xtool_privacy_texts($language)['title'];
+    } elseif (is_page('bezpieczenstwo')) {
+        $parts['title'] = lasery_xtool_safety_texts($language)['title'];
+    } elseif (is_page('informacje-o-zakupach')) {
+        $parts['title'] = lasery_xtool_purchase_info_title();
     } elseif (is_search()) {
         $parts['title'] = get_search_query(false) === '' ? __('Szukaj', 'lasery-xtool') : sprintf(__('Wyniki wyszukiwania: %s', 'lasery-xtool'), get_search_query(false));
     } elseif (is_404()) {

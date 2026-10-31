@@ -1,0 +1,81 @@
+// Run only against disposable local WordPress with its test administrator.
+// PLAYWRIGHT_CORE=/path/to/playwright-core WP_TEST_CONTAINER=... WP_TEST_URL=http://localhost:8093 WP_TEST_ADMIN=... WP_TEST_ADMIN_PASSWORD=... node tests/document-editor.cjs
+const { chromium } = require(process.env.PLAYWRIGHT_CORE || 'playwright-core');
+const { execFileSync } = require('node:child_process');
+const assert = require('node:assert/strict');
+const { WP_TEST_CONTAINER: container, WP_TEST_URL: base, WP_TEST_ADMIN: username, WP_TEST_ADMIN_PASSWORD: password } = process.env;
+if (!container || !base || !username || !password || !/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(base)) throw new Error('Disposable local WordPress and test administrator credentials are required');
+const php = script => execFileSync('docker', ['exec', '-i', container, 'php'], {input: `<?php require '/var/www/html/wp-load.php'; ${script}`, encoding:'utf8'}).trim();
+const fixture = JSON.parse(php(`
+ $old = get_option('lasery_xtool_text_overrides', []);
+ $id = wp_insert_post(['post_type'=>'lasery_product','post_status'=>'publish','post_title'=>'Document editor fixture']);
+ update_post_meta($id, LASERY_XTOOL_SOURCE_ID, '9163846877397');
+ echo wp_json_encode(['id'=>$id,'product'=>get_permalink($id),'old'=>base64_encode(serialize($old))]);
+`));
+(async()=>{
+ let browser;
+ try {
+  browser=await chromium.launch({headless:true,...(process.env.CHROME_BIN?{executablePath:process.env.CHROME_BIN}:{})});
+  const context=await browser.newContext();
+  const page=await context.newPage();
+  await page.goto(`${base}/wp-login.php`);
+  await page.locator('#user_login').fill(username);
+  await page.locator('#user_pass').fill(password);
+  await Promise.all([page.waitForURL(/wp-admin/),page.locator('#wp-submit').click()]);
+  const settings=`${base}/wp-admin/edit.php?post_type=lasery_product&page=lasery-xtool-texts&language=pl`;
+  const docs={purchase:`${base}/?pagename=informacje-o-zakupach&lang=pl`, safety:`${base}/?pagename=bezpieczenstwo&lang=pl`};
+  await page.goto(settings);
+  const purchase=page.locator('[name="texts[purchase_info][operator]"]');
+  const safety=page.locator('[name="texts[safety][intro]"]');
+  const xtoolEntity=page.locator('[name="texts[purchase_info][xtool_entity]"]');
+  const xtoolEmail=page.locator('[name="texts[purchase_info][xtool_email]"]');
+  assert.equal(await purchase.count(),1); assert.equal(await safety.count(),1);
+  assert.equal(await xtoolEntity.count(),1); assert.equal(await xtoolEmail.count(),1);
+  const originalPurchase=await purchase.inputValue();
+  const originalSafety=await safety.inputValue();
+  const originalEntity=await xtoolEntity.inputValue();
+  const originalEmail=await xtoolEmail.inputValue();
+  const purchaseValue='Przykładowy tekst operatora dokumentu zakupu.';
+  const safetyValue='Przykładowy tekst wprowadzenia informacji o bezpieczeństwie.';
+  await purchase.fill(purchaseValue); await safety.fill(safetyValue);
+  await xtoolEntity.fill('Testowy operator xTool'); await xtoolEmail.fill('seller@example.test');
+  await Promise.all([page.waitForURL(/result=saved/),page.locator('#submit').click()]);
+  assert.equal(await page.locator('[name="texts[purchase_info][operator]"]').inputValue(),purchaseValue);
+  assert.equal(await page.locator('[name="texts[safety][intro]"]').inputValue(),safetyValue);
+  assert.equal(await page.locator('[name="texts[purchase_info][xtool_entity]"]').inputValue(),'Testowy operator xTool');
+  assert.equal(await page.locator('[name="texts[purchase_info][xtool_email]"]').inputValue(),'seller@example.test');
+  const publicPage=await context.newPage();
+  await publicPage.goto(docs.purchase);
+  assert((await publicPage.locator('main').innerText()).includes(purchaseValue));
+  assert((await publicPage.locator('main').innerText()).includes('Testowy operator xTool'));
+  assert.equal(await publicPage.locator('main a[href="mailto:seller@example.test"]').count(),1);
+  assert((await publicPage.locator('meta[name="description"]').getAttribute('content')).includes(purchaseValue));
+  await publicPage.goto(docs.safety);
+  assert((await publicPage.locator('main').innerText()).includes(safetyValue));
+  assert((await publicPage.locator('meta[name="description"]').getAttribute('content')).includes(safetyValue));
+  await publicPage.goto(`${base}/?pagename=bezpieczenstwo&lang=en`);
+  assert(!(await publicPage.locator('main').innerText()).includes(safetyValue));
+  await publicPage.goto(`${base}/?pagename=informacje-o-zakupach&lang=en`);
+  assert(!(await publicPage.locator('main').innerText()).includes(purchaseValue));
+  assert((await publicPage.locator('main').innerText()).includes('Makeblock Europe B.V.'));
+  const product = new URL(fixture.product); product.searchParams.set('lang','pl');
+  await publicPage.goto(product.href);
+  assert.match(await publicPage.locator('.product-safety').innerText(),/klasy 4/);
+  assert(!(await publicPage.locator('.product-safety').innerText()).includes(safetyValue));
+  await page.goto(settings);
+  await page.locator('[name="texts[purchase_info][operator]"]').fill(originalPurchase);
+  await page.locator('[name="texts[safety][intro]"]').fill(originalSafety);
+  await page.locator('[name="texts[purchase_info][xtool_entity]"]').fill(originalEntity);
+  await page.locator('[name="texts[purchase_info][xtool_email]"]').fill(originalEmail);
+  await Promise.all([page.waitForURL(/result=saved/),page.locator('#submit').click()]);
+  await publicPage.goto(docs.purchase);
+  assert(!(await publicPage.locator('main').innerText()).includes(purchaseValue));
+  await publicPage.goto(docs.safety);
+  assert(!(await publicPage.locator('main').innerText()).includes(safetyValue));
+  console.log('Document editor: save and restore both documents, isolated language/SEO and independent F2 notice passed.');
+  await context.close();
+ } finally {
+  if(browser) await browser.close();
+  php(`update_option('lasery_xtool_text_overrides',unserialize(base64_decode('${fixture.old}'))); wp_delete_post(${fixture.id},true);`);
+ }
+})().catch(error=>{console.error(error);process.exitCode=1;});

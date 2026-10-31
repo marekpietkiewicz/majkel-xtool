@@ -1,0 +1,552 @@
+{
+  "laser-safety:pl": [
+    [
+      "Czy laser do grawerowania jest bezpieczny? Tak, jeśli panujesz nad trzema zagrożeniami: światłem lasera, które może uszkodzić wzrok, dymem z obrabianego materiału i ryzykiem pożaru. Zamknięty laser klasy 1 z odciągiem dymu, używany pod nadzorem, sprawdzi się w domu, sklepie czy szkole. Otwarta maszyna klasy 4 wymaga okularów, osobnego pomieszczenia i dużo większej dyscypliny.",
+      "Laser może uszkodzić wzrok i skórę, a obróbka wytwarza dym i stwarza ryzyko pożaru. Przed użyciem sprawdź klasyfikację całej konfiguracji, wymagania instrukcji i lokalne przepisy. Okulary są tylko jednym z wymaganych środków ochrony."
+    ],
+    [
+      "Klasa 1 nie oznacza słabego lasera. W środku może pracować źródło dużej mocy, ale obudowa z filtrującym okienkiem i czujniki pokrywy nie wypuszczają promieniowania. Przy zamkniętej pokrywie możesz obserwować pracę bez okularów – pod warunkiem, że czujniki działają, a okienko jest całe. Po otwarciu obudowy do serwisu wracasz do warunków klasy 4.",
+      "Klasa 1 określa ograniczenia dostępnego promieniowania w warunkach podanych dla konkretnej konfiguracji, a nie moc źródła wewnątrz. Nie zakładaj, że sama zamknięta pokrywa pozwala zrezygnować z okularów. Gdy osłona, okienko lub blokada są uszkodzone, przerwij pracę i skontaktuj się z serwisem."
+    ],
+    [
+      "W zamkniętych maszynach rolę okularów pełni okienko obudowy. xTool F1 Ultra z laserem światłowodowym 20 W i laserem diodowym ma według producenta zamkniętą obudowę, osłonę chroniącą oczy i zatrzymanie pracy w razie pożaru; te same zabezpieczenia xTool podaje dla F2 Ultra. Okulary przydają się tu głównie przy pracach z otwartą obudową – kiedy dokładnie, podaje instrukcja.",
+      "xTool klasyfikuje F2 i F2 Ultra jako produkty klasy 4. Dla F2 producent zaleca okulary chroniące przed 445 ± 15, 655 ± 5 i 1064 ± 5 nm także przy zamkniętej osłonie; dobierz odpowiednie OD i LB według instrukcji. Wybór ochrony i środki dla F2 Ultra zależą od instrukcji wersji i konfiguracji. Okulary nie zastępują osłony, szkoleń ani kontroli dostępu. F2 Ultra UV występuje w różnych wersjach, dlatego sprawdź oznaczenie konkretnego urządzenia."
+    ],
+    [
+      "Tak, jeśli to zamknięta maszyna klasy 1, dym jest odprowadzany na zewnątrz lub filtrowany, a ktoś pilnuje pracy. Otwarty laser klasy 4 w mieszkaniu wymaga okularów dla wszystkich obecnych i osobnego pomieszczenia.",
+      "To zależy od urządzenia, konfiguracji, miejsca i lokalnych przepisów. Sprawdź wymagania producenta dotyczące użytkowania i odciągu. xTool przeznacza F2 Ultra do zastosowań profesjonalnych i zabrania używania jej w miejscach mieszkalnych i publicznych oraz przy dzieciach lub osobach nieprzeszkolonych."
+    ],
+    [
+      "Przy maszynie klasy 1 z zamkniętą pokrywą i sprawnymi czujnikami zwykle nie, bo chroni Cię obudowa z filtrującym okienkiem. Okulary dobrane do długości fali są potrzebne przy otwartej obudowie lub uszkodzonym okienku – szczegóły podaje instrukcja.",
+      "Sprawdź instrukcję konkretnego modelu i akcesoriów; zamknięta pokrywa nie oznacza automatycznie, że okulary są zbędne. F2 wymaga okularów zgodnie z zaleceniami xTool. Jeśli okienko, osłona lub blokada są uszkodzone, nie uruchamiaj urządzenia i skontaktuj się z serwisem."
+    ],
+    [
+      "Nigdy nie tnij PVC, winylu, sztucznej skóry z PVC ani innych tworzyw z chlorem lub fluorem, np. PTFE. Unikaj poliwęglanu, a ABS co najwyżej lekko graweruj przy dobrym odciągu. Materiałów o nieznanym składzie nie obrabiaj wcale.",
+      "Nie obrabiaj PVC, winylu zawierającego PVC ani innych materiałów zawierających chlor lub fluor, np. PTFE. Poliwęglanu unikaj. ABS może się topić, palić i wydzielać niebezpieczne gazy: nie obrabiaj go bez potwierdzenia producenta maszyny i materiału oraz odpowiedniego odciągu. Nie obrabiaj materiałów o nieznanym składzie."
+    ],
+    [
+      "Obudowę, osłony i odciąg najłatwiej ocenić, gdy zobaczysz je w działaniu. Podczas bezpłatnego demo online pokażemy maszyny z naszego zestawu demonstracyjnego, m.in. P3 i F2 Ultra, i doradzimy, jak przygotować bezpieczne stanowisko w domu, firmie czy szkole.",
+      "Podczas bezpłatnego demo online pokażemy wybrane maszyny z zestawu demonstracyjnego i omówimy wymagania producenta dotyczące bezpieczeństwa oraz konfiguracji stanowiska."
+    ],
+    [
+      "ABS – tylko ostrożnie: topi się, mocno dymi, a dym może zawierać cyjanowodór. Co najwyżej lekki grawer przy sprawnym odciągu, jeśli instrukcja na to pozwala.",
+      "ABS może się topić, palić i wydzielać niebezpieczne gazy. Nie obrabiaj go bez potwierdzenia producenta maszyny i materiału oraz odpowiedniego odciągu."
+    ],
+    [
+      "Zamknięta pokrywa; przy otwartej obudowie okulary dobrane do długości fali i OD",
+      "Stosuj osłonę i okulary zgodnie z instrukcją konkretnego modelu; przerwij pracę przy uszkodzeniu"
+    ],
+    [
+      "Klasa 1 w S1 i X1, zatrzymanie po otwarciu pokrywy w S1, osłona chroniąca oczy w F1 Ultra i F2 Ultra",
+      "Sprawdź klasę urządzenia z używanymi akcesoriami w instrukcji producenta"
+    ],
+    [
+      "Bez PVC, winylu, PTFE i poliwęglanu; ABS tylko ostrożnie",
+      "Bez PVC i PTFE; ABS tylko po potwierdzeniu producentów"
+    ],
+    [
+      "Rozsądną podstawą jest zamknięta maszyna klasy 1, nad którą kontrolę ma dorosły. Pomaga kilka prostych zasad:",
+      "W placówce edukacyjnej stosuj zasady BHP i wymagania instrukcji konkretnego modelu oraz konfiguracji. Dostęp i obsługę ogranicz do uprawnionych, przeszkolonych osób."
+    ],
+    [
+      "Tak, pod nadzorem przeszkolonego dorosłego, najlepiej na zamkniętej maszynie klasy 1 z blokadą na kluczyk i przyciskiem awaryjnym. Uczniowie powinni znać listę dozwolonych materiałów i wiedzieć, co robić, gdy pojawi się płomień. Resztę określają zasady BHP szkoły i instrukcja.",
+      "Nie zakładaj, że sam nadzór dorosłego wystarcza. Wymagania zależą od modelu, akcesoriów, wieku użytkownika i zasad placówki. Przykładowo instrukcja xTool S1 z podstawą podwyższającą wymaga uniemożliwienia dostępu dzieciom i osobom nieprzeszkolonym."
+    ],
+    [
+      "Młodsze dzieci obserwują, starsi uczniowie pracują pod nadzorem przeszkolonej osoby.",
+      "Nie dopuszczaj osób nieuprawnionych; dostęp dzieci sprawdź w instrukcji konkretnego urządzenia."
+    ]
+  ],
+  "laser-safety:en": [
+    [
+      "Is a laser engraver safe? Yes, as long as you control three hazards: laser light that can damage your eyes, smoke from the material you are working on, and the risk of fire. An enclosed Class 1 laser with fume extraction, used under supervision, works well at home, in a shop or at a school. An open-frame Class 4 machine calls for safety glasses, a separate room and far more discipline.",
+      "Lasers can injure eyes and skin, while processing generates fumes and a fire risk. Before use, check the classification of the complete setup, the manual and local rules. Safety glasses are only one of the necessary controls."
+    ],
+    [
+      "Class 1 does not mean a weak laser. A high-power source may be working inside, but the enclosure with its filtering window and lid sensors keeps the radiation in. With the lid closed you can watch the job without glasses – provided the sensors work and the window is intact. Open the enclosure for servicing and you are back to Class 4 conditions.",
+      "Class 1 describes accessible radiation limits under the conditions specified for a particular setup, not the power of the source inside. Do not assume a closed lid alone removes the need for eyewear. If the cover, window or interlock is damaged, stop using the machine and contact service."
+    ],
+    [
+      "In enclosed machines, the window in the enclosure does the job of the glasses. According to xTool, the F1 Ultra with a 20 W fibre laser and a diode laser has an enclosed cover, an eye-protection cover and a fire safety stop; xTool lists the same features for the F2 Ultra. Glasses are mainly needed for work with the enclosure open – the manual tells you when.",
+      "xTool classifies the F2 and F2 Ultra as Class 4 products. For the F2, xTool recommends eyewear protecting against 445 ± 15, 655 ± 5 and 1064 ± 5 nm even with the cover closed; select suitable OD and LB ratings according to the manual. Protection for the F2 Ultra depends on the manual for its version and setup. Glasses do not replace an enclosure, training or access controls. The F2 Ultra UV comes in different versions, so check the label of your device."
+    ],
+    [
+      "Yes, if it is an enclosed Class 1 machine, the smoke is ducted outside or filtered, and someone keeps an eye on the job. An open Class 4 laser in a flat requires glasses for everyone present and a separate room.",
+      "It depends on the device, setup, location and local rules. Check the manufacturer’s requirements for use and extraction. xTool intends the F2 Ultra for professional use and says not to use it in residential or public places, or around children or untrained people."
+    ],
+    [
+      "With a Class 1 machine, the lid closed and the sensors working, usually not – the enclosure with its filtering window protects you. Glasses matched to the wavelength are needed with the enclosure open or the window damaged; your manual gives the details.",
+      "Check the manual for your model and accessories; a closed lid does not automatically make glasses unnecessary. Follow xTool’s eyewear guidance for the F2. If the window, cover or interlock is damaged, do not operate the machine and contact service."
+    ],
+    [
+      "Never cut PVC, vinyl, PVC faux leather or other plastics containing chlorine or fluorine, such as PTFE. Avoid polycarbonate, and engrave ABS lightly at most, with good extraction. Don’t process materials of unknown composition at all.",
+      "Do not process PVC, vinyl containing PVC or other chlorine- or fluorine-containing materials such as PTFE. Avoid polycarbonate. ABS can melt, burn and release hazardous gases: do not process it without confirmation from the machine and material manufacturers and suitable extraction. Never process materials of unknown composition."
+    ],
+    [
+      "Enclosures, covers and extraction are easiest to judge when you see them in action. In a free online demo we show the machines from our demo set, including the P3 and F2 Ultra, and help you plan a safe setup at home, at work or at school.",
+      "In a free online demo we can show selected machines from our demo set and discuss the manufacturer’s safety and workspace requirements for the setup."
+    ],
+    [
+      "ABS – only with care: it melts, smokes heavily, and the smoke can contain hydrogen cyanide. At most a light engraving with strong extraction, if the manual allows it.",
+      "ABS can melt, burn and release hazardous gases. Do not process it without confirmation from the machine and material manufacturers and suitable extraction."
+    ],
+    [
+      "Keep the lid closed; with the enclosure open, wear glasses matched to the wavelength and OD",
+      "Use the enclosure and eyewear as specified for the model; stop work if damaged"
+    ],
+    [
+      "Class 1 on the S1 and X1, lid-open stop on the S1, eye-protection cover on the F1 Ultra and F2 Ultra",
+      "Check the classification of the device with its accessories in the manufacturer’s instructions"
+    ],
+    [
+      "No PVC, vinyl, PTFE or polycarbonate; ABS only with care",
+      "No PVC or PTFE; ABS only with manufacturer confirmation"
+    ],
+    [
+      "A sensible baseline is an enclosed Class 1 machine that an adult controls. A few simple rules help:",
+      "In an educational setting, follow workplace safety rules and the manual for the exact model and setup. Restrict access and operation to authorised, trained people."
+    ],
+    [
+      "Yes, under the supervision of a trained adult, ideally on an enclosed Class 1 machine with a key lock and an emergency stop. Students should know the list of approved materials and what to do if a flame appears. The school’s health and safety rules and the manual cover the rest.",
+      "Do not assume adult supervision alone is sufficient. Requirements depend on the model, accessories, user age and the institution’s rules. For example, the xTool S1 instructions for use with the riser base require preventing access by children and untrained users."
+    ],
+    [
+      "Younger children watch; older students operate the machine under the supervision of a trained person.",
+      "Keep unauthorised people away; check the specific device manual for rules on children’s access."
+    ]
+  ],
+  "laser-safety:de": [
+    [
+      "Ist ein Lasergravierer gefährlich? Nicht, wenn Sie drei Risiken im Griff haben: Laserlicht, das die Augen schädigen kann, Rauch aus dem bearbeiteten Material und Brandgefahr. Ein geschlossener Laser der Klasse 1 mit Rauchabsaugung, der unter Aufsicht läuft, eignet sich für Zuhause, Laden oder Schule. Eine offene Maschine der Klasse 4 erfordert Laserschutzbrillen, einen eigenen Raum und deutlich mehr Disziplin.",
+      "Laser können Augen und Haut verletzen; bei der Bearbeitung entstehen Rauch und Brandgefahr. Prüfen Sie vor Gebrauch die Klassifizierung der gesamten Konfiguration, die Anleitung und örtliche Vorschriften. Eine Schutzbrille ist nur eine der erforderlichen Maßnahmen."
+    ],
+    [
+      "Klasse 1 heißt nicht schwacher Laser. Im Inneren kann eine leistungsstarke Quelle arbeiten, doch das Gehäuse mit Filterfenster und die Deckelsensoren lassen die Strahlung nicht nach außen. Bei geschlossenem Deckel können Sie die Arbeit ohne Brille beobachten – vorausgesetzt, die Sensoren funktionieren und das Fenster ist unbeschädigt. Wird das Gehäuse zur Wartung geöffnet, gelten wieder die Bedingungen der Klasse 4.",
+      "Klasse 1 beschreibt Grenzwerte der zugänglichen Strahlung unter den für die konkrete Konfiguration angegebenen Bedingungen, nicht die Leistung der Quelle im Inneren. Ein geschlossener Deckel allein macht eine Schutzbrille nicht automatisch überflüssig. Bei beschädigter Abdeckung, Scheibe oder Verriegelung Arbeit stoppen und den Service kontaktieren."
+    ],
+    [
+      "Bei geschlossenen Maschinen übernimmt das Gehäusefenster die Aufgabe der Brille. Laut xTool hat der F1 Ultra mit 20-W-Faserlaser und Diodenlaser eine geschlossene Abdeckung, eine Augenschutzabdeckung und einen Brandschutz-Stopp; dieselben Merkmale nennt xTool für den F2 Ultra. Eine Brille brauchen Sie hier vor allem bei Arbeiten mit geöffnetem Gehäuse – wann genau, steht in der Anleitung.",
+      "xTool stuft F2 und F2 Ultra als Produkte der Klasse 4 ein. Für den F2 empfiehlt der Hersteller auch bei geschlossener Abdeckung eine Schutzbrille gegen 445 ± 15, 655 ± 5 und 1064 ± 5 nm; wählen Sie passende OD- und LB-Werte gemäß Anleitung. Beim F2 Ultra richten sich Schutz und Maßnahmen nach der Anleitung der jeweiligen Version und Konfiguration. Eine Brille ersetzt weder Abdeckung noch Schulung oder Zugangskontrolle. Den F2 Ultra UV gibt es in verschiedenen Versionen; prüfen Sie die Kennzeichnung Ihres Geräts."
+    ],
+    [
+      "Ja, wenn es eine geschlossene Maschine der Klasse 1 ist, der Rauch nach außen abgeführt oder gefiltert wird und jemand die Arbeit beaufsichtigt. Ein offener Laser der Klasse 4 in der Wohnung erfordert Schutzbrillen für alle Anwesenden und einen eigenen Raum.",
+      "Das hängt vom Gerät, der Konfiguration, dem Ort und den örtlichen Vorschriften ab. Prüfen Sie die Herstellerangaben zu Betrieb und Absaugung. xTool bestimmt den F2 Ultra für den professionellen Einsatz und untersagt die Nutzung in Wohn- und öffentlichen Bereichen sowie in Anwesenheit von Kindern oder ungeschulten Personen."
+    ],
+    [
+      "Bei einer Maschine der Klasse 1 mit geschlossenem Deckel und funktionierenden Sensoren in der Regel nicht – das Gehäuse mit Filterfenster schützt Sie. Eine Brille passend zur Wellenlänge brauchen Sie bei geöffnetem Gehäuse oder beschädigtem Fenster; Einzelheiten nennt die Anleitung.",
+      "Prüfen Sie die Anleitung Ihres Modells und Zubehörs; ein geschlossener Deckel macht eine Brille nicht automatisch entbehrlich. Beachten Sie beim F2 die Schutzbrillenhinweise von xTool. Sind Scheibe, Abdeckung oder Verriegelung beschädigt, nehmen Sie das Gerät nicht in Betrieb und kontaktieren Sie den Service."
+    ],
+    [
+      "Schneiden Sie nie PVC, Vinyl, PVC-Kunstleder oder andere chlor- oder fluorhaltige Kunststoffe wie PTFE. Meiden Sie Polycarbonat, und gravieren Sie ABS höchstens leicht mit guter Absaugung. Materialien unbekannter Zusammensetzung bearbeiten Sie gar nicht.",
+      "Bearbeiten Sie kein PVC, PVC-haltiges Vinyl oder andere chlor- oder fluorhaltige Materialien wie PTFE. Meiden Sie Polycarbonat. ABS kann schmelzen, brennen und gefährliche Gase freisetzen: Bearbeiten Sie es nicht ohne Bestätigung von Maschinen- und Materialhersteller und geeignete Absaugung. Materialien unbekannter Zusammensetzung nicht bearbeiten."
+    ],
+    [
+      "Gehäuse, Abdeckungen und Absaugung beurteilen Sie am besten, wenn Sie sie in Aktion sehen. In einer kostenlosen Online-Demo zeigen wir die Maschinen aus unserem Demo-Set, darunter P3 und F2 Ultra, und helfen Ihnen, einen sicheren Arbeitsplatz zu Hause, im Betrieb oder in der Schule zu planen.",
+      "In einer kostenlosen Online-Demo zeigen wir ausgewählte Geräte aus unserem Demo-Set und besprechen die Sicherheits- und Arbeitsplatzanforderungen des Herstellers für die jeweilige Konfiguration."
+    ],
+    [
+      "ABS – nur mit Vorsicht: Es schmilzt, qualmt stark, und der Rauch kann Blausäure (Cyanwasserstoff) enthalten. Höchstens eine leichte Gravur mit kräftiger Absaugung, wenn die Anleitung es erlaubt.",
+      "ABS kann schmelzen, brennen und gefährliche Gase freisetzen. Nicht ohne Bestätigung von Maschinen- und Materialhersteller und geeignete Absaugung bearbeiten."
+    ],
+    [
+      "Deckel geschlossen halten; bei offenem Gehäuse Brille passend zu Wellenlänge und OD",
+      "Abdeckung und Brille laut Modellanleitung verwenden; bei Schäden Arbeit stoppen"
+    ],
+    [
+      "Klasse 1 bei S1 und X1, Stopp beim Öffnen des Deckels beim S1, Augenschutzabdeckung bei F1 Ultra und F2 Ultra",
+      "Klasse des Geräts mit Zubehör in der Herstelleranleitung prüfen"
+    ],
+    [
+      "Kein PVC, Vinyl, PTFE oder Polycarbonat; ABS nur mit Vorsicht",
+      "Kein PVC oder PTFE; ABS nur mit Herstellerbestätigung"
+    ],
+    [
+      "Eine sinnvolle Grundlage ist eine geschlossene Maschine der Klasse 1, die ein Erwachsener kontrolliert. Einige einfache Regeln helfen:",
+      "Befolgen Sie in Bildungseinrichtungen die Arbeitsschutzregeln und die Anleitung des konkreten Modells und Aufbaus. Beschränken Sie Zugang und Bedienung auf befugte, geschulte Personen."
+    ],
+    [
+      "Ja, unter Aufsicht eines geschulten Erwachsenen, am besten an einer geschlossenen Maschine der Klasse 1 mit Schlüsselschalter und Not-Aus. Schüler sollten die Liste erlaubter Materialien kennen und wissen, was bei einer Flamme zu tun ist. Den Rest regeln die Arbeitsschutzvorgaben der Schule und die Anleitung.",
+      "Gehen Sie nicht davon aus, dass die Aufsicht eines Erwachsenen allein genügt. Die Anforderungen hängen von Modell, Zubehör, Alter und Regeln der Einrichtung ab. Beispielsweise verlangt xTool für den S1 mit Riser Base, den Zugang für Kinder und ungeschulte Personen zu verhindern."
+    ],
+    [
+      "Jüngere Kinder schauen zu, ältere Schüler arbeiten unter Aufsicht einer geschulten Person.",
+      "Unbefugte fernhalten; die Regeln für den Zugang von Kindern in der jeweiligen Geräteanleitung prüfen."
+    ]
+  ],
+  "laser-safety:ru": [
+    [
+      "Безопасен ли лазерный гравер? Да, если вы контролируете три риска: лазерное излучение, которое может повредить зрение, дым от обрабатываемого материала и опасность пожара. Закрытый лазер класса 1 с вытяжкой, работающий под присмотром, подойдёт для дома, магазина или школы. Открытая машина класса 4 требует защитных очков, отдельного помещения и гораздо большей дисциплины.",
+      "Лазер может повредить глаза и кожу, а при обработке возникают дым и риск пожара. Перед работой проверьте класс всей конфигурации, инструкцию и местные правила. Очки — лишь одна из необходимых мер защиты."
+    ],
+    [
+      "Класс 1 не означает слабый лазер. Внутри может работать мощный источник, но корпус с фильтрующим окном и датчики крышки не выпускают излучение наружу. При закрытой крышке можно наблюдать за работой без очков — при условии, что датчики исправны, а окно цело. При открытии корпуса для обслуживания вы снова оказываетесь в условиях класса 4.",
+      "Класс 1 определяет пределы доступного излучения при условиях, указанных для конкретной конфигурации, а не мощность источника внутри. Закрытая крышка сама по себе не означает, что очки не нужны. При повреждении корпуса, окна или блокировки прекратите работу и обратитесь в сервис."
+    ],
+    [
+      "В закрытых машинах роль очков выполняет окно корпуса. По данным xTool, у F1 Ultra с волоконным лазером 20 Вт и диодным лазером есть закрытый корпус, защитный экран для глаз и остановка при возгорании; те же функции xTool указывает для F2 Ultra. Очки здесь нужны в основном при работе с открытым корпусом — когда именно, сказано в инструкции.",
+      "xTool относит F2 и F2 Ultra к изделиям класса 4. Для F2 производитель рекомендует очки, защищающие от излучения 445 ± 15, 655 ± 5 и 1064 ± 5 нм, даже при закрытом кожухе; подбирайте уровни OD и LB по инструкции. Защита для F2 Ultra зависит от инструкции конкретной версии и конфигурации. Очки не заменяют кожух, обучение и контроль доступа. F2 Ultra UV выпускается в разных версиях; проверьте маркировку устройства."
+    ],
+    [
+      "Да, если это закрытая машина класса 1, дым выводится на улицу или фильтруется, а за работой кто-то присматривает. Открытый лазер класса 4 в квартире требует очков для всех присутствующих и отдельного помещения.",
+      "Это зависит от устройства, конфигурации, помещения и местных правил. Проверьте требования производителя к работе и вытяжке. xTool предназначает F2 Ultra для профессионального применения и запрещает использовать его в жилых и общественных местах, рядом с детьми или неподготовленными людьми."
+    ],
+    [
+      "С машиной класса 1, закрытой крышкой и исправными датчиками обычно нет — вас защищает корпус с фильтрующим окном. Очки под нужную длину волны нужны при открытом корпусе или повреждённом окне; подробности есть в инструкции.",
+      "Проверьте инструкцию к своей модели и принадлежностям: закрытая крышка не означает автоматически, что очки не нужны. Для F2 следуйте требованиям xTool к очкам. При повреждении окна, корпуса или блокировки не включайте устройство и обратитесь в сервис."
+    ],
+    [
+      "Никогда не режьте ПВХ, винил, искусственную кожу из ПВХ и другие пластики с хлором или фтором, например ПТФЭ. Избегайте поликарбоната, а ABS в лучшем случае слегка гравируйте при хорошей вытяжке. Материалы неизвестного состава не обрабатывайте вовсе.",
+      "Не обрабатывайте ПВХ, винил с ПВХ и другие материалы с хлором или фтором, например PTFE. Избегайте поликарбоната. ABS может плавиться, гореть и выделять опасные газы: не обрабатывайте его без подтверждения производителей машины и материала и подходящей вытяжки. Не обрабатывайте материалы неизвестного состава."
+    ],
+    [
+      "Корпус, защитные экраны и вытяжку проще всего оценить, когда видишь их в действии. На бесплатном онлайн-демо мы покажем машины из нашего демонстрационного набора, в том числе P3 и F2 Ultra, и поможем спланировать безопасное рабочее место дома, на работе или в школе.",
+      "На бесплатной онлайн-демонстрации покажем выбранные машины из нашего набора и обсудим требования производителя к безопасности и рабочему месту для конкретной конфигурации."
+    ],
+    [
+      "ABS — только осторожно: он плавится, сильно дымит, а в дыме может быть цианистый водород. В лучшем случае лёгкая гравировка при мощной вытяжке, если это допускает инструкция.",
+      "ABS может плавиться, гореть и выделять опасные газы. Не обрабатывайте его без подтверждения производителей машины и материала и подходящей вытяжки."
+    ],
+    [
+      "Закрытая крышка; при открытом корпусе — очки под длину волны и OD",
+      "Используйте кожух и очки по инструкции к модели; при повреждении прекратите работу"
+    ],
+    [
+      "Класс 1 у S1 и X1, остановка при открытии крышки у S1, защитный экран для глаз у F1 Ultra и F2 Ultra",
+      "Проверьте класс устройства с принадлежностями в инструкции производителя"
+    ],
+    [
+      "Без ПВХ, винила, ПТФЭ и поликарбоната; ABS — осторожно",
+      "Без ПВХ и ПТФЭ; ABS только с подтверждением производителей"
+    ],
+    [
+      "Разумная основа — закрытая машина класса 1 под контролем взрослого. Помогут несколько простых правил:",
+      "В учебном заведении соблюдайте правила охраны труда и инструкцию к конкретной модели и конфигурации. Допускайте к устройству и работе только уполномоченных обученных людей."
+    ],
+    [
+      "Да, под присмотром обученного взрослого, лучше всего на закрытой машине класса 1 с блокировкой ключом и кнопкой аварийной остановки. Ученики должны знать список разрешённых материалов и что делать, если появилось пламя. Остальное определяют правила охраны труда школы и инструкция.",
+      "Не считайте, что одного присмотра взрослого достаточно. Требования зависят от модели, принадлежностей, возраста и правил учреждения. Например, инструкция xTool S1 с повышающим основанием требует не допускать детей и неподготовленных людей к устройству."
+    ],
+    [
+      "Младшие дети наблюдают, старшие ученики работают под присмотром обученного взрослого.",
+      "Не допускайте посторонних; правила доступа детей проверьте в инструкции конкретного устройства."
+    ]
+  ],
+  "laser-safety:uk": [
+    [
+      "Чи безпечний лазерний гравер? Так, якщо ви контролюєте три ризики: лазерне випромінювання, що може пошкодити зір, дим від оброблюваного матеріалу та небезпеку пожежі. Закритий лазер класу 1 з витяжкою, що працює під наглядом, підійде для дому, магазину чи школи. Відкрита машина класу 4 потребує захисних окулярів, окремого приміщення та значно більшої дисципліни.",
+      "Лазер може пошкодити очі та шкіру, а під час обробки виникають дим і ризик пожежі. Перед роботою перевірте клас усієї конфігурації, інструкцію та місцеві правила. Окуляри — лише один із необхідних заходів захисту."
+    ],
+    [
+      "Клас 1 не означає слабкий лазер. Усередині може працювати потужне джерело, але корпус із фільтрувальним вікном і датчики кришки не випускають випромінювання назовні. За закритої кришки можна спостерігати за роботою без окулярів — за умови, що датчики справні, а вікно ціле. Після відкриття корпусу для обслуговування ви знову опиняєтеся в умовах класу 4.",
+      "Клас 1 визначає межі доступного випромінювання за умов, зазначених для конкретної конфігурації, а не потужність джерела всередині. Закрита кришка сама по собі не означає, що окуляри не потрібні. У разі пошкодження кожуха, вікна або блокування припиніть роботу та зверніться до сервісу."
+    ],
+    [
+      "У закритих машинах роль окулярів виконує вікно корпусу. За даними xTool, F1 Ultra з волоконним лазером 20 Вт і діодним лазером має закритий корпус, захисний екран для очей і зупинку в разі займання; ті самі функції xTool зазначає для F2 Ultra. Окуляри тут потрібні переважно під час робіт із відкритим корпусом — коли саме, сказано в інструкції.",
+      "xTool відносить F2 і F2 Ultra до виробів класу 4. Для F2 виробник рекомендує окуляри, що захищають від випромінювання 445 ± 15, 655 ± 5 і 1064 ± 5 нм, навіть із закритим кожухом; добирайте рівні OD та LB за інструкцією. Захист для F2 Ultra залежить від інструкції конкретної версії та конфігурації. Окуляри не замінюють кожух, навчання й контроль доступу. F2 Ultra UV випускається в різних версіях; перевірте маркування пристрою."
+    ],
+    [
+      "Так, якщо це закрита машина класу 1, дим виводиться надвір або фільтрується, а за роботою хтось наглядає. Відкритий лазер класу 4 у квартирі потребує окулярів для всіх присутніх і окремого приміщення.",
+      "Це залежить від пристрою, конфігурації, приміщення та місцевих правил. Перевірте вимоги виробника до роботи й витяжки. xTool призначає F2 Ultra для професійного використання та забороняє його в житлових і громадських місцях, поруч із дітьми або ненавченими людьми."
+    ],
+    [
+      "З машиною класу 1, закритою кришкою та справними датчиками зазвичай ні — вас захищає корпус із фільтрувальним вікном. Окуляри під потрібну довжину хвилі потрібні за відкритого корпусу або пошкодженого вікна; подробиці є в інструкції.",
+      "Перевірте інструкцію до своєї моделі та приладдя: закрита кришка не означає автоматично, що окуляри не потрібні. Для F2 дотримуйтеся вимог xTool щодо окулярів. Якщо вікно, кожух або блокування пошкоджені, не вмикайте пристрій і зверніться до сервісу."
+    ],
+    [
+      "Ніколи не ріжте ПВХ, вініл, штучну шкіру з ПВХ та інші пластики з хлором чи фтором, наприклад ПТФЕ. Уникайте полікарбонату, а ABS щонайбільше злегка гравіюйте з доброю витяжкою. Матеріали невідомого складу не обробляйте взагалі.",
+      "Не обробляйте ПВХ, вініл із ПВХ та інші матеріали з хлором або фтором, наприклад PTFE. Уникайте полікарбонату. ABS може плавитися, горіти й виділяти небезпечні гази: не обробляйте його без підтвердження виробників машини й матеріалу та належної витяжки. Не обробляйте матеріали невідомого складу."
+    ],
+    [
+      "Корпус, захисні екрани й витяжку найпростіше оцінити, коли бачиш їх у дії. Під час безкоштовного онлайн-демо ми покажемо машини з нашого демонстраційного набору, зокрема P3 і F2 Ultra, і допоможемо спланувати безпечне робоче місце вдома, на роботі чи в школі.",
+      "На безкоштовній онлайн-демонстрації покажемо вибрані машини з нашого набору й обговоримо вимоги виробника до безпеки та робочого місця для конкретної конфігурації."
+    ],
+    [
+      "ABS — лише обережно: він плавиться, сильно димить, а в димі може бути ціанистий водень. Щонайбільше легке гравіювання з потужною витяжкою, якщо це дозволяє інструкція.",
+      "ABS може плавитися, горіти й виділяти небезпечні гази. Не обробляйте його без підтвердження виробників машини й матеріалу та належної витяжки."
+    ],
+    [
+      "Закрита кришка; за відкритого корпусу — окуляри під довжину хвилі та OD",
+      "Використовуйте кожух і окуляри за інструкцією моделі; у разі пошкодження припиніть роботу"
+    ],
+    [
+      "Клас 1 у S1 та X1, зупинка в разі відкриття кришки в S1, захисний екран для очей у F1 Ultra та F2 Ultra",
+      "Перевірте клас пристрою з приладдям в інструкції виробника"
+    ],
+    [
+      "Без ПВХ, вінілу, ПТФЕ і полікарбонату; ABS — обережно",
+      "Без ПВХ і ПТФЕ; ABS лише з підтвердженням виробників"
+    ],
+    [
+      "Розумна основа — закрита машина класу 1 під контролем дорослого. Допоможуть кілька простих правил:",
+      "У навчальному закладі дотримуйтеся правил охорони праці та інструкції до конкретної моделі й конфігурації. Допускайте до пристрою й роботи лише уповноважених навчених людей."
+    ],
+    [
+      "Так, під наглядом навченого дорослого, найкраще на закритій машині класу 1 з блокуванням ключем і кнопкою аварійної зупинки. Учні мають знати список дозволених матеріалів і що робити, якщо з’явилося полум’я. Решту визначають правила охорони праці школи та інструкція.",
+      "Не вважайте, що самого нагляду дорослого достатньо. Вимоги залежать від моделі, приладдя, віку та правил закладу. Наприклад, інструкція xTool S1 із підвищувальною основою вимагає не допускати дітей і ненавчених людей до пристрою."
+    ],
+    [
+      "Молодші діти спостерігають, старші учні працюють під наглядом навченого дорослого.",
+      "Не допускайте сторонніх; правила доступу дітей перевірте в інструкції конкретного пристрою."
+    ]
+  ],
+  "xtool-x1:pl": [
+    [
+      "Klasa 1 według normy IEC 60825-1 oznacza, że przy zamkniętej obudowie i normalnej pracy dostępne promieniowanie lasera jest bezpieczne dla oczu. xTool dodaje wielowarstwowe zabezpieczenia i ochronę przeciwpożarową. Odciąg dymu jest jednak potrzebny zawsze – piszemy o tym w artykule o bezpiecznej pracy z laserem.",
+      "Klasyfikacja i środki ochrony dotyczą konkretnej konfiguracji oraz warunków pracy. Sprawdź instrukcję X1 i używanych akcesoriów; nie uruchamiaj maszyny z uszkodzoną osłoną lub blokadą. Podczas obróbki potrzebny jest odpowiedni odciąg."
+    ],
+    [
+      "xTool opisuje X1 jako urządzenie klasy 1, więc przy zamkniętej obudowie i normalnej pracy okulary nie są potrzebne. Przy serwisie z otwartą obudową dobiera się je do długości fali, a źródła X1 pracują na bardzo różnych długościach fal. Odciąg dymu jest potrzebny zawsze.",
+      "Zapotrzebowanie na okulary zależy od konfiguracji, akcesoriów i instrukcji producenta. Sprawdź wymagania przed użyciem, a serwis powierz uprawnionym osobom. Przy uszkodzeniu osłony lub blokady przerwij pracę. Zapewnij odpowiedni odciąg."
+    ]
+  ],
+  "xtool-x1:en": [
+    [
+      "Class 1 under IEC 60825-1 means that, with the enclosure closed and in normal operation, the accessible laser radiation is safe for the eyes. xTool adds multi-layer protection and fire safety. You still always need fume extraction – see our article on safe work with a laser.",
+      "Classification and protective measures depend on the particular setup and operating conditions. Check the X1 and accessory manuals; do not operate the machine with a damaged cover or interlock. Suitable fume extraction is needed during processing."
+    ],
+    [
+      "xTool describes the X1 as a Class 1 device, so with the enclosure closed and in normal operation you do not need glasses. For servicing with the enclosure open, glasses must match the wavelength, and the X1’s sources work at very different wavelengths. Fume extraction is always needed.",
+      "The need for safety glasses depends on the setup, accessories and manufacturer’s instructions. Check the requirements before use and leave servicing to authorised personnel. Stop work if the cover or interlock is damaged, and use suitable extraction."
+    ]
+  ],
+  "xtool-x1:de": [
+    [
+      "Klasse 1 nach IEC 60825-1 bedeutet, dass die zugängliche Laserstrahlung bei geschlossenem Gehäuse und im Normalbetrieb für die Augen ungefährlich ist. xTool ergänzt mehrstufigen Schutz und Brandschutz. Eine Rauchabsaugung brauchen Sie trotzdem immer – mehr dazu im Artikel über sicheres Arbeiten mit dem Laser.",
+      "Klassifizierung und Schutzmaßnahmen hängen von der konkreten Konfiguration und den Betriebsbedingungen ab. Prüfen Sie die Anleitungen für X1 und Zubehör; arbeiten Sie nicht mit beschädigter Abdeckung oder Verriegelung. Bei der Bearbeitung ist geeignete Absaugung erforderlich."
+    ],
+    [
+      "xTool beschreibt den X1 als Gerät der Klasse 1, daher ist bei geschlossenem Gehäuse und im Normalbetrieb keine Brille nötig. Bei Wartung mit offenem Gehäuse muss die Brille zur Wellenlänge passen, und die Quellen im X1 arbeiten mit sehr unterschiedlichen Wellenlängen. Eine Rauchabsaugung brauchen Sie immer.",
+      "Ob eine Schutzbrille erforderlich ist, hängt von Konfiguration, Zubehör und Herstelleranleitung ab. Prüfen Sie die Vorgaben vor Gebrauch und überlassen Sie die Wartung autorisiertem Personal. Bei beschädigter Abdeckung oder Verriegelung stoppen Sie die Arbeit. Sorgen Sie für geeignete Absaugung."
+    ]
+  ],
+  "xtool-x1:ru": [
+    [
+      "Класс 1 по IEC 60825-1 означает, что при закрытом корпусе и нормальной работе доступное лазерное излучение безопасно для глаз. xTool добавляет многоуровневую защиту и пожарную безопасность. Но вытяжка дыма нужна всегда — подробнее в статье о безопасной работе с лазером.",
+      "Классификация и меры защиты зависят от конкретной конфигурации и условий работы. Проверьте инструкции к X1 и принадлежностям; не работайте с повреждённым корпусом или блокировкой. При обработке нужна подходящая вытяжка."
+    ],
+    [
+      "xTool описывает X1 как устройство класса 1, поэтому при закрытом корпусе и нормальной работе очки не нужны. При обслуживании с открытым корпусом очки подбирают под длину волны, а источники X1 работают на очень разных длинах волн. Вытяжка дыма нужна всегда.",
+      "Необходимость очков зависит от конфигурации, принадлежностей и инструкции производителя. Проверьте требования до работы, а обслуживание доверьте уполномоченным специалистам. При повреждении корпуса или блокировки прекратите работу. Обеспечьте подходящую вытяжку."
+    ]
+  ],
+  "xtool-x1:uk": [
+    [
+      "Клас 1 за IEC 60825-1 означає, що за закритого корпусу й нормальної роботи доступне лазерне випромінювання безпечне для очей. xTool додає багаторівневий захист і пожежну безпеку. Але витяжка диму потрібна завжди — докладніше в статті про безпечну роботу з лазером.",
+      "Класифікація та заходи захисту залежать від конкретної конфігурації й умов роботи. Перевірте інструкції до X1 та приладдя; не працюйте з пошкодженим кожухом або блокуванням. Під час обробки потрібна належна витяжка."
+    ],
+    [
+      "xTool описує X1 як пристрій класу 1, тому за закритого корпусу й нормальної роботи окуляри не потрібні. Під час обслуговування з відкритим корпусом окуляри добирають під довжину хвилі, а джерела X1 працюють на дуже різних довжинах хвиль. Витяжка диму потрібна завжди.",
+      "Потреба в окулярах залежить від конфігурації, приладдя та інструкції виробника. Перевірте вимоги до роботи, а обслуговування довірте уповноваженим фахівцям. У разі пошкодження кожуха чи блокування припиніть роботу. Забезпечте належну витяжку."
+    ]
+  ],
+  "laser-types:pl": [
+    [
+      "Bezpieczeństwo: zamknięta obudowa klasy 1 i czujniki płomienia ułatwiają pracę w biurze, sklepie czy szkole.",
+      "Bezpieczeństwo: sprawdź klasę urządzenia wraz z akcesoriami oraz wymagania producenta dotyczące ochrony oczu, miejsca pracy i nadzoru."
+    ]
+  ],
+  "laser-types:en": [
+    [
+      "Safety: a Class 1 enclosure and flame detection make it easier to work in an office, shop or school.",
+      "Safety: check the classification of the device with its accessories and the manufacturer’s requirements for eye protection, location and supervision."
+    ]
+  ],
+  "laser-types:de": [
+    [
+      "Sicherheit: Ein Gehäuse der Klasse 1 und Flammenerkennung erleichtern die Arbeit im Büro, im Laden oder in der Schule.",
+      "Sicherheit: Prüfen Sie die Klasse des Geräts mit Zubehör sowie die Herstellervorgaben zu Augenschutz, Arbeitsort und Aufsicht."
+    ]
+  ],
+  "laser-types:ru": [
+    [
+      "Безопасность: закрытый корпус класса 1 и датчики пламени упрощают работу в офисе, магазине или школе.",
+      "Безопасность: проверьте класс устройства с принадлежностями и требования производителя к защите глаз, месту работы и надзору."
+    ]
+  ],
+  "laser-types:uk": [
+    [
+      "Безпека: закритий корпус класу 1 і датчики полум’я спрощують роботу в офісі, магазині чи школі.",
+      "Безпека: перевірте клас пристрою з приладдям та вимоги виробника до захисту очей, місця роботи й нагляду."
+    ]
+  ],
+  "laser-school:pl": [
+    [
+      "Laser do szkoły powinien być zamkniętą maszyną klasy 1 z zatrzymaniem po otwarciu pokrywy, wykrywaniem płomienia, przyciskiem awaryjnym i blokadą na kluczyk, pracującą z odciągiem lub oczyszczaczem dymu. Na lekcje techniki, plastyki i projekty STEM zwykle wystarczy zamknięty laser diodowy, np. xTool S1 for Education lub M2. Szkoły zawodowe uczące obróbki metalu mogą wybrać F1 Ultra for Education do znakowania albo MetalFab for Education do cięcia i spawania.",
+      "Wybór lasera do szkoły wymaga oceny ryzyka, sprawdzenia instrukcji konkretnego modelu i akcesoriów oraz zasad placówki. Zabezpieczenia i odciąg nie zastępują szkolenia ani kontroli dostępu. Poniżej omawiamy przykłady urządzeń i pytania przed zakupem."
+    ],
+    [
+      "Do sali z uczniami wybieraj zamkniętą maszynę klasy 1 i sprawdź, czy ma:",
+      "Przed wyborem urządzenia do placówki sprawdź wymagania producenta, klasyfikację całej konfiguracji oraz zasady dostępu. Sprawdź również:"
+    ],
+    [
+      "Przy zamkniętej pokrywie maszyny klasy 1 okulary nie są potrzebne; przydają się przy pracach z otwartą obudową, jeśli przewiduje je instrukcja. Okulary ochronne xTool chronią w zakresach 316–460 nm (OD powyżej 6) i 800–1080 nm (OD powyżej 7), więc pasują do S1, M2 i F1 Ultra. Fire Safety Set współpracuje z maszyną i automatycznie gasi ogień, można go też uruchomić ręcznie jednym przyciskiem; pasuje m.in. do S1, M2 i F1 Ultra i jest dostępny w UE.",
+      "Dobór okularów zależy od modelu, parametrów lasera i konfiguracji; zamknięta pokrywa nie daje ogólnego zwolnienia z wymagań instrukcji. Nie używaj urządzenia z uszkodzoną osłoną lub blokadą. Fire Safety Set jest dodatkowym zabezpieczeniem i nie zastępuje nadzoru."
+    ],
+    [
+      "Tak, jeśli to zamknięta maszyna klasy 1 z zatrzymaniem po otwarciu pokrywy, wykrywaniem płomienia i przyciskiem awaryjnym, dym jest odprowadzany lub filtrowany, a pracę nadzoruje przeszkolony dorosły. Otwarte lasery klasy 4 i ręczne spawarki laserowe nie nadają się do zwykłej sali lekcyjnej – wymagają wydzielonego stanowiska i środków ochrony osobistej.",
+      "Nie da się zagwarantować bezpieczeństwa samą klasą urządzenia lub obecnością dorosłego. Placówka powinna ocenić ryzyko i stosować instrukcję modelu, wymagania producenta i przepisy BHP, w tym zasady dostępu."
+    ],
+    [
+      "Nie ma jednej granicy wieku dla wszystkich maszyn i szkół. Decydują regulamin i zasady BHP szkoły, instrukcja producenta oraz stały nadzór przeszkolonej osoby. Sprawdza się podział ról: młodsi uczniowie projektują i obserwują pracę przez okienko, a maszynę obsługuje nauczyciel lub starsi, przeszkoleni uczniowie.",
+      "Nie zakładaj ogólnego zezwolenia na dostęp dzieci. Wymagania zależą od modelu i konfiguracji; dla S1 z podstawą podwyższającą xTool wymaga uniemożliwienia dostępu dzieciom i osobom nieprzeszkolonym. Sprawdź instrukcję oraz zasady placówki."
+    ],
+    [
+      "Przy zamkniętej pokrywie i sprawnych czujnikach nie – chroni obudowa z okienkiem filtrującym. Okulary dobrane do długości fali są potrzebne przy otwartej obudowie lub uszkodzonym okienku i zawsze przy ręcznym spawaniu laserowym. Okulary przeciwsłoneczne nie chronią przed wiązką lasera.",
+      "Sprawdź instrukcję konkretnego urządzenia i akcesoriów, również pod kątem okularów. Jeśli osłona, okienko lub blokada są uszkodzone, przerwij pracę i skontaktuj się z serwisem. Okulary przeciwsłoneczne nie są ochroną przed wiązką lasera."
+    ],
+    [
+      "okienko filtrujące światło lasera – przy zamkniętej pokrywie pracę można obserwować bez okularów;",
+      "osłonę i okno ochronne; wymagania dotyczące obserwacji i okularów sprawdź w instrukcji modelu;"
+    ]
+  ],
+  "laser-school:en": [
+    [
+      "A laser cutter for schools should be an enclosed Class 1 machine with a lid interlock, flame detection, an emergency stop and a key switch, running with fume extraction or an air purifier. For design and technology, art and STEM classes, an enclosed diode laser such as the xTool S1 for Education or the M2 is usually enough. Vocational schools that teach metalwork can choose the F1 Ultra for Education for marking or the MetalFab for Education for cutting and welding.",
+      "Choosing a school laser requires a risk assessment and a review of the exact model and accessory manuals and the institution’s rules. Safety features and extraction do not replace training or access controls. Below are example machines and questions to ask before buying."
+    ],
+    [
+      "For a room with students, choose an enclosed Class 1 machine and check that it has:",
+      "Before choosing equipment for an educational setting, check the manufacturer’s requirements, the classification of the whole setup and access rules. Also check for:"
+    ],
+    [
+      "With the lid of a Class 1 machine closed, goggles are not needed; they are useful for work with the enclosure open, where the manual provides for it. xTool laser safety goggles protect at 316–460 nm (OD above 6) and 800–1080 nm (OD above 7), so they suit the S1, M2 and F1 Ultra. The Fire Safety Set communicates with the machine and puts out a fire automatically, and it can also be triggered manually with one button; it fits the S1, M2 and F1 Ultra, among others, and is available in the EU.",
+      "Eyewear selection depends on the model, laser parameters and setup; a closed lid does not override the manual. Do not use a machine with a damaged cover or interlock. The Fire Safety Set is an additional safeguard, not a replacement for supervision."
+    ],
+    [
+      "Yes, if it is an enclosed Class 1 machine with a lid interlock, flame detection and an emergency stop, fumes are extracted or filtered and a trained adult supervises the work. Open Class 4 lasers and handheld laser welders are not suitable for an ordinary classroom – they need a separate work area and personal protective equipment.",
+      "Device classification and adult supervision alone cannot guarantee safety. The institution must assess risks and follow the model manual, manufacturer requirements and health and safety rules, including access controls."
+    ],
+    [
+      "There is no single age limit for every machine and every school. The school’s rules and health and safety policy, the manufacturer’s instructions and constant supervision by a trained person decide. A division of roles works well: younger students design and watch through the window, while the teacher or older, trained students operate the machine.",
+      "Do not assume children are generally permitted access. Requirements depend on the model and setup; xTool requires children and untrained users to be kept away from the S1 used with a riser base. Check the manual and institutional rules."
+    ],
+    [
+      "Not with the lid closed and the sensors working – the enclosure with its filtering window protects you. Goggles matched to the wavelength are needed when the enclosure is open or the window is damaged, and always for handheld laser welding. Sunglasses do not protect against a laser beam.",
+      "Check the manual for the specific device and accessories, including eyewear requirements. If the cover, window or interlock is damaged, stop work and contact service. Sunglasses do not protect against a laser beam."
+    ],
+    [
+      "a window that filters the laser light – with the lid closed, students can watch without goggles;",
+      "a protective enclosure and window; check the model manual for observation and eyewear requirements;"
+    ]
+  ],
+  "laser-school:de": [
+    [
+      "Ein Lasercutter für die Schule sollte eine geschlossene Maschine der Laserklasse 1 sein – mit Deckelsensor, Flammenerkennung, Not-Aus und Schlüsselschalter, betrieben mit Absaugung oder Luftreiniger. Für Technik, Kunst und MINT-Projekte reicht meist ein geschlossener Diodenlaser wie der xTool S1 for Education oder der M2. Berufsschulen mit Metallausbildung greifen zum F1 Ultra for Education fürs Markieren oder zum MetalFab for Education fürs Schneiden und Schweißen.",
+      "Die Wahl eines Lasers für eine Schule erfordert eine Gefährdungsbeurteilung sowie die Prüfung der Anleitungen des konkreten Modells und Zubehörs und der Regeln der Einrichtung. Schutzfunktionen und Absaugung ersetzen weder Schulung noch Zugangskontrolle."
+    ],
+    [
+      "Wählen Sie für einen Raum mit Schülern eine geschlossene Maschine der Klasse 1 und prüfen Sie, ob sie Folgendes hat:",
+      "Prüfen Sie vor der Gerätewahl für eine Bildungseinrichtung die Herstellervorgaben, die Klasse der gesamten Konfiguration und die Zugangsregeln. Prüfen Sie auch:"
+    ],
+    [
+      "Bei geschlossenem Deckel einer Maschine der Klasse 1 braucht man keine Schutzbrille; nützlich ist sie bei Arbeiten mit geöffnetem Gehäuse, sofern die Anleitung sie vorsieht. Die Laserschutzbrille von xTool schützt bei 316–460 nm (OD über 6) und 800–1080 nm (OD über 7) und passt damit zu S1, M2 und F1 Ultra. Das Fire Safety Set kommuniziert mit der Maschine und löscht einen Brand automatisch, lässt sich aber auch per Knopfdruck manuell auslösen; es passt unter anderem zu S1, M2 und F1 Ultra und ist in der EU erhältlich.",
+      "Die Auswahl der Schutzbrille hängt von Modell, Laserparametern und Aufbau ab; ein geschlossener Deckel setzt die Anleitung nicht außer Kraft. Bei beschädigter Abdeckung oder Verriegelung das Gerät nicht benutzen. Das Fire Safety Set ergänzt den Schutz, ersetzt aber keine Aufsicht."
+    ],
+    [
+      "Ja, wenn es eine geschlossene Maschine der Klasse 1 mit Deckelsensor, Flammenerkennung und Not-Aus ist, der Rauch abgesaugt oder gefiltert wird und ein geschulter Erwachsener die Arbeit beaufsichtigt. Offene Laser der Klasse 4 und Handlaserschweißgeräte gehören nicht in einen normalen Klassenraum – sie brauchen einen abgetrennten Bereich und persönliche Schutzausrüstung.",
+      "Geräteklasse und Aufsicht durch Erwachsene allein garantieren keine Sicherheit. Die Einrichtung muss Risiken beurteilen und Modellanleitung, Herstellervorgaben und Arbeitsschutzregeln einschließlich Zugangskontrolle beachten."
+    ],
+    [
+      "Eine einheitliche Altersgrenze für alle Maschinen und Schulen gibt es nicht. Es entscheiden die Regeln und der Arbeitsschutz der Schule, die Anleitung des Herstellers und eine ständige Aufsicht durch eine geschulte Person. Bewährt hat sich eine Rollenteilung: Jüngere Schüler entwerfen und schauen durchs Fenster zu, die Maschine bedienen die Lehrkraft oder ältere, unterwiesene Schüler.",
+      "Gehen Sie nicht von einer allgemeinen Erlaubnis für Kinder aus. Die Anforderungen hängen von Modell und Aufbau ab; für den S1 mit Riser Base verlangt xTool, den Zugang für Kinder und ungeschulte Personen zu verhindern. Prüfen Sie Anleitung und Regeln der Einrichtung."
+    ],
+    [
+      "Nicht bei geschlossenem Deckel und funktionierenden Sensoren – dann schützt das Gehäuse mit seinem Filterfenster. Eine zur Wellenlänge passende Brille ist nötig, wenn das Gehäuse offen oder das Fenster beschädigt ist, und immer beim Handlaserschweißen. Sonnenbrillen schützen nicht vor Laserstrahlung.",
+      "Prüfen Sie die Anleitung des konkreten Geräts und Zubehörs auch hinsichtlich Schutzbrillen. Sind Abdeckung, Fenster oder Verriegelung beschädigt, stoppen Sie die Arbeit und kontaktieren Sie den Service. Sonnenbrillen schützen nicht vor einem Laserstrahl."
+    ],
+    [
+      "ein Fenster, das das Laserlicht filtert – bei geschlossenem Deckel kann man ohne Brille zusehen;",
+      "eine Schutzabdeckung und ein Schutzfenster; prüfen Sie die Anleitung zu Beobachtung und Schutzbrille;"
+    ]
+  ],
+  "laser-school:ru": [
+    [
+      "Лазерный станок для школы должен быть закрытой машиной класса 1: с остановкой при открытии крышки, обнаружением пламени, кнопкой аварийной остановки и блокировкой ключом, а также с вытяжкой или очистителем воздуха. Для уроков технологии, изобразительного искусства и STEM-проектов обычно хватает закрытого диодного лазера, например xTool S1 for Education или M2. Профессиональным колледжам, где учат обработке металла, подойдут F1 Ultra for Education для маркировки или MetalFab for Education для резки и сварки.",
+      "Выбор лазера для школы требует оценки рисков и проверки инструкций конкретной модели и принадлежностей, а также правил учреждения. Защитные функции и вытяжка не заменяют обучение и контроль доступа."
+    ],
+    [
+      "Для кабинета с учениками выбирайте закрытую машину класса 1 и проверьте, есть ли у неё:",
+      "Перед выбором устройства для учебного заведения проверьте требования производителя, класс всей конфигурации и правила доступа. Проверьте также:"
+    ],
+    [
+      "При закрытой крышке машины класса 1 очки не нужны; они пригодятся при работе с открытым корпусом, если это предусмотрено инструкцией. Защитные очки xTool защищают в диапазонах 316–460 нм (OD выше 6) и 800–1080 нм (OD выше 7), поэтому подходят для S1, M2 и F1 Ultra. Fire Safety Set связывается со станком и автоматически тушит возгорание, а при необходимости запускается вручную одной кнопкой; он подходит, в частности, к S1, M2 и F1 Ultra и доступен в ЕС.",
+      "Выбор очков зависит от модели, параметров лазера и конфигурации; закрытая крышка не отменяет требования инструкции. Не используйте устройство с повреждённым корпусом или блокировкой. Fire Safety Set дополняет защиту, но не заменяет наблюдение."
+    ],
+    [
+      "Да, если это закрытая машина класса 1 с остановкой при открытии крышки, обнаружением пламени и кнопкой аварийной остановки, дым удаляется или фильтруется, а работу контролирует обученный взрослый. Открытые лазеры класса 4 и ручные лазерные сварочные аппараты не подходят для обычного класса — им нужны отдельная зона и средства индивидуальной защиты.",
+      "Класс устройства и присутствие взрослого сами по себе не гарантируют безопасность. Учреждение должно оценить риски и соблюдать инструкцию модели, требования производителя и правила охраны труда, включая контроль доступа."
+    ],
+    [
+      "Единой возрастной границы для всех станков и школ нет. Решают правила и требования охраны труда школы, инструкция производителя и постоянный надзор обученного человека. Хорошо работает разделение ролей: младшие ученики проектируют и наблюдают через окно, а станком управляют учитель или старшие ученики, прошедшие инструктаж.",
+      "Не предполагайте общего разрешения на доступ детей. Требования зависят от модели и конфигурации; для S1 с повышающим основанием xTool требует не допускать детей и неподготовленных людей. Проверьте инструкцию и правила учреждения."
+    ],
+    [
+      "При закрытой крышке и исправных датчиках — нет: защищает корпус с фильтрующим окном. Очки, подобранные по длине волны, нужны, когда корпус открыт или окно повреждено, и всегда при ручной лазерной сварке. Солнцезащитные очки от лазерного луча не защищают.",
+      "Проверьте инструкцию конкретного устройства и принадлежностей, включая требования к очкам. При повреждении корпуса, окна или блокировки прекратите работу и обратитесь в сервис. Солнцезащитные очки не защищают от лазерного луча."
+    ],
+    [
+      "окно, фильтрующее свет лазера, — при закрытой крышке за работой можно наблюдать без очков;",
+      "защитный корпус и окно; требования к наблюдению и очкам проверьте в инструкции модели;"
+    ]
+  ],
+  "laser-school:uk": [
+    [
+      "Лазерний верстат для школи має бути закритою машиною класу 1: із зупинкою в разі відкриття кришки, виявленням полум’я, кнопкою аварійної зупинки та блокуванням ключем, а також із витяжкою чи очищувачем повітря. Для уроків технологій, мистецтва і STEM-проєктів зазвичай вистачає закритого діодного лазера, наприклад xTool S1 for Education або M2. Професійним коледжам, де навчають обробки металу, підійдуть F1 Ultra for Education для маркування або MetalFab for Education для різання та зварювання.",
+      "Вибір лазера для школи потребує оцінки ризиків і перевірки інструкцій конкретної моделі та приладдя, а також правил закладу. Захисні функції й витяжка не замінюють навчання та контроль доступу."
+    ],
+    [
+      "Для кабінету з учнями обирайте закриту машину класу 1 і перевірте, чи має вона:",
+      "Перед вибором пристрою для навчального закладу перевірте вимоги виробника, клас усієї конфігурації та правила доступу. Також перевірте:"
+    ],
+    [
+      "За закритої кришки машини класу 1 окуляри не потрібні; вони знадобляться під час роботи з відкритим корпусом, якщо це передбачено інструкцією. Захисні окуляри xTool захищають у діапазонах 316–460 нм (OD понад 6) і 800–1080 нм (OD понад 7), тож підходять для S1, M2 і F1 Ultra. Fire Safety Set зв’язується з верстатом і автоматично гасить займання, а за потреби вмикається вручну однією кнопкою; він підходить, зокрема, до S1, M2 і F1 Ultra та доступний в ЄС.",
+      "Вибір окулярів залежить від моделі, параметрів лазера й конфігурації; закрита кришка не скасовує вимог інструкції. Не використовуйте пристрій із пошкодженим кожухом чи блокуванням. Fire Safety Set доповнює захист, але не замінює нагляд."
+    ],
+    [
+      "Так, якщо це закрита машина класу 1 із зупинкою в разі відкриття кришки, виявленням полум’я і кнопкою аварійної зупинки, дим видаляється або фільтрується, а роботу контролює навчений дорослий. Відкриті лазери класу 4 та ручні лазерні зварювальні апарати не підходять для звичайного класу — їм потрібні окрема зона й засоби індивідуального захисту.",
+      "Клас пристрою та присутність дорослого самі по собі не гарантують безпеки. Заклад має оцінити ризики й дотримуватися інструкції моделі, вимог виробника та правил охорони праці, зокрема контролю доступу."
+    ],
+    [
+      "Єдиної вікової межі для всіх верстатів і шкіл немає. Вирішують правила й вимоги охорони праці школи, інструкція виробника та постійний нагляд навченої людини. Добре працює розподіл ролей: молодші учні проєктують і спостерігають крізь вікно, а верстатом керують учитель або старші учні, які пройшли інструктаж.",
+      "Не припускайте загального дозволу на доступ дітей. Вимоги залежать від моделі й конфігурації; для S1 із підвищувальною основою xTool вимагає не допускати дітей і ненавчених людей. Перевірте інструкцію та правила закладу."
+    ],
+    [
+      "За закритої кришки та справних датчиків — ні: захищає корпус із фільтрувальним вікном. Окуляри, дібрані за довжиною хвилі, потрібні, коли корпус відкритий або вікно пошкоджене, і завжди під час ручного лазерного зварювання. Сонцезахисні окуляри від лазерного променя не захищають.",
+      "Перевірте інструкцію конкретного пристрою й приладдя, зокрема вимоги до окулярів. У разі пошкодження кожуха, вікна чи блокування припиніть роботу та зверніться до сервісу. Сонцезахисні окуляри не захищають від лазерного променя."
+    ],
+    [
+      "вікно, що фільтрує світло лазера, — за закритої кришки за роботою можна спостерігати без окулярів;",
+      "захисний кожух і вікно; вимоги до спостереження та окулярів перевірте в інструкції моделі;"
+    ]
+  ],
+  "home-laser-engraver:pl": [
+    [
+      "W naszym zestawie demonstracyjnym są xTool M2, F2 i P3. Umów bezpłatne demo online: pokażemy na żywo grawerowanie i cięcie, opowiemy o odciągu dymu i pomożemy dobrać maszynę do Twojego mieszkania, domu lub pracowni.",
+      "Nasz zestaw demonstracyjny obejmuje M2, F2 i P3. Podczas bezpłatnego demo online omówimy funkcje i wymagania producenta dla wybranej konfiguracji, w tym miejsce pracy i odciąg."
+    ]
+  ],
+  "home-laser-engraver:en": [
+    [
+      "Our demo set includes the xTool M2, F2 and P3. Book a free online demo: we will show engraving and cutting live, talk you through fume extraction and help you pick the right machine for your flat, house or workshop.",
+      "Our demo set includes the M2, F2 and P3. In a free online demo we can discuss the features and manufacturer’s requirements for the chosen setup, including location and extraction."
+    ]
+  ],
+  "home-laser-engraver:de": [
+    [
+      "Zu unserem Demo-Set gehören der xTool M2, F2 und P3. Buchen Sie eine kostenlose Online-Demo: Wir zeigen Gravieren und Schneiden live, sprechen über die Rauchabsaugung und helfen Ihnen, die passende Maschine für Ihre Wohnung, Ihr Haus oder Ihre Werkstatt zu finden.",
+      "Zu unserem Demo-Set gehören M2, F2 und P3. In einer kostenlosen Online-Demo besprechen wir Funktionen und Herstellervorgaben für die gewählte Konfiguration, einschließlich Arbeitsort und Absaugung."
+    ]
+  ],
+  "home-laser-engraver:ru": [
+    [
+      "В нашем демонстрационном наборе есть xTool M2, F2 и P3. Запишитесь на бесплатное онлайн-демо: мы вживую покажем гравировку и резку, расскажем о вытяжке и поможем подобрать машину для вашей квартиры, дома или мастерской.",
+      "В наш демонстрационный набор входят M2, F2 и P3. На бесплатной онлайн-демонстрации обсудим функции и требования производителя к выбранной конфигурации, включая место работы и вытяжку."
+    ]
+  ],
+  "home-laser-engraver:uk": [
+    [
+      "У нашому демонстраційному наборі є xTool M2, F2 і P3. Запишіться на безкоштовне онлайн-демо: ми наживо покажемо гравіювання й різання, розповімо про витяжку й допоможемо підібрати машину для вашої квартири, будинку чи майстерні.",
+      "До нашого демонстраційного набору входять M2, F2 та P3. На безкоштовній онлайн-демонстрації обговоримо функції та вимоги виробника до обраної конфігурації, зокрема місце роботи й витяжку."
+    ]
+  ]
+}

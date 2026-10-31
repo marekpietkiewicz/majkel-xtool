@@ -32,6 +32,10 @@ $email = lasery_xtool_contact_email();
                     <li><a href="<?php echo esc_url($home . '#demo'); ?>"><?php esc_html_e('Demo', 'lasery-xtool'); ?></a></li>
                     <?php $blog = lasery_xtool_blog_url(); ?>
                     <?php if ($blog !== '') : ?><li><a href="<?php echo esc_url($blog); ?>"><?php esc_html_e('Blog', 'lasery-xtool'); ?></a></li><?php endif; ?>
+                    <?php $safety_url = lasery_xtool_safety_url(); ?>
+                    <?php if ($safety_url) : ?><li><a href="<?php echo esc_url($safety_url); ?>"><?php echo esc_html(lasery_xtool_safety_texts()['title']); ?></a></li><?php endif; ?>
+                    <?php $purchase_url = lasery_xtool_purchase_info_url(); ?>
+                    <?php if ($purchase_url) : ?><li><a href="<?php echo esc_url($purchase_url); ?>"><?php echo esc_html(lasery_xtool_purchase_info_title()); ?></a></li><?php endif; ?>
                     <?php if ($privacy_url) : ?>
                         <li><a href="<?php echo esc_url(lasery_xtool_language_url($privacy_url)); ?>"><?php echo esc_html($consent_text['privacy']); ?></a></li>
                     <?php endif; ?>

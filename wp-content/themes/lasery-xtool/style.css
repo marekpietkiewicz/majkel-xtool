@@ -561,6 +561,9 @@ html:not(.js) .cart-toast:empty { display: none; }
 .product-title { font-size: clamp(1.9rem, 1.3rem + 2.4vw, 3.1rem); letter-spacing: -.04em; }
 .price-box { margin-top: 24px; padding: 20px; border-radius: var(--radius-lg); background: var(--surface); }
 .price-box-note { margin-top: 6px; color: var(--muted); font-size: .8rem; line-height: 1.5; }
+.product-safety { margin-top: 16px; padding: 16px 18px; border: 1px solid #dfb97d; border-radius: var(--radius); background: #fff8ed; color: #603900; font-size: .9rem; line-height: 1.5; }
+.product-safety p { margin-top: 6px; }
+.product-safety a { display: inline-block; margin-top: 8px; color: inherit; font-weight: 700; text-decoration: underline; }
 .product-actions { display: grid; gap: 10px; margin-top: 16px; }
 .product-actions--single { grid-template-columns: 1fr !important; }
 .demo-callout { display: flex; gap: 14px; margin-top: 16px; padding: 18px; border: 1px solid #ffd3bf; border-radius: var(--radius-lg); background: linear-gradient(135deg, #fff5ef, #ffe9de); }
