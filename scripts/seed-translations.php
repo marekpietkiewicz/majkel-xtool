@@ -222,6 +222,10 @@ foreach ( $translations as $source_id => $languages ) {
     foreach ( $languages as $language => $items ) {
         $key = '_lasery_description_' . $language;
         $html = $to_html( $items );
+        // English uses the original post content as a fallback. Do not hide an existing edit.
+        if ( 'en' === $language && ! metadata_exists( 'post', $posts[0], $key ) && '' !== trim( (string) get_post_field( 'post_content', $posts[0], 'raw' ) ) ) {
+            continue;
+        }
         if ( metadata_exists( 'post', $posts[0], $key ) ) {
             $placeholder = isset( $placeholders[ $source_id ][ $language ] ) ? $to_html( [ $placeholders[ $source_id ][ $language ] ] ) : null;
             if ( $placeholder !== get_post_meta( $posts[0], $key, true ) ) {

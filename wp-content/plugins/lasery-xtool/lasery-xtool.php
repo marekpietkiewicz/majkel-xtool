@@ -20,6 +20,8 @@ const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
 const LASERY_XTOOL_SCHEMA       = '6';
 
+require_once __DIR__ . '/reviewed-product-content.php';
+
 add_action( 'init', 'lasery_xtool_register_product_type' );
 function lasery_xtool_register_product_type() {
 	register_post_type(
@@ -630,7 +632,7 @@ function lasery_xtool_save_products( $products, $result ) {
 					'post_type'    => LASERY_XTOOL_PRODUCT_TYPE,
 					'post_status'  => 'draft',
 					'post_title'   => $product['title'],
-					'post_content' => $product['content'],
+					'post_content' => lasery_xtool_initial_product_content( $product ),
 				)
 			),
 			true
