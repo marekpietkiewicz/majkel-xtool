@@ -291,7 +291,9 @@
         // The cookie tells whether the server added the product: then another page opens (the cart, or the
         // server's answer), so it is never added twice; otherwise the browser sends the form itself.
         if (cartCookie() !== before) {
-          window.location.assign(cartLink ? cartLink.href : (response && response.redirected ? response.url : window.location.href));
+          if (cartLink) window.location.assign(cartLink.href);
+          else if (response && response.redirected) window.location.assign(response.url);
+          else window.location.reload();
           return;
         }
         native = true;
