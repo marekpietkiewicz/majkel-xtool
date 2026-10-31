@@ -119,4 +119,28 @@ cover('cover-event-engraving.webp', [('f2.webp', 340, 400, 755), ('dji.webp', 25
 cover('cover-stone-engraving.webp', [('s1.webp', 210, 380, 740), ('riser.webp', 130, 820, 735), ('f2ultrauv.webp', 390, 1230, 765)], glow=(800, 745))
 # xTool X1.
 cover('cover-xtool-x1.webp', [('x1.webp', 480, 800, 790)], glow=(800, 760))
+# Accessories: RA3 rotary, AP2 purifier and the Fire Safety Set.
+cover('cover-laser-accessories.webp', [('ra3.webp', 200, 380, 735), ('ap2.webp', 380, 800, 765), ('firesafety.webp', 150, 1230, 730)], glow=(800, 745))
+# Christmas: M2, F2 and F2 Ultra UV.
+cover('cover-christmas-laser.webp', [('m2.webp', 220, 370, 740), ('f2.webp', 330, 800, 750), ('f2ultrauv.webp', 380, 1220, 760)], glow=(800, 745))
+# Pricing services: F2, F2 Ultra and P3.
+cover('cover-engraving-pricing.webp', [('f2.webp', 320, 340, 750), ('f2ultra.webp', 370, 760, 760), ('p3.webp', 260, 1240, 745)], glow=(800, 745))
+# Maintenance: P3, its honeycomb panel and AP2 filters.
+cover('cover-laser-maintenance.webp', [('p3.webp', 290, 470, 755), ('honeycombp3.webp', 150, 990, 735), ('ap2filters.webp', 140, 1360, 730)], glow=(800, 745))
+# Screen printing: the Screen Printer and P3.
+cover('cover-screen-printing.webp', [('screenprinter.webp', 330, 520, 760), ('p3.webp', 270, 1150, 750)], glow=(800, 750))
+# Fabric: P3 and M2.
+cover('cover-fabric-cutting.webp', [('p3.webp', 320, 560, 760), ('m2.webp', 230, 1160, 745)], glow=(800, 745))
+# Heat press: WonderPress 3D and its craft oven module.
+cover('cover-heat-press.webp', [('wonderpress.webp', 420, 620, 775), ('oven.webp', 200, 1150, 740)], glow=(800, 755))
+# Jewellery: F2 Ultra, F1 Ultra and RA2 Pro.
+cover('cover-jewelry-engraving.webp', [('f2ultra.webp', 380, 400, 760), ('f1ultra.webp', 330, 820, 750), ('ra2pro.webp', 200, 1240, 735)], glow=(800, 745))
+# Fume extraction: AP2, IF2 inline fan and Air Purifier Go.
+cover('cover-fume-extraction.webp', [('ap2.webp', 400, 420, 770), ('if2.webp', 200, 820, 740), ('purifiergo.webp', 320, 1220, 755)], glow=(800, 750))
+# Welding stainless and aluminium: MetalFab and its wire feeder.
+cover('cover-laser-welding-materials.webp', [('metalfab.webp', 470, 590, 790), ('wirefeeder.webp', 280, 1170, 750)], glow=(800, 760))
+# Buying xTool: the demo machines F2, P3 and M2 with the MetalFab.
+cover('cover-buy-xtool.webp', [('f2.webp', 280, 210, 745), ('p3.webp', 220, 580, 740), ('m2.webp', 170, 1000, 735), ('metalfab.webp', 360, 1380, 770)], glow=(800, 745))
+# Home laser engraver: M2, S1 and F2.
+cover('cover-home-laser-engraver.webp', [('m2.webp', 200, 330, 740), ('s1.webp', 190, 790, 740), ('f2.webp', 320, 1240, 750)], glow=(800, 745))
 print('done')
