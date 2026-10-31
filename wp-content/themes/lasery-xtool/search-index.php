@@ -94,7 +94,8 @@ add_action('rest_api_init', function () {
 function lasery_xtool_search_normalize($text) {
     $text = mb_strtolower((string) $text, 'UTF-8');
     if (!class_exists('Normalizer')) {
-        return strtr(remove_accents($text, 'en_US'), ['й' => 'и', 'ё' => 'е', 'ї' => 'і', 'ѝ' => 'и', 'ѐ' => 'е', 'ѓ' => 'г', 'ќ' => 'к', 'ў' => 'у']);
+        $text = preg_replace('/[\x{0300}-\x{036f}]/u', '', remove_accents($text, 'en_US'));
+        return strtr((string) $text, ['й' => 'и', 'ё' => 'е', 'ї' => 'і', 'ѝ' => 'и', 'ѐ' => 'е', 'ѓ' => 'г', 'ќ' => 'к', 'ў' => 'у']);
     }
     $text = preg_replace('/[\x{0300}-\x{036f}]/u', '', (string) Normalizer::normalize($text, Normalizer::FORM_D));
     return strtr($text, ['ł' => 'l', 'ß' => 's']);

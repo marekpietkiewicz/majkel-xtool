@@ -22,6 +22,9 @@ try {
 	if ( 'и е' !== lasery_xtool_search_normalize( 'й ё' ) ) {
 		throw new RuntimeException( 'Cyrillic folding without intl failed.' );
 	}
+	if ( 'a' !== lasery_xtool_search_normalize( "a\u{0301}" ) || '' !== lasery_xtool_search_normalize( "\u{0301}" ) ) {
+		throw new RuntimeException( 'Combining-mark folding without intl failed.' );
+	}
 	echo "Search without intl: ß/ss and Cyrillic folding passed.\n";
 } finally {
 	foreach ( $ids as $id ) {
