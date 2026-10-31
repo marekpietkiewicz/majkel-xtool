@@ -103,4 +103,20 @@ cover('cover-sticker-cutter.webp', [('m2.webp', 300, 640, 760), ('m2cmyk.webp', 
 cover('cover-laser-school.webp', [('s1edu.webp', 170, 270, 735), ('f1ultraedu.webp', 290, 760, 750), ('metalfabedu.webp', 250, 1290, 750)], glow=(800, 740))
 # F2 family: F2, F2 Ultra, F2 Ultra UV.
 cover('cover-xtool-f2-comparison.webp', [('f2.webp', 330, 380, 745), ('f2ultra.webp', 380, 800, 760), ('f2ultrauv.webp', 380, 1220, 760)], glow=(800, 745))
+# Sheet metal cutting: MetalFab and the compressor with air dryer.
+cover('cover-metal-cutting.webp', [('metalfab.webp', 470, 580, 790), ('compressor.webp', 300, 1180, 750)], glow=(800, 760))
+# Laser marking: F2 Ultra, the Auto Streamline conveyor and F1 Ultra.
+cover('cover-laser-marking.webp', [('f2ultra.webp', 380, 420, 760), ('conveyor.webp', 110, 830, 760), ('f1ultra.webp', 330, 1230, 750)], glow=(800, 745))
+# Photo engraving: M2, F2 Ultra UV and F2.
+cover('cover-photo-engraving.webp', [('m2.webp', 220, 360, 740), ('f2ultrauv.webp', 400, 800, 765), ('f2.webp', 330, 1240, 750)], glow=(800, 745))
+# Leather: P3 and M2.
+cover('cover-leather-engraving.webp', [('p3.webp', 320, 560, 760), ('m2.webp', 230, 1160, 745)], glow=(800, 745))
+# Paper and cardboard: M2 and S1.
+cover('cover-paper-cutting.webp', [('m2.webp', 280, 540, 755), ('s1.webp', 220, 1150, 745)], glow=(800, 750))
+# Events: F2, DJI Power 1000 Mini and Air Purifier Go.
+cover('cover-event-engraving.webp', [('f2.webp', 340, 400, 755), ('dji.webp', 250, 840, 745), ('purifiergo.webp', 320, 1250, 755)], glow=(800, 745))
+# Stone: S1, its riser base and F2 Ultra UV.
+cover('cover-stone-engraving.webp', [('s1.webp', 210, 380, 740), ('riser.webp', 130, 820, 735), ('f2ultrauv.webp', 390, 1230, 765)], glow=(800, 745))
+# xTool X1.
+cover('cover-xtool-x1.webp', [('x1.webp', 480, 800, 790)], glow=(800, 760))
 print('done')
