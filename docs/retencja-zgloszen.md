@@ -12,6 +12,8 @@ Formularz wysyła dane zgłoszenia e-mailem do odbiorcy ustawionego w panelu. St
 
 ## Regularny przegląd
 
+Za wykonywanie regularnego przeglądu skrzynki odpowiada Michał. Samo wyznaczenie osoby nie potwierdza, że przejrzano wcześniejszą korespondencję.
+
 1. Ustal i stosuj harmonogram pozwalający dotrzymać podanego terminu; sprawdzaj nie tylko nowe wiadomości, ale również zaległe zgłoszenia i ich daty zakończenia.
 2. W terminie zweryfikuj, czy zgłoszenie rzeczywiście nie doprowadziło do zamówienia i czy nie ma konkretnej podstawy prawnej wymagającej dłuższego przechowania określonych danych. Jeśli istnieje taka podstawa, zachowaj tylko potrzebne dane i odnotuj uzasadnienie oraz termin ponownego przeglądu.
 3. Pozostałe wiadomości i zbędne załączniki usuń z właściwych folderów i dostępnych kopii, w tym z folderu elementów usuniętych, zgodnie z działaniem używanej poczty. Ustal z dostawcą zasady wygasania kopii zapasowych i sposób zapobiegania ponownemu przywróceniu usuniętych danych. Nie usuwaj innych danych bez ich osobnej oceny.
