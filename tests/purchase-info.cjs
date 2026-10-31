@@ -29,17 +29,17 @@ const fixture = JSON.parse(php(`
  echo wp_json_encode(['id'=>$id, 'f2'=>$f2, 'articles'=>$articles]);
 `));
 const expected = {
- pl: ['Informacje o zakupach', 'Reklamacje i zwroty', 'Sprzedawcą jest xTool', 'Regulamin korzystania z serwisu', '14 dni', 'Jesteśmy autoryzowanym partnerem xTool.'],
- en: ['Purchase information', 'Complaints and returns', 'xTool is the seller', 'Website terms of use', '14 days', 'We are an authorized xTool partner.'],
- de: ['Informationen zum Kauf', 'Reklamation und Rückgabe', 'Verkäufer ist xTool', 'Nutzungsbedingungen der Website', '14 Tagen', 'Wir sind autorisierter xTool-Partner.'],
- ru: ['Информация о покупке', 'Претензии и возврат', 'Продавцом является xTool', 'Правила пользования сайтом', '14 дней', 'Мы являемся авторизованным партнёром xTool.'],
- uk: ['Інформація про покупку', 'Рекламації та повернення', 'Продавцем є xTool', 'Правила користування сайтом', '14 днів', 'Ми є авторизованим партнером xTool.'],
+ pl: ['Informacje o zakupach', 'Reklamacje i zwroty', 'Sprzedawcą jest xTool', 'Regulamin korzystania z serwisu', '14 dni', 'Jesteśmy autoryzowanym partnerem xTool.', 'Reklama produktów. Jesteśmy autoryzowanym partnerem xTool.'],
+ en: ['Purchase information', 'Complaints and returns', 'xTool is the seller', 'Website terms of use', '14 days', 'We are an authorized xTool partner.', 'Product advertising. We are an authorized xTool partner.'],
+ de: ['Informationen zum Kauf', 'Reklamation und Rückgabe', 'Verkäufer ist xTool', 'Nutzungsbedingungen der Website', '14 Tagen', 'Wir sind autorisierter xTool-Partner.', 'Produktwerbung. Wir sind autorisierter xTool-Partner.'],
+ ru: ['Информация о покупке', 'Претензии и возврат', 'Продавцом является xTool', 'Правила пользования сайтом', '14 дней', 'Мы являемся авторизованным партнёром xTool.', 'Реклама продукции. Мы являемся авторизованным партнёром xTool.'],
+ uk: ['Інформація про покупку', 'Рекламації та повернення', 'Продавцем є xTool', 'Правила користування сайтом', '14 днів', 'Ми є авторизованим партнером xTool.', 'Реклама продукції. Ми є авторизованим партнером xTool.'],
 };
 (async () => {
  let browser;
  try {
   browser = await chromium.launch({headless:true,...(process.env.CHROME_BIN ? {executablePath:process.env.CHROME_BIN} : {})});
-  for (const [language, [title, rights, seller, serviceTitle, complaintPeriod, partnership]] of Object.entries(expected)) {
+  for (const [language, [title, rights, seller, serviceTitle, complaintPeriod, partnership, articleDisclosure]] of Object.entries(expected)) {
    const context = await browser.newContext();
    await context.addCookies([{name:'lasery_cart', value:encodeURIComponent(`${fixture.id}::1`), url:base}]);
    const page = await context.newPage();
@@ -70,7 +70,7 @@ const expected = {
    await page.goto(`${base}/?post_type=lasery_product&p=${fixture.id}&lang=${language}`);
    assert.equal(await page.locator('.product-summary .commercial-disclosure').innerText(), partnership);
    await page.goto(`${base}/?p=${fixture.articles[language]}`);
-   assert.equal(await page.locator('.article-header .commercial-disclosure').innerText(), partnership);
+   assert.equal(await page.locator('.article-header .commercial-disclosure').innerText(), articleDisclosure);
    await page.goto(`${base}/?lang=${language}`);
    assert.equal(await page.locator('.hero > .wrap .commercial-disclosure').innerText(), partnership);
    await page.locator('[data-search-open]').first().click();
@@ -83,6 +83,21 @@ const expected = {
    await context.close();
   }
   console.log('Purchase information: five languages, footer and pre-submit links, seller, rights and official xTool links passed.');
+  {
+   const old = php(`echo base64_encode(serialize(get_option('lasery_xtool_text_overrides', [])));`);
+   try {
+    php(`$v=get_option('lasery_xtool_text_overrides', []); $v['pl']['purchase_info']['commercial_disclosure']='Partner testowy'; $v['pl']['purchase_info']['article_advertising']='Oznaczenie testowe.'; update_option('lasery_xtool_text_overrides', $v);`);
+    const page = await browser.newPage();
+    await page.goto(`${base}/?lang=pl`);
+    assert.equal(await page.locator('.hero > .wrap .commercial-disclosure').innerText(), 'Partner testowy');
+    await page.goto(`${base}/?p=${fixture.articles.pl}`);
+    assert.equal(await page.locator('.article-header .commercial-disclosure').innerText(), 'Oznaczenie testowe. Partner testowy');
+    await page.close();
+   } finally {
+    php(`update_option('lasery_xtool_text_overrides', unserialize(base64_decode('${old}')));`);
+   }
+   console.log('Article disclosure uses both editable texts without changing the homepage.');
+  }
   {
    const context = await browser.newContext();
    await context.addCookies([{name:'lasery_cart', value:encodeURIComponent(`${fixture.f2}:101:1|${fixture.f2}:102:1|${fixture.id}::1`), url:base}]);
