@@ -74,12 +74,8 @@ $find = static function ( $key, $language ) {
 };
 
 foreach ( $articles as $key => $article ) {
-    // The F2 event article needs a safety rewrite before it can be published again.
-    if ( 'event-engraving' === $key ) {
-        WP_CLI::log( 'event-engraving requires a safety rewrite; skipped.' );
-        continue;
-    }
-    $cover = get_posts( [ 'post_type' => 'attachment', 'post_status' => 'inherit', 'meta_key' => '_lasery_seed', 'meta_value' => 'cover:' . $key, 'fields' => 'ids', 'posts_per_page' => 1 ] );
+    $cover_key = $article['cover_key'] ?? $key;
+    $cover = get_posts( [ 'post_type' => 'attachment', 'post_status' => 'inherit', 'meta_key' => '_lasery_seed', 'meta_value' => 'cover:' . $cover_key, 'fields' => 'ids', 'posts_per_page' => 1 ] );
     $cover = $cover ? $cover[0] : 0;
     if ( ! $cover ) {
         $file = wp_tempnam( $article['cover'] );
@@ -89,7 +85,7 @@ foreach ( $articles as $key => $article ) {
             wp_delete_file( $file );
             WP_CLI::error( 'Could not import the cover of ' . $key . ': ' . $cover->get_error_message() );
         }
-        update_post_meta( $cover, '_lasery_seed', 'cover:' . $key );
+        update_post_meta( $cover, '_lasery_seed', 'cover:' . $cover_key );
         update_post_meta( $cover, '_wp_attachment_image_alt', $article['languages']['pl']['title'] );
     }
     $date = gmdate( 'Y-m-d H:i:s', time() - $article['days_ago'] * DAY_IN_SECONDS );

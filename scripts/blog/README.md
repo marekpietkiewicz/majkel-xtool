@@ -34,11 +34,11 @@ Opublikowane artykuły (klucz — temat):
 | `photo-engraving` | Grawerowanie zdjęć laserem: drewno, łupek, szkło, metal i kolor |
 | `leather-engraving` | Grawerowanie i cięcie skóry laserem |
 | `paper-cutting` | Cięcie papieru i kartonu laserem: zaproszenia, opakowania, makiety |
-| `event-engraving` | Grawerowanie na eventach: przeniesiony do szkiców, wymaga przepisania zgodnie z instrukcją bezpieczeństwa F2 |
+| `event-engraving` | Zamówienia na wydarzenia i grawerowanie w pracowni |
 | `stone-engraving` | Grawerowanie kamienia: łupek, granit, marmur, płytki |
 | `xtool-x1` | xTool X1: Laser Swap, wersje i zestawy |
 
-Przygotowane do publikacji:
+Opublikowane dodatkowo:
 
 | Klucz | Temat |
 |---|---|
@@ -101,6 +101,8 @@ return [
     ],
 ];
 ```
+
+Opcjonalne `cover_key` pozwala użyć okładki innego artykułu: wpisz jego klucz, a w `cover` nazwę tego samego pliku. Seeder wyszuka lub zaimportuje okładkę pod wspólnym kluczem; istniejących załączników nie zmienia.
 
 Bloki to zwykły tekst, który skrypt koduje do HTML, więc nie wstawiaj znaczników, linków ani markdownu:
 
