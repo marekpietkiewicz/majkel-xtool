@@ -58,7 +58,7 @@ $email = lasery_xtool_contact_email();
     data-label-all="<?php esc_attr_e('Pokaż wszystkie wyniki (%d)', 'lasery-xtool'); ?>">
     <form class="search-form" role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
         <?php echo lasery_xtool_icon('search'); ?>
-        <input type="search" name="s" placeholder="<?php esc_attr_e('Szukaj urządzeń, akcesoriów i artykułów', 'lasery-xtool'); ?>" aria-label="<?php esc_attr_e('Szukaj', 'lasery-xtool'); ?>" aria-controls="search-results" autocomplete="off" enterkeyhint="search">
+        <input type="search" name="s" maxlength="200" placeholder="<?php esc_attr_e('Szukaj urządzeń, akcesoriów i artykułów', 'lasery-xtool'); ?>" aria-label="<?php esc_attr_e('Szukaj', 'lasery-xtool'); ?>" aria-controls="search-results" autocomplete="off" enterkeyhint="search">
         <input type="hidden" name="lang" value="<?php echo esc_attr(lasery_xtool_interface_language()); ?>">
         <button type="button" class="search-close" data-search-close><span aria-hidden="true">Esc</span><span class="visually-hidden"><?php esc_html_e('Zamknij', 'lasery-xtool'); ?></span></button>
     </form>

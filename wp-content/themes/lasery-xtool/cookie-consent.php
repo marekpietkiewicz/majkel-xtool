@@ -23,25 +23,45 @@ function lasery_xtool_gate_external_content($content) {
             return true;
         }
         $host = wp_parse_url($url, PHP_URL_HOST);
+        // A browser can resolve e.g. "http:example.org/image" to an external host,
+        // even though PHP's URL parser reports a scheme and a path without a host.
+        if (!is_string($host) && preg_match('~^https?:~i', $url)) {
+            return true;
+        }
         return is_string($host) && strtolower($host) !== $site_host;
+    };
+    // CSS escapes can spell functions and URLs in forms a simple url() check cannot see.
+    $css_may_load = static function ($css) {
+        return is_string($css) && (strpos($css, '\\') !== false || preg_match('~\b(?:url|image-set|image)\s*\(|@import|(?:https?:)?//~i', $css));
     };
     $processor = new WP_HTML_Tag_Processor($content);
     while ($processor->next_tag()) {
         $tag = $processor->get_tag();
-        foreach (['src', 'poster', 'data'] as $attribute) {
+        foreach (['src', 'poster', 'data', 'background', 'href', 'xlink:href'] as $attribute) {
             if ($attribute === 'data' && $tag !== 'OBJECT') {
                 continue;
             }
+            if (in_array($attribute, ['href', 'xlink:href'], true) && !in_array($tag, ['LINK', 'IMAGE', 'USE', 'FEIMAGE'], true)) {
+                continue;
+            }
             $value = $processor->get_attribute($attribute);
-            if ($is_external($value)) {
-                $processor->set_attribute('data-lasery-consent-' . $attribute, $value);
+            // A data: document in an iframe, object or embed can itself load external resources.
+            $embedded_data = is_string($value) && in_array($tag, ['IFRAME', 'OBJECT', 'EMBED'], true)
+                && in_array($attribute, ['src', 'data'], true)
+                && preg_match('~^data:~i', trim(str_replace(["\t", "\n", "\r"], '', $value)));
+            if ($embedded_data || $is_external($value)) {
+                $processor->set_attribute('data-lasery-consent-' . str_replace(':', '-', $attribute), $value);
                 $processor->remove_attribute($attribute);
             }
+        }
+        if ($tag === 'IFRAME' && is_string($processor->get_attribute('srcdoc'))) {
+            $processor->set_attribute('data-lasery-consent-srcdoc', $processor->get_attribute('srcdoc'));
+            $processor->remove_attribute('srcdoc');
         }
         $srcset = $processor->get_attribute('srcset');
         $external_srcset = is_string($srcset) && strpos($srcset, '\\') !== false;
         $normalized_srcset = is_string($srcset) ? str_replace(["\t", "\n", "\r"], '', $srcset) : '';
-        if ($normalized_srcset !== '' && preg_match_all('~(?:https?:)?//[^\s,]+~i', $normalized_srcset, $matches)) {
+        if ($normalized_srcset !== '' && preg_match_all('~(?:https?:)?//[^\s,]+|https?:[^\s,]+~i', $normalized_srcset, $matches)) {
             foreach ($matches[0] as $url) {
                 if ($is_external($url)) {
                     $external_srcset = true;
@@ -54,9 +74,14 @@ function lasery_xtool_gate_external_content($content) {
             $processor->remove_attribute('srcset');
         }
         $style = $processor->get_attribute('style');
-        if (is_string($style) && preg_match('/url\s*\(/i', $style)) {
+        if ($css_may_load($style)) {
             $processor->set_attribute('data-lasery-consent-style', $style);
             $processor->remove_attribute('style');
+        }
+        if ($tag === 'STYLE' && $css_may_load($processor->get_modifiable_text())) {
+            $type = $processor->get_attribute('type');
+            $processor->set_attribute('data-lasery-consent-css-type', is_string($type) ? $type : 'text/css');
+            $processor->set_attribute('type', 'text/plain');
         }
     }
     return $processor->get_updated_html();

@@ -26,7 +26,7 @@ Artykuły w pięciu językach tworzy `wp eval-file scripts/seed-blog.php` z plik
 
 ## Wyszukiwarka
 
-Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera okno wyszukiwania urządzeń, akcesoriów i artykułów w języku interfejsu. Przeglądarka pobiera raz mały indeks (`/wp-json/lasery/v1/search?lang=pl`, kilkanaście–kilkadziesiąt KB, przeglądarka przechowuje go 10 minut) i wyszukuje w nim od razu przy wpisywaniu, bez rozróżniania wielkości liter i polskich znaków; angielska nazwa ze sklepu xTool również znajduje produkt. Indeks jest odświeżany po zapisaniu produktu lub artykułu i po każdej synchronizacji cen. Bez JavaScriptu ten sam indeks obsługuje stronę wyników `/?s=…&lang=…`.
+Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera wyszukiwanie urządzeń, akcesoriów i artykułów w języku interfejsu. Po wpisaniu frazy serwer przeszukuje indeks bez rozróżniania wielkości liter i znaków diakrytycznych; uwzględnia też niemieckie warianty `ß`/`ss`, a angielska nazwa ze sklepu xTool również znajduje produkt. Do okna trafia najwyżej osiem produktów i cztery artykuły oraz liczba wszystkich wyników. Serwer przechowuje indeks produktów i porcje indeksu artykułów w pamięci podręcznej, odświeżając je po zmianach treści lub cen. Bez JavaScriptu działa strona wyników `/?s=…&lang=…`, z maksymalnie 24 kartami na stronę. Stare, już otwarte karty mogą do przeładowania korzystać z poprzedniego wariantu API bez parametru `q`, który zwraca najwyżej 2000 produktów i 100 ostatnich artykułów.
 
 Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie siedem, żeby siatka była pełna): najpierw maszyny z oznaczeniem demo, potem pozostałe, w obu grupach według pola **Kolejność**. Pozostałe są w katalogu `/produkty/`.
 

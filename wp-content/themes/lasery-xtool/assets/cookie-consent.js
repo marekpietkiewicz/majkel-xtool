@@ -4,7 +4,7 @@
 
   const key = 'lasery_xtool_external_consent_v1';
   const lifetime = 180 * 24 * 60 * 60 * 1000;
-  const attributes = ['src', 'srcset', 'poster', 'data', 'style'];
+  const attributes = ['src', 'srcset', 'poster', 'data', 'background', 'href', 'xlink:href', 'srcdoc', 'style'];
   let temporaryChoice = null;
   let opener = null;
 
@@ -26,18 +26,26 @@
 
   const updateContent = (choice) => {
     attributes.forEach((attribute) => {
-      const dataAttribute = `data-lasery-consent-${attribute}`;
+      const dataAttribute = `data-lasery-consent-${attribute.replace(':', '-')}`;
       document.querySelectorAll(`[${dataAttribute}]`).forEach((element) => {
+        const xlink = attribute === 'xlink:href' ? 'http://www.w3.org/1999/xlink' : '';
         if (choice === 'allow') {
           const value = element.getAttribute(dataAttribute);
-          if (value !== null && element.getAttribute(attribute) !== value) element.setAttribute(attribute, value);
+          if (value !== null && element.getAttribute(attribute) !== value) {
+            if (xlink) element.setAttributeNS(xlink, attribute, value);
+            else element.setAttribute(attribute, value);
+          }
         } else {
-          element.removeAttribute(attribute);
+          if (xlink) element.removeAttributeNS(xlink, 'href');
+          else element.removeAttribute(attribute);
         }
         if (attribute === 'src' && element.tagName === 'IFRAME') {
           element.hidden = choice !== 'allow';
         }
       });
+    });
+    document.querySelectorAll('[data-lasery-consent-css-type]').forEach((element) => {
+      element.setAttribute('type', choice === 'allow' ? element.getAttribute('data-lasery-consent-css-type') : 'text/plain');
     });
     document.querySelectorAll('[data-lasery-consent-placeholder]').forEach((element) => {
       element.hidden = choice === 'allow';

@@ -26,8 +26,7 @@ function lasery_xtool_post_translations( $post_id, $published_only = true ) {
 	if ( isset( $cache[ $key ] ) ) {
 		return $cache[ $key ];
 	}
-	$ids = get_posts(
-		array(
+	$args = array(
 			'post_type'      => 'post',
 			'post_status'    => $published_only ? 'publish' : array( 'publish', 'future', 'draft', 'pending', 'private', 'trash' ),
 			'meta_key'       => '_lasery_translation_of',
@@ -35,10 +34,13 @@ function lasery_xtool_post_translations( $post_id, $published_only = true ) {
 			'fields'         => 'ids',
 			'posts_per_page' => 20,
 			'no_found_rows'  => true,
-		)
-	);
+		);
+	if ( $published_only ) {
+		$args['has_password'] = false;
+	}
+	$ids = get_posts( $args );
 	$translations = array();
-	if ( ! $published_only || 'publish' === get_post_status( $original ) ) {
+	if ( ! $published_only || ( 'publish' === get_post_status( $original ) && '' === get_post_field( 'post_password', $original ) ) ) {
 		$translations[ lasery_xtool_post_language( $original ) ] = $original;
 	}
 	foreach ( $ids as $id ) {
@@ -104,7 +106,7 @@ function lasery_xtool_products_shortcode( $attributes ) {
 	$source_ids = array_filter( array_map( 'trim', explode( ',', $attributes['xtool'] ) ), 'ctype_digit' );
 	if ( $source_ids ) {
 		// One product per source ID (the oldest), in the order given in the shortcode.
-		$found = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => $source_ids, 'meta_compare' => 'IN', 'fields' => 'ids', 'posts_per_page' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) );
+		$found = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'has_password' => false, 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => $source_ids, 'meta_compare' => 'IN', 'fields' => 'ids', 'posts_per_page' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) );
 		update_postmeta_cache( $found );
 		$by_source = array();
 		foreach ( $found as $id ) {
@@ -116,7 +118,7 @@ function lasery_xtool_products_shortcode( $attributes ) {
 			}
 		}
 	}
-	$products = $ids ? get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'post__in' => array_unique( $ids ), 'orderby' => 'post__in', 'posts_per_page' => 6 ) ) : array();
+	$products = $ids ? get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'has_password' => false, 'post__in' => array_unique( $ids ), 'orderby' => 'post__in', 'posts_per_page' => 6 ) ) : array();
 	if ( ! $products ) {
 		return '';
 	}

@@ -115,7 +115,9 @@ function lasery_xtool_sync_images() {
 			$id = isset( $images[ $url ] ) ? absint( $images[ $url ] ) : 0;
 			if ( $id && 'attachment' === get_post_type( $id ) && 'image/webp' === get_post_mime_type( $id ) && get_attached_file( $id ) && file_exists( get_attached_file( $id ) ) ) {
 				if ( 0 === $index && ( $old_url !== $url || $old_id !== $id ) ) {
+					$before = lasery_xtool_public_product_state( $post_id );
 					lasery_xtool_set_source_thumbnail( $post_id, $url, $id );
+					lasery_xtool_product_state_changed( $post_id, $before );
 				}
 				continue;
 			}
@@ -141,7 +143,9 @@ function lasery_xtool_sync_images() {
 		$retries = get_post_meta( $post_id, '_lasery_image_retries', true );
 		$retries = is_array( $retries ) ? array_intersect_key( $retries, array_fill_keys( lasery_xtool_source_image_urls( $post_id ), true ) ) : array();
 		++$attempted;
+		$before = lasery_xtool_public_product_state( $post_id );
 		$image = lasery_xtool_import_image( $post_id, $url );
+		lasery_xtool_product_state_changed( $post_id, $before );
 		if ( is_wp_error( $image ) ) {
 			++$failed;
 			$retries[ $url ] = time() + 6 * HOUR_IN_SECONDS;

@@ -73,13 +73,92 @@ add_filter('rest_endpoints', function ($endpoints) {
     }
     return $endpoints;
 });
+
+/** Protected posts this user cannot edit; null means every protected post for an anonymous visitor. */
+function lasery_xtool_rest_hidden_posts() {
+    static $by_user = [];
+    $user_id = get_current_user_id();
+    if (!$user_id) {
+        return null;
+    }
+    if (!isset($by_user[$user_id])) {
+        $hidden = [];
+        $posts = get_posts(['post_type' => get_post_types(['public' => true]), 'post_status' => ['publish', 'future', 'draft', 'pending', 'private', 'trash'], 'has_password' => true, 'posts_per_page' => -1, 'update_post_meta_cache' => false, 'update_post_term_cache' => false]);
+        foreach ($posts as $post) {
+            if (!current_user_can('edit_post', $post->ID)) {
+                $hidden[] = $post->ID;
+            }
+        }
+        $by_user[$user_id] = $hidden;
+    }
+    return $by_user[$user_id];
+}
+
+// Collections and search enforce the same per-post permissions as the single REST endpoint.
+function lasery_xtool_rest_public_query($args) {
+    $hidden = lasery_xtool_rest_hidden_posts();
+    unset($args['post_password']);
+    if ($hidden === null) {
+        $args['has_password'] = false;
+    } elseif ($hidden) {
+        // WP_Query ignores post__not_in when a caller also specifies post__in.
+        $args['lasery_hidden_posts'] = $hidden;
+    }
+    return $args;
+}
+foreach (['post', 'page', 'lasery_product'] as $type) {
+    add_filter('rest_' . $type . '_query', 'lasery_xtool_rest_public_query');
+}
+add_filter('rest_post_search_query', function ($args) {
+    $args = lasery_xtool_rest_public_query($args);
+    $args['lasery_hidden_media_parents'] = lasery_xtool_rest_hidden_posts() ?? true;
+    return $args;
+});
+add_filter('rest_attachment_query', function ($args) {
+    $args['lasery_hidden_media_parents'] = lasery_xtool_rest_hidden_posts() ?? true;
+    return $args;
+});
+add_filter('posts_where', function ($where, $query) {
+    $posts = $query->get('lasery_hidden_posts');
+    if (is_array($posts) && $posts) {
+        global $wpdb;
+        $where .= " AND {$wpdb->posts}.ID NOT IN (" . implode(',', array_map('absint', $posts)) . ')';
+    }
+    $hidden = $query->get('lasery_hidden_media_parents');
+    if ($hidden === true) {
+        global $wpdb;
+        $where .= " AND ({$wpdb->posts}.post_type <> 'attachment' OR NOT EXISTS (SELECT 1 FROM {$wpdb->posts} lasery_parent WHERE lasery_parent.ID = {$wpdb->posts}.post_parent AND lasery_parent.post_password <> ''))";
+    } elseif (is_array($hidden) && $hidden) {
+        global $wpdb;
+        $where .= " AND ({$wpdb->posts}.post_type <> 'attachment' OR {$wpdb->posts}.post_parent NOT IN (" . implode(',', array_map('absint', $hidden)) . '))';
+    }
+    return $where;
+}, 10, 2);
+add_filter('rest_pre_dispatch', function ($result, $server, $request) {
+    if ($result !== null || !in_array($request->get_method(), ['GET', 'HEAD'], true) || !preg_match('~^/wp/v2/(posts|pages|media|lasery_product)/(\d+)$~', $request->get_route(), $match)) {
+        return $result;
+    }
+    $post = get_post((int) $match[2]);
+    $types = ['posts' => 'post', 'pages' => 'page', 'media' => 'attachment', 'lasery_product' => 'lasery_product'];
+    $protected = $post && $post->post_type === $types[$match[1]] ? $post : null;
+    if ($protected && $protected->post_type === 'attachment') {
+        $protected = $protected->post_parent ? get_post($protected->post_parent) : null;
+    }
+    if ($protected && $protected->post_password !== '' && !current_user_can('edit_post', $protected->ID)) {
+        return new WP_Error('rest_post_invalid_id', __('Invalid post ID.'), ['status' => 404]);
+    }
+    return $result;
+}, 10, 3);
 add_filter('wp_sitemaps_add_provider', function ($provider, $name) {
     return in_array($name, ['users', 'taxonomies'], true) ? false : $provider;
 }, 10, 2);
-add_filter('oembed_response_data', function ($data) {
+add_filter('oembed_response_data', function ($data, $post) {
+    if ($post->post_password !== '' && !current_user_can('edit_post', $post->ID)) {
+        return false;
+    }
     unset($data['author_name'], $data['author_url']);
     return $data;
-});
+}, 10, 2);
 // Author, date, category and tag archives would list articles of every language under a user name;
 // the blog page lists them instead. Before redirect_canonical, which would reveal the author's slug.
 add_action('template_redirect', function () {
@@ -150,6 +229,10 @@ function lasery_xtool_display_product_title($post_id) {
 
 // Titles in the interface language (WordPress would use the Polish site tagline, post type label and page titles).
 add_filter('document_title_parts', function ($parts) {
+    if (is_singular() && get_queried_object()->post_password !== '') {
+        $parts['title'] = __('Protected');
+        return $parts;
+    }
     $language = lasery_xtool_interface_language();
     if (is_front_page()) {
         $parts['tagline'] = __('Produkty xTool i demonstracje', 'lasery-xtool');
@@ -198,6 +281,9 @@ add_filter('post_type_archive_link', function ($url, $post_type) {
 
 // Pages are translated in place, so each language version is its own canonical URL.
 add_filter('get_canonical_url', function ($url, $post) {
+    if ($post->post_password !== '') {
+        return false;
+    }
     if ($post->post_type !== 'page') {
         return $url;
     }
@@ -220,12 +306,58 @@ add_action('template_redirect', function () {
     }
 });
 
+// A password cookie must never affect a shared response, even after the page is unlocked.
+add_action('template_redirect', function () {
+    if (is_singular() && get_queried_object()->post_password !== '') {
+        nocache_headers();
+        do_action('litespeed_control_set_nocache', 'password-protected content');
+    }
+}, 0);
+
+// Custom page templates do not necessarily call the_content(), which normally checks the password.
+add_filter('template_include', function ($template) {
+    return is_singular() && post_password_required() ? get_template_directory() . '/protected.php' : $template;
+}, 99);
+
 // Pages with source prices (also product cards inside articles) and the article list stay in the page cache for at most an hour.
 add_action('template_redirect', function () {
+    if (is_singular() && get_queried_object()->post_password !== '') {
+        return;
+    }
     if (is_front_page() || is_post_type_archive('lasery_product') || is_singular(['lasery_product', 'post']) || is_page('blog')) {
         do_action('litespeed_control_set_ttl', HOUR_IN_SECONDS);
     }
 });
+
+// Protected posts and products can be opened directly, but never belong in a shared listing.
+add_action('pre_get_posts', function ($query) {
+    if (!is_admin() && !(defined('REST_REQUEST') && REST_REQUEST) && !wp_doing_cron() && !(defined('WP_CLI') && WP_CLI) && !$query->is_singular() && in_array($query->get('post_type'), ['post', 'lasery_product'], true)) {
+        $query->set('has_password', false);
+    }
+});
+
+// Core and language sitemap providers can also be rendered outside a normal front-end request.
+add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
+    if (in_array($post_type, ['post', 'page', 'lasery_product'], true)) {
+        $args['has_password'] = false;
+    }
+    return $args;
+}, 10, 2);
+
+add_filter('wp_robots', function ($robots) {
+    if (is_singular() && get_queried_object()->post_password !== '') {
+        unset($robots['index']);
+        $robots['noindex'] = true;
+    }
+    return $robots;
+});
+
+// Cards can appear on any page, including cached articles. Invalidate all shared pages on a visibility change.
+add_action('wp_after_insert_post', function ($id, $post, $update, $before) {
+    if ($update && $before && in_array($post->post_type, ['post', 'page', 'lasery_product'], true) && $post->post_password !== $before->post_password) {
+        do_action('litespeed_purge_all', 'content password changed');
+    }
+}, 10, 4);
 
 // Post archives and feeds list the articles of the interface language only.
 add_action('pre_get_posts', function ($query) {
@@ -233,6 +365,7 @@ add_action('pre_get_posts', function ($query) {
         return;
     }
     if ($query->is_home() || $query->is_archive() || $query->is_feed()) {
+        $query->set('has_password', false);
         $query->set('meta_query', lasery_xtool_language_meta_query(lasery_xtool_interface_language()));
     }
 });

@@ -37,7 +37,8 @@ final class Lasery_XTool_Sitemap_Languages extends WP_Sitemaps_Provider {
                     $list[] = ['loc' => $url];
                 }
             }
-            if ($language !== 'pl') {
+            $front = get_option('show_on_front') === 'page' ? get_post(get_option('page_on_front')) : null;
+            if ($language !== 'pl' && (!$front || $front->post_password === '')) {
                 $list[] = ['loc' => add_query_arg('lang', $language, home_url('/'))];
             }
         }

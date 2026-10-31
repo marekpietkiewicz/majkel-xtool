@@ -1,6 +1,9 @@
 <?php
 /** Article tile. Args: heading (h2|h3), featured (bool). */
 $post_id = get_the_ID();
+if (get_post($post_id)->post_password !== '') {
+    return;
+}
 $heading = isset($args['heading']) && $args['heading'] === 'h2' ? 'h2' : 'h3';
 $featured = !empty($args['featured']);
 ?>

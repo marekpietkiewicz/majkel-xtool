@@ -76,6 +76,8 @@ function lasery_xtool_products($kind, $limit = -1, $extra = []) {
         'lasery_demo_first' => true,
         'suppress_filters' => false,
     ];
+    // Product rails and their cached output are public even when rendered by cron or WP-CLI.
+    $args['has_password'] = false;
     if ($kind !== '' && function_exists('lasery_xtool_kind_tax_query')) {
         $args['tax_query'] = array_merge($args['tax_query'] ?? [], lasery_xtool_kind_tax_query($kind));
     }
@@ -167,6 +169,7 @@ function lasery_xtool_blog_url($language = '') {
 /** Blog posts written in the current language (and matching an optional meta_query). */
 function lasery_xtool_blog_query($args = []) {
     $args += ['post_type' => 'post', 'post_status' => 'publish', 'ignore_sticky_posts' => true];
+    $args['has_password'] = false;
     if (function_exists('lasery_xtool_language_meta_query')) {
         $language = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
         $args['meta_query'] = isset($args['meta_query']) ? ['relation' => 'AND', $args['meta_query'], $language] : $language;

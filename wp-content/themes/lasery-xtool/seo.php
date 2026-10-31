@@ -72,6 +72,9 @@ function lasery_xtool_catalogue_url($language, $kind = '', $page = 1) {
  * nothing for the cart, which is not indexed.
  */
 function lasery_xtool_post_language_urls($post) {
+    if ($post->post_password !== '') {
+        return [];
+    }
     if ($post->post_type === 'page' && $post->post_name === (defined('LASERY_XTOOL_CART_PAGE') ? LASERY_XTOOL_CART_PAGE : 'koszyk')) {
         return [];
     }
@@ -92,6 +95,9 @@ function lasery_xtool_post_language_urls($post) {
  * the current language and its description; empty where they do not apply.
  */
 function lasery_xtool_seo_page() {
+    if (is_singular() && get_queried_object()->post_password !== '') {
+        return [[], '', ''];
+    }
     $language = lasery_xtool_interface_language();
     $alternates = [];
     $canonical = '';
@@ -238,7 +244,7 @@ function lasery_xtool_structured_data($canonical, $description, $image) {
         $crumbs[] = [$kind === 'accessory' ? __('Akcesoria', 'lasery-xtool') : __('Urządzenia', 'lasery-xtool'), lasery_xtool_catalogue_url($language, $kind)];
         $crumbs[] = [$title, $canonical];
         // Google expects an offer with every product, so products without a current price are left out.
-        $offer = lasery_xtool_product_offer($id, $canonical, $shop['@id']);
+        $offer = lasery_xtool_product_offer($id, $canonical);
         if ($offer) {
             $product = ['@type' => 'Product', '@id' => $canonical . '#product', 'name' => $title, 'description' => $description, 'url' => $canonical, 'brand' => ['@type' => 'Brand', 'name' => 'xTool'], 'offers' => $offer];
             if ($image) {
@@ -283,7 +289,7 @@ function lasery_xtool_structured_data($canonical, $description, $image) {
 }
 
 /** The offer of a product with current prices: one price, or the range of its available variants. */
-function lasery_xtool_product_offer($post_id, $url, $seller) {
+function lasery_xtool_product_offer($post_id, $url) {
     if (!function_exists('lasery_xtool_lowest_price')) {
         return null;
     }
@@ -291,7 +297,7 @@ function lasery_xtool_product_offer($post_id, $url, $seller) {
     if (!$lowest) {
         return null;
     }
-    $offer = ['url' => $url, 'priceCurrency' => $lowest[1], 'availability' => 'https://schema.org/InStock', 'seller' => ['@id' => $seller]];
+    $offer = ['url' => $url, 'priceCurrency' => $lowest[1], 'availability' => 'https://schema.org/InStock', 'seller' => ['@type' => 'Organization', 'name' => 'xTool']];
     if (!$lowest[2]) {
         return ['@type' => 'Offer', 'price' => $lowest[0]] + $offer;
     }
