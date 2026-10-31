@@ -201,18 +201,23 @@
   /* Cart confirmations show for a moment; the address drops the result, so a reload does not repeat it. */
   const toast = document.querySelector('[data-cart-toast]');
   let toastTimer = 0;
-  // Emptied first, so screen readers also announce a message that repeats the previous one.
   const showToast = (message) => {
     clearTimeout(toastTimer);
-    toast.textContent = '';
-    toastTimer = setTimeout(() => {
+    const show = () => {
       toast.textContent = message;
       toast.classList.add('is-shown');
       toastTimer = setTimeout(() => {
         toast.classList.remove('is-shown');
         toastTimer = setTimeout(() => { toast.textContent = ''; }, 300);
       }, 4000);
-    }, 100);
+    };
+    // The same message again is emptied for a moment first, so screen readers announce it again.
+    if (toast.textContent !== message) {
+      show();
+      return;
+    }
+    toast.textContent = '';
+    toastTimer = setTimeout(show, 100);
   };
   if (toast) {
     const message = toast.textContent.trim();
