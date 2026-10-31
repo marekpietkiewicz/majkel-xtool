@@ -428,6 +428,8 @@ html:not(.js) .cart-toast:empty { display: none; }
 .js .cart-toast { position: fixed; top: calc(var(--header-height) + 12px); left: 50%; z-index: 70; display: flex; align-items: center; gap: 10px; width: max-content; max-width: calc(100% - 2 * var(--gutter)); margin: 0; padding: 12px 20px 12px 14px; border-radius: 999px; background: var(--ink); color: #fff; box-shadow: var(--shadow); font-size: .95rem; line-height: 1.35; opacity: 0; pointer-events: none; transform: translate(-50%, -8px); transition: opacity .25s, transform .25s; }
 .js .cart-toast::before { content: ""; width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; background: #22a35a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 14px no-repeat; }
 .js .cart-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+/* Emptied for a moment before a new message (so it is announced again): hidden meanwhile. */
+.js .cart-toast:empty { opacity: 0; transition: none; }
 
 /* Search */
 .search-dialog { width: min(680px, calc(100% - 24px)); max-width: none; max-height: min(720px, calc(100dvh - 24px)); margin: 12px auto auto; padding: 0; overflow: hidden; border: 0; border-radius: 22px; background: #fff; color: var(--ink); box-shadow: 0 40px 80px -24px rgb(13 15 18 / 45%); }
