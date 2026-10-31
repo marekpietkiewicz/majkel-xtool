@@ -33,11 +33,12 @@ function lasery_xtool_preferred_language() {
 }
 
 // Pages opened without a language (typed or shared addresses, x-default in search results) switch to the
-// visitor's language. Articles have one language each and redirect themselves. The answer depends on the
-// visitor, so it is never cached. After WordPress's own redirects (e.g. old addresses), so there is one hop.
+// visitor's language. Articles have one language each and redirect themselves; missing pages stay 404s.
+// The answer depends on the visitor, so it is never cached. It runs after WordPress's own redirects,
+// which keep such addresses without a language, so the visitor still gets their language.
 add_action('template_redirect', function () {
     $method = isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
-    if (isset($_GET['lang']) || !in_array($method, ['GET', 'HEAD'], true) || is_singular('post') || is_feed() || is_robots() || is_favicon() || is_embed() || is_preview() || is_trackback() || is_customize_preview() || get_query_var('sitemap') !== '' || get_query_var('sitemap-stylesheet') !== '') {
+    if (isset($_GET['lang']) || !in_array($method, ['GET', 'HEAD'], true) || is_404() || is_singular('post') || is_feed() || is_robots() || is_favicon() || is_embed() || is_preview() || is_trackback() || is_customize_preview() || get_query_var('sitemap') !== '' || get_query_var('sitemap-stylesheet') !== '') {
         return;
     }
     nocache_headers();
@@ -47,48 +48,102 @@ add_action('template_redirect', function () {
     exit;
 }, 11);
 
+/** Plain text from WordPress output that may hold tags and entities (titles, excerpts, the site name). */
+function lasery_xtool_seo_text($html) {
+    return trim(html_entity_decode(wp_strip_all_tags((string) $html), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+}
+
+/** The catalogue (one kind, one page) in a language, or without one (''), with its parameters in the site's order. */
+function lasery_xtool_catalogue_url($language, $kind = '', $page = 1) {
+    $url = get_post_type_archive_link('lasery_product');
+    if (!$url) {
+        return '';
+    }
+    $url = remove_query_arg('lang', $url);
+    if ($page > 1) {
+        $url = user_trailingslashit(trailingslashit($url) . 'page/' . $page, 'paged');
+    }
+    return add_query_arg(array_filter(['lang' => $language, 'kind' => $kind]), $url);
+}
+
 /**
- * The page's address without its language (for alternates in every language), its canonical
- * address in the current language and its description; empty strings where they do not apply.
+ * Language => address of a published post: products, the blog and the privacy policy in every
+ * language (translated in place), an article in its own language, other pages in Polish only;
+ * nothing for the cart, which is not indexed.
+ */
+function lasery_xtool_post_language_urls($post) {
+    if ($post->post_type === 'page' && $post->post_name === (defined('LASERY_XTOOL_CART_PAGE') ? LASERY_XTOOL_CART_PAGE : 'koszyk')) {
+        return [];
+    }
+    if ($post->post_type === 'post') {
+        return [function_exists('lasery_xtool_post_language') ? lasery_xtool_post_language($post->ID) : 'pl' => get_permalink($post)];
+    }
+    $translated = $post->post_type === 'lasery_product' || $post->post_name === 'blog' || (int) $post->ID === (int) get_option('wp_page_for_privacy_policy');
+    $url = remove_query_arg('lang', get_permalink($post));
+    $urls = [];
+    foreach ($translated ? array_keys(lasery_xtool_languages()) : ['pl'] as $language) {
+        $urls[$language] = add_query_arg('lang', $language, $url);
+    }
+    return $urls;
+}
+
+/**
+ * The page's language alternates (language => address, with x-default), its canonical address in
+ * the current language and its description; empty where they do not apply.
  */
 function lasery_xtool_seo_page() {
     $language = lasery_xtool_interface_language();
-    $neutral = '';
+    $alternates = [];
     $canonical = '';
     $description = '';
     if (is_front_page()) {
-        $neutral = home_url('/');
+        foreach (array_keys(lasery_xtool_languages()) as $other) {
+            $alternates[$other] = add_query_arg('lang', $other, home_url('/'));
+        }
+        $alternates['x-default'] = home_url('/');
         $description = lasery_xtool_text('hero_description');
-    } elseif (is_singular('lasery_product')) {
-        $canonical = get_permalink(get_queried_object_id());
-        $neutral = remove_query_arg('lang', $canonical);
-        $description = lasery_xtool_display_summary(get_queried_object_id());
-    } elseif (is_singular('post')) {
-        $canonical = get_permalink(get_queried_object_id());
-        $description = get_the_excerpt(get_queried_object_id());
-    } elseif (is_page('blog')) {
-        $canonical = wp_get_canonical_url(get_queried_object_id());
-        // Further pages list other articles in each language, so only the first one has alternates.
-        $neutral = lasery_xtool_blog_listing()[0] > 1 ? '' : remove_query_arg('lang', $canonical);
-        $description = lasery_xtool_text('blog_description');
-    } elseif (is_privacy_policy()) {
-        $canonical = wp_get_canonical_url(get_queried_object_id());
-        $neutral = remove_query_arg('lang', $canonical);
     } elseif (is_post_type_archive('lasery_product')) {
         // The same products in the same order in every language, so each page of the catalogue has alternates.
         $kind = lasery_xtool_requested_kind();
-        $neutral = remove_query_arg('lang', get_post_type_archive_link('lasery_product'));
         $page = max(1, (int) get_query_var('paged'));
-        if ($page > 1) {
-            $neutral = user_trailingslashit(trailingslashit($neutral) . 'page/' . $page, 'paged');
+        foreach (array_keys(lasery_xtool_languages()) as $other) {
+            $alternates[$other] = lasery_xtool_catalogue_url($other, $kind, $page);
         }
-        $neutral = $kind !== '' ? add_query_arg('kind', $kind, $neutral) : $neutral;
+        $alternates['x-default'] = lasery_xtool_catalogue_url('', $kind, $page);
         $description = lasery_xtool_text($kind === 'accessory' ? 'accessories_description' : 'products_description');
+    } elseif (is_singular('post')) {
+        $canonical = get_permalink(get_queried_object_id());
+        $description = lasery_xtool_seo_text(get_the_excerpt(get_queried_object_id()));
+        // Articles link their translations, which have their own addresses.
+        $translations = function_exists('lasery_xtool_post_translations') ? lasery_xtool_post_translations(get_queried_object_id()) : [];
+        if (count($translations) > 1) {
+            $alternates = array_map('get_permalink', $translations);
+            if (isset($translations['pl'])) {
+                $alternates['x-default'] = get_permalink($translations['pl']);
+            }
+        }
+    } elseif (is_singular(['lasery_product', 'page'])) {
+        $post = get_queried_object();
+        $urls = lasery_xtool_post_language_urls($post);
+        if (!$urls) {
+            return [[], '', ''];
+        }
+        $canonical = wp_get_canonical_url($post);
+        // Further blog pages list other articles in each language, so only the first one has alternates.
+        if (count($urls) > 1 && !(is_page('blog') && lasery_xtool_blog_listing()[0] > 1)) {
+            $alternates = $urls + ['x-default' => remove_query_arg('lang', reset($urls))];
+        }
+        if (is_singular('lasery_product')) {
+            // Product summaries are plain text already, so a "<5 mm" in them stays.
+            $description = lasery_xtool_display_summary($post->ID);
+        } elseif (is_page('blog')) {
+            $description = lasery_xtool_text('blog_description');
+        }
     }
-    if ($canonical === '' && $neutral !== '') {
-        $canonical = add_query_arg('lang', $language, $neutral);
+    if ($canonical === '' && isset($alternates[$language])) {
+        $canonical = $alternates[$language];
     }
-    return [$neutral, $canonical, $description];
+    return [$alternates, $canonical, $description];
 }
 
 /** The page's main image: the product or article photo, on the home page the first machine's. */
@@ -106,9 +161,7 @@ function lasery_xtool_seo_image() {
 }
 
 add_action('wp_head', function () {
-    [$neutral, $canonical, $description] = lasery_xtool_seo_page();
-    $description = trim(wp_strip_all_tags($description));
-    // Descriptions are plain text, so they are shortened without stripping tags again (which would cut "<5 mm").
+    [$alternates, $canonical, $description] = lasery_xtool_seo_page();
     $description = $description !== '' ? mb_strimwidth($description, 0, 160, '…') : '';
     if ($description !== '') {
         printf('<meta name="description" content="%s">' . "\n", esc_attr($description));
@@ -117,41 +170,22 @@ add_action('wp_head', function () {
     if ($canonical !== '' && !is_singular()) {
         printf('<link rel="canonical" href="%s">' . "\n", esc_url($canonical));
     }
-    // Open Graph writes every locale as language_COUNTRY (WordPress's Ukrainian is just "uk").
-    $locales = ['uk' => 'uk_UA'] + lasery_xtool_locales();
-    $alternates = [];
-    if ($neutral !== '') {
-        foreach (array_keys(lasery_xtool_languages()) as $language) {
-            $alternates[$language] = add_query_arg('lang', $language, $neutral);
-        }
-        // The address without a language opens in the visitor's language.
-        $alternates['x-default'] = $neutral;
-    } elseif (is_singular('post') && function_exists('lasery_xtool_post_translations')) {
-        // Articles link their translations, which have their own addresses.
-        $translations = lasery_xtool_post_translations(get_queried_object_id());
-        if (count($translations) > 1) {
-            foreach ($translations as $language => $id) {
-                $alternates[$language] = get_permalink($id);
-            }
-            if (isset($translations['pl'])) {
-                $alternates['x-default'] = get_permalink($translations['pl']);
-            }
-        }
-    }
     foreach ($alternates as $language => $url) {
         printf('<link rel="alternate" hreflang="%s" href="%s">' . "\n", esc_attr($language), esc_url($url));
     }
     if ($canonical === '') {
         return;
     }
-    // Open Graph and Twitter cards for links shared in messengers and social networks.
+    // Open Graph and Twitter cards for links shared in messengers and social networks. Open Graph
+    // writes every locale as language_COUNTRY (WordPress's Ukrainian is just "uk").
+    $locales = ['uk' => 'uk_UA'] + lasery_xtool_locales();
     $language = lasery_xtool_interface_language();
     $image = lasery_xtool_seo_image();
     $meta = [
-        'og:site_name' => get_bloginfo('name'),
+        'og:site_name' => lasery_xtool_seo_text(get_bloginfo('name')),
         'og:locale' => $locales[$language],
         'og:type' => is_singular('post') ? 'article' : (is_singular('lasery_product') ? 'product' : 'website'),
-        'og:title' => wp_get_document_title(),
+        'og:title' => lasery_xtool_seo_text(wp_get_document_title()),
         'og:description' => $description,
         'og:url' => $canonical,
         'og:image' => $image ? $image['url'] : '',
@@ -176,76 +210,51 @@ add_action('wp_head', function () {
     }
 });
 
-/** WordPress locales of the site languages (also used for og:locale). */
-function lasery_xtool_locales() {
-    return ['pl' => 'pl_PL', 'en' => 'en_US', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk'];
-}
-
-/** schema.org data of the page: the shop, the site with its search, products, articles and breadcrumbs. */
+/** schema.org data of the page: the shop, the site, products with their offer, articles and breadcrumbs. */
 function lasery_xtool_structured_data($canonical, $description, $image) {
     $language = lasery_xtool_interface_language();
     $home = add_query_arg('lang', $language, home_url('/'));
+    $name = lasery_xtool_seo_text(get_bloginfo('name'));
     $shop = [
         '@type' => 'Organization',
         '@id' => home_url('/#organization'),
-        'name' => get_bloginfo('name'),
+        'name' => $name,
         'url' => $home,
         'email' => lasery_xtool_contact_email(),
         'logo' => get_template_directory_uri() . '/assets/apple-touch-icon.png',
     ];
-    $data = [];
     if (is_front_page()) {
-        $data[] = $shop;
-        $data[] = [
-            '@type' => 'WebSite',
-            '@id' => home_url('/#website'),
-            'name' => get_bloginfo('name'),
-            'url' => $home,
-            'inLanguage' => $language,
-            'publisher' => ['@id' => $shop['@id']],
-            'potentialAction' => [
-                '@type' => 'SearchAction',
-                'target' => ['@type' => 'EntryPoint', 'urlTemplate' => add_query_arg('lang', $language, home_url('/')) . '&s={search_term_string}'],
-                'query-input' => 'required name=search_term_string',
-            ],
-        ];
-        return $data;
+        return [$shop, ['@type' => 'WebSite', '@id' => home_url('/#website'), 'name' => $name, 'url' => $home, 'inLanguage' => $language, 'publisher' => ['@id' => $shop['@id']]]];
     }
-    $crumbs = [[get_bloginfo('name'), $home]];
+    $crumbs = [[$name, $home]];
+    $data = [$shop];
     if (is_singular('lasery_product')) {
         $id = get_queried_object_id();
-        $title = wp_strip_all_tags(lasery_xtool_display_product_title($id));
-        $accessory = function_exists('lasery_xtool_is_accessory') && lasery_xtool_is_accessory($id);
-        $crumbs[] = [$accessory ? __('Akcesoria', 'lasery-xtool') : __('Urządzenia', 'lasery-xtool'), add_query_arg('kind', $accessory ? 'accessory' : 'device', get_post_type_archive_link('lasery_product'))];
+        $title = lasery_xtool_seo_text(lasery_xtool_display_product_title($id));
+        $kind = function_exists('lasery_xtool_is_accessory') && lasery_xtool_is_accessory($id) ? 'accessory' : 'device';
+        $crumbs[] = [$kind === 'accessory' ? __('Akcesoria', 'lasery-xtool') : __('Urządzenia', 'lasery-xtool'), lasery_xtool_catalogue_url($language, $kind)];
         $crumbs[] = [$title, $canonical];
-        $product = [
-            '@type' => 'Product',
-            '@id' => $canonical . '#product',
-            'name' => $title,
-            'description' => $description,
-            'url' => $canonical,
-            'brand' => ['@type' => 'Brand', 'name' => 'xTool'],
-        ];
-        if ($image) {
-            $product['image'] = $image['url'];
-        }
+        // Google expects an offer with every product, so products without a current price are left out.
         $offer = lasery_xtool_product_offer($id, $canonical, $shop['@id']);
         if ($offer) {
-            $product['offers'] = $offer;
+            $product = ['@type' => 'Product', '@id' => $canonical . '#product', 'name' => $title, 'description' => $description, 'url' => $canonical, 'brand' => ['@type' => 'Brand', 'name' => 'xTool'], 'offers' => $offer];
+            if ($image) {
+                $product['image'] = $image['url'];
+            }
+            $data[] = $product;
         }
-        $data[] = $shop;
-        $data[] = $product;
     } elseif (is_singular('post')) {
         $id = get_queried_object_id();
+        $title = lasery_xtool_seo_text(get_the_title($id));
         $blog = lasery_xtool_blog_url($language);
         if ($blog !== '') {
             $crumbs[] = [__('Blog', 'lasery-xtool'), $blog];
         }
-        $crumbs[] = [get_the_title($id), $canonical];
+        $crumbs[] = [$title, $canonical];
         $article = [
             '@type' => 'Article',
             '@id' => $canonical . '#article',
-            'headline' => get_the_title($id),
+            'headline' => $title,
             'description' => $description,
             'mainEntityOfPage' => $canonical,
             'inLanguage' => $language,
@@ -257,10 +266,9 @@ function lasery_xtool_structured_data($canonical, $description, $image) {
         if ($image) {
             $article['image'] = $image['url'];
         }
-        $data[] = $shop;
         $data[] = $article;
     } else {
-        return $data;
+        return [];
     }
     $data[] = [
         '@type' => 'BreadcrumbList',
@@ -306,7 +314,7 @@ add_filter('wp_sitemaps_posts_show_on_front_entry', function ($entry) {
     return $entry;
 });
 
-// The other language versions of pages and products, and the catalogue in every language.
+// The other language versions of the home page, pages and products, and the catalogue in every language.
 add_action('init', function () {
     if (function_exists('wp_register_sitemap_provider') && class_exists('WP_Sitemaps_Provider')) {
         require_once __DIR__ . '/class-sitemap-languages.php';
@@ -324,10 +332,14 @@ function lasery_xtool_indexnow_key() {
     return $key;
 }
 
+// The key file. The option is read only for addresses that look like one.
 add_action('template_redirect', function () {
+    $path = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI']) ? (string) wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '';
+    if (!preg_match('~/([a-f0-9]{32})\.txt$~D', $path, $match)) {
+        return;
+    }
     $key = get_option('lasery_xtool_indexnow_key');
-    $path = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI']) ? wp_parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '';
-    if (is_string($key) && $key !== '' && $path === '/' . $key . '.txt') {
+    if (is_string($key) && $key === $match[1] && $path === wp_parse_url(home_url('/' . $key . '.txt'), PHP_URL_PATH)) {
         status_header(200);
         header('Content-Type: text/plain; charset=utf-8');
         echo esc_html($key);
@@ -335,23 +347,15 @@ add_action('template_redirect', function () {
     }
 }, 0);
 
-/** Every language version of a page or product; an article has its own address per language. */
-function lasery_xtool_indexnow_urls($post) {
-    if ($post->post_type === 'post') {
-        return [get_permalink($post)];
+/** Queue addresses for IndexNow; they are sent together a minute later. Only a public production site sends any. */
+function lasery_xtool_indexnow_queue($urls, $delay = MINUTE_IN_SECONDS) {
+    if (!$urls || !get_option('blog_public') || wp_get_environment_type() !== 'production') {
+        return;
     }
-    $url = remove_query_arg('lang', get_permalink($post));
-    return array_map(function ($language) use ($url) {
-        return add_query_arg('lang', $language, $url);
-    }, array_keys(lasery_xtool_languages()));
-}
-
-/** Queue addresses for IndexNow; they are sent together a minute later. */
-function lasery_xtool_indexnow_queue($urls) {
     $queue = get_option('lasery_xtool_indexnow_queue', []);
     update_option('lasery_xtool_indexnow_queue', array_values(array_unique(array_merge(is_array($queue) ? $queue : [], $urls))), false);
     if (!wp_next_scheduled('lasery_xtool_indexnow_send')) {
-        wp_schedule_single_event(time() + MINUTE_IN_SECONDS, 'lasery_xtool_indexnow_send');
+        wp_schedule_single_event(time() + $delay, 'lasery_xtool_indexnow_send');
     }
 }
 
@@ -359,12 +363,12 @@ function lasery_xtool_indexnow_queue($urls) {
 // address. Price changes from the hourly sync do not count.
 add_action('wp_after_insert_post', function ($id, $post, $update, $before) {
     $changed = !$before || $before->post_status !== 'publish' || $post->post_title !== $before->post_title || $post->post_content !== $before->post_content || $post->post_excerpt !== $before->post_excerpt || $post->post_name !== $before->post_name;
-    // The cart is not indexed.
-    if ($changed && $post->post_status === 'publish' && in_array($post->post_type, ['page', 'post', 'lasery_product'], true) && !($post->post_type === 'page' && $post->post_name === 'koszyk')) {
-        lasery_xtool_indexnow_queue(lasery_xtool_indexnow_urls($post));
+    if ($changed && $post->post_status === 'publish' && in_array($post->post_type, ['page', 'post', 'lasery_product'], true)) {
+        lasery_xtool_indexnow_queue(array_values(lasery_xtool_post_language_urls($post)));
     }
 }, 10, 4);
 
+// Addresses that could not be delivered (network error, rate limit, server error) are tried again an hour later.
 add_action('lasery_xtool_indexnow_send', 'lasery_xtool_indexnow_send');
 function lasery_xtool_indexnow_send() {
     $urls = get_option('lasery_xtool_indexnow_queue', []);
@@ -378,5 +382,9 @@ function lasery_xtool_indexnow_send() {
         'headers' => ['Content-Type' => 'application/json; charset=utf-8'],
         'body' => wp_json_encode(['host' => wp_parse_url(home_url(), PHP_URL_HOST), 'key' => $key, 'keyLocation' => home_url('/' . $key . '.txt'), 'urlList' => array_slice($urls, 0, 10000)]),
     ]);
-    update_option('lasery_xtool_indexnow_last', ['time' => time(), 'urls' => count($urls), 'status' => is_wp_error($response) ? $response->get_error_message() : wp_remote_retrieve_response_code($response)], false);
+    $status = is_wp_error($response) ? $response->get_error_message() : wp_remote_retrieve_response_code($response);
+    update_option('lasery_xtool_indexnow_last', ['time' => time(), 'urls' => count($urls), 'status' => $status], false);
+    if (is_wp_error($response) || $status === 429 || $status >= 500) {
+        lasery_xtool_indexnow_queue($urls, HOUR_IN_SECONDS);
+    }
 }

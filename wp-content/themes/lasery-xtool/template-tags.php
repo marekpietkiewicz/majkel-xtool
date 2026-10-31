@@ -9,6 +9,11 @@ function lasery_xtool_languages() {
     return function_exists('lasery_xtool_description_languages') ? lasery_xtool_description_languages() : ['pl' => 'Polski'];
 }
 
+/** WordPress locales of the site languages. */
+function lasery_xtool_locales() {
+    return ['pl' => 'pl_PL', 'en' => 'en_US', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk'];
+}
+
 /** The flag shown next to a language (English: United Kingdom), or '' for other languages. */
 function lasery_xtool_flag($language) {
     $flags = [

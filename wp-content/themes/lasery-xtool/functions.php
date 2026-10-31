@@ -78,7 +78,9 @@ add_filter('oembed_response_data', function ($data) {
 add_action('template_redirect', function () {
     if (is_author() || is_date() || is_category() || is_tag()) {
         $blog = lasery_xtool_blog_url();
-        wp_safe_redirect($blog !== '' ? $blog : lasery_xtool_language_url(home_url('/')), 301);
+        $target = $blog !== '' ? $blog : lasery_xtool_language_url(home_url('/'));
+        // Without a language the next page picks the visitor's (see seo.php).
+        wp_safe_redirect(isset($_GET['lang']) ? $target : remove_query_arg('lang', $target), 301);
         exit;
     }
 }, 9);
