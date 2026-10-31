@@ -87,4 +87,20 @@ cover('cover-laser-cost.webp', [('p6.webp', 200, 260, 735), ('p22.webp', 320, 60
 cover('cover-laser-safety.webp', [('p24.webp', 210, 330, 735), ('p5.webp', 240, 800, 745), ('p23.webp', 230, 1270, 740)], glow=(800, 740))
 # DTF and UV printing: O1, Apparel Printer Plus, WonderPress 3D.
 cover('cover-dtf-printing.webp', [('o1.webp', 270, 330, 745), ('apparel.webp', 270, 820, 750), ('wonderpress.webp', 290, 1290, 745)], glow=(800, 740))
+# Wood: F2, S1, M2.
+cover('cover-laser-wood.webp', [('f2.webp', 330, 360, 745), ('s1.webp', 210, 800, 740), ('m2.webp', 190, 1240, 735)], glow=(800, 740))
+# CO2 cutter: P3 and X1.
+cover('cover-co2-laser-cutter.webp', [('p3.webp', 330, 500, 760), ('x1.webp', 340, 1130, 765)], glow=(800, 740))
+# Glass: F2 Ultra UV and the Business Duo set.
+cover('cover-glass-engraving.webp', [('f2ultrauv.webp', 440, 520, 780), ('duo.webp', 360, 1120, 765)], glow=(800, 750))
+# Laser cleaning: MetalFab and the MaxClean head.
+cover('cover-laser-cleaning.webp', [('metalfab.webp', 470, 620, 790), ('maxclean.webp', 330, 1150, 720)], glow=(800, 760))
+# Rotary: RA3 and RA2 Pro next to the F2 Ultra.
+cover('cover-rotary-engraving.webp', [('ra3.webp', 220, 380, 735), ('f2ultra.webp', 380, 800, 760), ('ra2pro.webp', 200, 1230, 735)], glow=(800, 740))
+# Stickers: M2 and its CMYK module.
+cover('cover-sticker-cutter.webp', [('m2.webp', 300, 640, 760), ('m2cmyk.webp', 300, 1170, 760)], glow=(800, 750))
+# School: S1, F1 Ultra and MetalFab for Education.
+cover('cover-laser-school.webp', [('s1edu.webp', 170, 270, 735), ('f1ultraedu.webp', 290, 760, 750), ('metalfabedu.webp', 250, 1290, 750)], glow=(800, 740))
+# F2 family: F2, F2 Ultra, F2 Ultra UV.
+cover('cover-xtool-f2-comparison.webp', [('f2.webp', 330, 380, 745), ('f2ultra.webp', 380, 800, 760), ('f2ultrauv.webp', 380, 1220, 760)], glow=(800, 745))
 print('done')
