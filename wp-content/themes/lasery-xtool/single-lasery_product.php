@@ -10,6 +10,7 @@
     $home = lasery_xtool_language_url(home_url('/'));
     $archive = get_post_type_archive_link('lasery_product');
     $description = function_exists('lasery_xtool_product_description') ? lasery_xtool_product_description($post_id, lasery_xtool_interface_language()) : get_the_content();
+    $safety_notice = lasery_xtool_product_safety_notice($post_id);
     // A machine lists its accessories, an accessory the machines it fits (set in the panel).
     $related_query = function_exists('lasery_xtool_related_meta_query') ? lasery_xtool_related_meta_query($post_id) : null;
     $related = $related_query ? lasery_xtool_products($is_accessory ? 'device' : 'accessory', -1, ['post__not_in' => [$post_id], 'meta_query' => $related_query]) : [];
@@ -80,6 +81,14 @@
                         <p class="price price--large"><?php echo $price !== '' ? $price : esc_html__('Cena na zapytanie', 'lasery-xtool'); ?></p>
                         <p class="price-box-note"><?php esc_html_e('Cena orientacyjna z oficjalnego sklepu xTool. Przed płatnością potwierdzimy ostateczną kwotę i koszt dostawy.', 'lasery-xtool'); ?></p>
                     </div>
+                    <?php if ($safety_notice !== '') : ?>
+                        <?php $safety_text = lasery_xtool_safety_texts(); $safety_url = lasery_xtool_safety_url(); ?>
+                        <aside class="product-safety" aria-label="<?php echo esc_attr($safety_text['notice_heading']); ?>">
+                            <strong><?php echo esc_html($safety_text['notice_heading']); ?></strong>
+                            <p><?php echo esc_html($safety_notice); ?></p>
+                            <?php if ($safety_url) : ?><a href="<?php echo esc_url($safety_url); ?>"><?php echo esc_html($safety_text['more']); ?></a><?php endif; ?>
+                        </aside>
+                    <?php endif; ?>
                     <div class="product-actions<?php echo $has_demo ? ' product-actions--single' : ''; ?>">
                         <a class="btn btn-primary btn-lg" href="#zamow"><?php esc_html_e('Zamów', 'lasery-xtool'); ?><?php echo lasery_xtool_icon('arrow-right'); ?></a>
                         <?php if (!$has_demo) : ?>

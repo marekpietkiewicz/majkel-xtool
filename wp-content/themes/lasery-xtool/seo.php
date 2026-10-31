@@ -81,7 +81,7 @@ function lasery_xtool_post_language_urls($post) {
     if ($post->post_type === 'post') {
         return [function_exists('lasery_xtool_post_language') ? lasery_xtool_post_language($post->ID) : 'pl' => get_permalink($post)];
     }
-    $translated = $post->post_type === 'lasery_product' || $post->post_name === 'blog' || (int) $post->ID === (int) get_option('wp_page_for_privacy_policy');
+    $translated = $post->post_type === 'lasery_product' || in_array($post->post_name, ['blog', 'bezpieczenstwo', 'informacje-o-zakupach'], true) || (int) $post->ID === (int) get_option('wp_page_for_privacy_policy');
     $url = remove_query_arg('lang', get_permalink($post));
     $urls = [];
     foreach ($translated ? array_keys(lasery_xtool_languages()) : ['pl'] as $language) {
@@ -147,6 +147,10 @@ function lasery_xtool_seo_page() {
         } elseif (is_privacy_policy()) {
             // The first sentence on how the data is used.
             $description = preg_replace('/(?<=[.!?])\s.*$/su', '', lasery_xtool_seo_text(lasery_xtool_privacy_texts($language)['purposes_text']));
+        } elseif (is_page('bezpieczenstwo')) {
+            $description = lasery_xtool_safety_page_texts($language)['intro'];
+        } elseif (is_page('informacje-o-zakupach')) {
+            $description = lasery_xtool_purchase_info_texts($language)['operator'];
         }
     }
     if ($canonical === '' && isset($alternates[$language])) {

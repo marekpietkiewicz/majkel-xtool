@@ -313,9 +313,17 @@ function lasery_xtool_render_cart() {
 				<?php // With JavaScript, prices follow a typed quantity at once; then the server's new cart page replaces the parts marked data-cart-update-part and data-cart-total. ?>
 				<div class="cart-items">
 					<ul class="cart-lines">
+						<?php $warned_products = array(); ?>
 						<?php foreach ( $lines as $index => $line ) : ?>
 							<?php $title = lasery_xtool_order_product_title( $line['product'], $language ); ?>
 							<?php $link = add_query_arg( 'lang', $language, get_permalink( $line['product'] ) ); ?>
+							<?php
+							$notice = '';
+							if ( ! isset( $warned_products[ $line['product'] ] ) && function_exists( 'lasery_xtool_product_safety_notice' ) ) {
+								$notice = lasery_xtool_product_safety_notice( $line['product'], $language );
+								$warned_products[ $line['product'] ] = true;
+							}
+							?>
 							<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>" data-cart-line="<?php echo esc_attr( $line['key'] ); ?>"<?php echo lasery_xtool_amount_attributes( $line['amount'] ); ?>>
 								<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
 								<div class="cart-line-body">
@@ -327,6 +335,16 @@ function lasery_xtool_render_cart() {
 									<?php else : ?>
 										<p class="cart-line-unit" data-cart-update-part><?php echo esc_html( $line['amount'] ? sprintf( $text['each'], lasery_xtool_cart_line_value( $line, 1, $text, $language ) ) : $text['no_price'] ); ?></p>
 									<?php endif; ?>
+									<div data-cart-update-part>
+										<?php if ( '' !== $notice && function_exists( 'lasery_xtool_safety_texts' ) && function_exists( 'lasery_xtool_safety_url' ) ) : ?>
+											<?php $safety = lasery_xtool_safety_texts( $language ); $safety_url = lasery_xtool_safety_url(); ?>
+											<div class="order-form-notice" data-cart-safety>
+												<strong><?php echo esc_html( $safety['notice_heading'] ); ?></strong>
+												<p><?php echo esc_html( $notice ); ?></p>
+												<?php if ( $safety_url ) : ?><a href="<?php echo esc_url( $safety_url ); ?>"><?php echo esc_html( $safety['more'] ); ?></a><?php endif; ?>
+											</div>
+										<?php endif; ?>
+									</div>
 								</div>
 								<div class="cart-line-actions">
 									<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
@@ -386,6 +404,10 @@ function lasery_xtool_render_cart() {
 					<dd class="order-summary-price" data-cart-sum><?php echo esc_html( $total ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
+				<?php $purchase_info = function_exists( 'lasery_xtool_purchase_info_url' ) ? lasery_xtool_purchase_info_url( $language ) : ''; ?>
+				<?php if ( $purchase_info && function_exists( 'lasery_xtool_purchase_info_title' ) ) : ?>
+					<p class="order-summary-note"><a href="<?php echo esc_url( $purchase_info ); ?>"><?php echo esc_html( lasery_xtool_purchase_info_title( $language ) ); ?></a></p>
+				<?php endif; ?>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>
 				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
 				<p class="order-summary-note"><?php echo esc_html( $text['seller_note'] ); ?></p>

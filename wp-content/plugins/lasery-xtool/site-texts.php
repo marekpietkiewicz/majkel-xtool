@@ -64,8 +64,28 @@ function lasery_xtool_text_groups( $language ) {
 	$groups = array(
 		'order' => array( 'Zamówienie, koszyk i e-maile', $pairs( lasery_xtool_order_default_texts( $language ), lasery_xtool_order_default_texts( 'pl' ) ) ),
 	);
+	if ( function_exists( 'lasery_xtool_purchase_info_default_texts' ) ) {
+		$labels = array(
+			'title' => 'Tytuł i etykieta odnośnika',
+			'operator_heading' => 'Nagłówek: operator i sprzedawca', 'operator' => 'Operator i sprzedawca',
+			'xtool_heading' => 'Nagłówek danych xTool', 'xtool_intro' => 'Wyjaśnienie danych xTool',
+			'xtool_entity' => 'xTool: nazwa operatora', 'xtool_address' => 'xTool: adres operatora',
+			'xtool_email' => 'xTool: adres e-mail', 'xtool_phone' => 'xTool: numer telefonu',
+			'xtool_imprint' => 'Etykieta danych firmy xTool', 'xtool_contact_source' => 'Etykieta strony kontaktowej xTool',
+			'process_heading' => 'Nagłówek: zgłoszenie i płatność', 'process' => 'Zgłoszenie i płatność',
+			'rights_heading' => 'Nagłówek: reklamacje i zwroty', 'rights' => 'Prawa kupującego',
+			'contact' => 'Kontakt z prowadzącym stronę', 'seller_contact' => 'Kontakt ze sprzedawcą',
+			'links_heading' => 'Nagłówek: dokumenty xTool', 'terms' => 'Etykieta warunków xTool',
+			'returns' => 'Etykieta zwrotów xTool', 'support' => 'Etykieta pomocy xTool',
+		);
+		$groups['purchase_info'] = array( 'Informacje o zakupach', $pairs( lasery_xtool_purchase_info_default_texts( $language ), $labels ) );
+	}
 	if ( function_exists( 'lasery_xtool_consent_default_texts' ) ) {
 		$groups['consent'] = array( 'Baner prywatności', $pairs( lasery_xtool_consent_default_texts( $language ), lasery_xtool_consent_default_texts( 'pl' ) ) );
+	}
+	if ( function_exists( 'lasery_xtool_safety_page_defaults' ) ) {
+		$labels = array( 'intro' => 'Wprowadzenie', 'general' => 'Przygotowanie stanowiska', 'materials' => 'Materiały i opary', 'f2' => 'xTool F2', 'f2_package' => 'Okulary w zestawie F2', 'ultra' => 'xTool F2 Ultra', 'uv' => 'xTool F2 Ultra UV i RA3', 'p3' => 'xTool P3 z podajnikiem' );
+		$groups['safety'] = array( 'Informacja o bezpieczeństwie (ostrzeżenia produktów są niezależne)', $pairs( lasery_xtool_safety_page_defaults( $language ), $labels ) );
 	}
 	$groups['ui'] = array( 'Interfejs strony (przyciski, nagłówki, stopka, wyszukiwarka, 404)', lasery_xtool_interface_default_texts( $language ) );
 	return $groups;

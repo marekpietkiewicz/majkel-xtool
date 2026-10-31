@@ -68,4 +68,8 @@ Nazwy, opisy i galerię produktów można edytować w panelu WordPressa. Wybór 
 
 W motywie przygotowano informację o prywatności w pięciu językach. Właściciel musi zapewnić usuwanie zgłoszeń niezakończonych zamówieniem po sześciu miesiącach od zakończenia ich obsługi. Regulamin i pozostałe informacje prawne wymagają przygotowania i dostosowania do rzeczywistego działania serwisu.
 
+Informacje o zakupach i bezpieczeństwie są dostępne w stopce; treści obu dokumentów można zmieniać dla każdego języka w **Produkty xTool → Teksty strony**. Ostrzeżenia przypisane do produktów i koszyka pozostają niezależne od edytowanego opisu. Dane sprzedawcy, rzeczywisty przebieg zakupu i zasady przechowywania danych wymagają potwierdzenia przez właściciela.
+
+Jednorazowe korekty opublikowanych artykułów przygotowuje `wp eval-file scripts/apply-safety-corrections.php`. Domyślnie jest to podgląd; zapis wymaga `LASERY_APPLY_SAFETY_CORRECTIONS=1`. Skrypt sprawdza wszystkie fragmenty przed zapisem i przerywa przy konflikcie z edycją. Przed uruchomieniem zapisu należy wykonać kopię bazy.
+
 Hasła, klucze, pliki konfiguracyjne zawierające sekrety oraz zrzuty bazy nie należą do repozytorium. Dane dostępowe należy przekazywać i przechowywać bezpiecznie poza Git; nie wklejać ich do zgłoszeń ani czatu.

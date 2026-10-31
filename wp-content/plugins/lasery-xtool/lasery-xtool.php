@@ -18,7 +18,7 @@ const LASERY_XTOOL_MAX_PRODUCTS = 500;
 const LASERY_XTOOL_PAGE_SIZE    = 250;
 const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
-const LASERY_XTOOL_SCHEMA       = '6';
+const LASERY_XTOOL_SCHEMA       = '7';
 
 require_once __DIR__ . '/reviewed-product-content.php';
 
@@ -91,10 +91,22 @@ function lasery_xtool_install() {
 			}
 		}
 	}
-	// The theme renders the blog listing and the cart on these pages (page-<slug>.php).
-	foreach ( array( 'blog' => 'Blog', LASERY_XTOOL_CART_PAGE => 'Koszyk' ) as $slug => $title ) {
+	// The theme renders the blog, cart and information pages (page-<slug>.php).
+	foreach ( array( 'blog' => 'Blog', LASERY_XTOOL_CART_PAGE => 'Koszyk', 'bezpieczenstwo' => 'Bezpieczeństwo', 'informacje-o-zakupach' => 'Informacje o zakupach' ) as $slug => $title ) {
 		if ( ! get_page_by_path( $slug ) ) {
-			wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'comment_status' => 'closed' ) );
+			$created = wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'comment_status' => 'closed' ), true );
+			if ( is_wp_error( $created ) || ! $created ) {
+				// Keep the old schema so the next request can retry without duplicating pages already created.
+				return false;
+			}
+			$page = get_post( $created );
+			if ( ! $page || $page->post_name !== $slug ) {
+				// A conflicting reserved slug must not leave behind a duplicate page on each retry.
+				if ( $page ) {
+					wp_delete_post( $created, true );
+				}
+				return false;
+			}
 		}
 	}
 	// Products shown in existing articles; saving a post keeps this up to date (schema 6).
