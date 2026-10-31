@@ -27,8 +27,14 @@
     </header>
     <?php if (is_search()) : ?>
         <?php
-        // The same index as the instant search, so both find the same products and articles.
-        $matches = lasery_xtool_search_matches(get_search_query(false));
+        // The same search as the dialog; a page holds at most 24 cards.
+        $search_page = isset($_GET['strona']) && is_string($_GET['strona']) ? max(1, min(1000000, absint($_GET['strona']))) : 1;
+        $search = lasery_xtool_search_results(get_search_query(false), ($search_page - 1) * 24, 24);
+        if ($search['count'] && !$search['items'] && $search_page > 1) {
+            $search_page = (int) ceil($search['count'] / 24);
+            $search = lasery_xtool_search_results(get_search_query(false), ($search_page - 1) * 24, 24);
+        }
+        $matches = $search['items'];
         $groups = [
             'p' => ['lasery_product', __('Produkty', 'lasery-xtool'), 'product-grid', 'product-card'],
             'a' => ['post', __('Artykuły', 'lasery-xtool'), 'post-grid', 'post-card'],
@@ -41,7 +47,7 @@
                     <section class="search-page-section">
                         <h2 class="section-title section-title--sm"><?php echo esc_html($heading); ?></h2>
                         <div class="<?php echo esc_attr($grid); ?>">
-                            <?php foreach (get_posts(['post_type' => $post_type, 'post__in' => $ids, 'orderby' => 'post__in', 'posts_per_page' => -1]) as $position => $post) : setup_postdata($post); ?>
+                            <?php foreach (get_posts(['post_type' => $post_type, 'has_password' => false, 'post__in' => $ids, 'orderby' => 'post__in', 'posts_per_page' => -1]) as $position => $post) : setup_postdata($post); ?>
                                 <?php get_template_part('template-parts/' . $card, null, ['position' => $position]); ?>
                             <?php endforeach; wp_reset_postdata(); ?>
                         </div>
@@ -50,6 +56,11 @@
             <?php endforeach; ?>
             <?php if (!$matches && get_search_query(false) !== '') : ?>
                 <p class="empty-state"><?php printf(esc_html__('Brak wyników dla „%s”.', 'lasery-xtool'), esc_html(get_search_query(false))); ?></p>
+            <?php endif; ?>
+            <?php if ($search['count'] > 24) : ?>
+                <nav class="pagination" aria-label="<?php esc_attr_e('Kolejne strony', 'lasery-xtool'); ?>">
+                    <?php echo wp_kses_post(paginate_links(['base' => esc_url_raw(add_query_arg(['s' => get_search_query(false), 'lang' => lasery_xtool_interface_language()], home_url('/'))) . '%_%', 'format' => '&strona=%#%', 'current' => $search_page, 'total' => (int) ceil($search['count'] / 24), 'prev_text' => '←', 'next_text' => '→'])); ?>
+                </nav>
             <?php endif; ?>
         </div>
     <?php elseif (have_posts()) : ?>

@@ -363,6 +363,45 @@ function lasery_xtool_release_import_lock() {
 	unset( $GLOBALS['lasery_xtool_lock_value'] );
 }
 
+/** State that can affect public product pages, cards, search and set contents. */
+function lasery_xtool_public_product_state( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'publish' !== $post->post_status || '' !== $post->post_password ) {
+		return null;
+	}
+	$variants = lasery_xtool_order_variants( $post_id );
+	$fresh = (bool) $variants && lasery_xtool_source_is_fresh( $post_id );
+	return array(
+		'variants' => $variants,
+		'fresh' => $fresh,
+		'currency' => $fresh ? get_post_meta( $post_id, '_lasery_source_currency', true ) : '',
+		'thumbnail' => get_post_thumbnail_id( $post_id ),
+		'gallery' => lasery_xtool_product_gallery( $post_id ),
+	);
+}
+
+/** Coalesce all changes in this request, including partial failures, into one purge. */
+function lasery_xtool_product_state_changed( $post_id, $before ) {
+	if ( $before === lasery_xtool_public_product_state( $post_id ) ) {
+		return;
+	}
+	static $scheduled = false;
+	if ( $scheduled ) {
+		return;
+	}
+	$scheduled = true;
+	// LiteSpeed emits headers and kicks its CLI queue on shutdown at priority 0.
+	add_action( 'shutdown', 'lasery_xtool_purge_catalog_cache', -1 );
+}
+
+function lasery_xtool_purge_catalog_cache() {
+	if ( function_exists( 'lasery_xtool_search_refresh' ) ) {
+		lasery_xtool_search_refresh();
+	}
+	// LiteSpeed's public purge hook with * clears page cache, including cards in articles.
+	do_action( 'litespeed_purge', '*' );
+}
+
 add_action( 'admin_post_lasery_xtool_import', 'lasery_xtool_handle_import' );
 function lasery_xtool_handle_import() {
 	if ( ! current_user_can( 'manage_options' ) || ! current_user_can( 'edit_posts' ) ) {
@@ -518,7 +557,9 @@ function lasery_xtool_fetch_source( $target_ids = null ) {
 			foreach ( $raw as $entry ) {
 				$id = lasery_xtool_raw_product_id( $entry );
 				$product = isset( $remaining[ $id ] ) ? lasery_xtool_parse_product( $entry ) : false;
-				if ( $product ) {
+				// A source snapshot without variants cannot confirm an offer. Keep it
+				// in the remaining set so the existing offer becomes stale.
+				if ( $product && array_key_exists( 'variants', $product ) ) {
 					$products[ $id ] = $product + $source;
 					unset( $remaining[ $id ] );
 				}
@@ -590,7 +631,9 @@ function lasery_xtool_sync_existing() {
 	$stale = array();
 	foreach ( $targets as $post_ids ) {
 		foreach ( $post_ids as $post_id ) {
+			$before = lasery_xtool_public_product_state( $post_id );
 			update_post_meta( $post_id, '_lasery_source_updated_at', '' );
+			lasery_xtool_product_state_changed( $post_id, $before );
 			$stale[] = $post_id;
 			++$failed;
 		}
@@ -656,28 +699,36 @@ function lasery_xtool_save_products( $products, $result ) {
 
 /** Source data never overwrites edited content, prices or featured images. */
 function lasery_xtool_save_source_data( $post_id, $product ) {
-	$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls' );
-	if ( array_key_exists( 'variants', $product ) ) {
-		// Hide the snapshot while any of its fields are being changed. A failed
-		// write must never leave new prices paired with an old currency or time.
-		update_post_meta( $post_id, '_lasery_source_updated_at', '' );
-		if ( '' !== get_post_meta( $post_id, '_lasery_source_updated_at', true ) ) {
-			return false;
+	$before = lasery_xtool_public_product_state( $post_id );
+	try {
+		$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls' );
+		if ( array_key_exists( 'variants', $product ) ) {
+			// Files have no verified storefront context; never reuse an old currency.
+			$product['currency'] = isset( $product['currency'] ) ? $product['currency'] : '';
+			$product['fetched_at'] = isset( $product['fetched_at'] ) ? (string) $product['fetched_at'] : '';
+			// Hide a changing offer until all its fields are saved. For an identical
+			// offer, preserve the old timestamp while refreshing it: concurrent page
+			// loads must not cache a spurious stale message during an ordinary sync.
+			if ( get_post_meta( $post_id, '_lasery_source_variants', true ) !== $product['variants'] || get_post_meta( $post_id, '_lasery_source_currency', true ) !== $product['currency'] ) {
+				update_post_meta( $post_id, '_lasery_source_updated_at', '' );
+				if ( '' !== get_post_meta( $post_id, '_lasery_source_updated_at', true ) ) {
+					return false;
+				}
+			}
+			$fields['currency'] = '_lasery_source_currency';
+			$fields['fetched_at'] = '_lasery_source_updated_at';
 		}
-		// Files have no verified storefront context; never reuse an old currency.
-		$product['currency'] = isset( $product['currency'] ) ? $product['currency'] : '';
-		$product['fetched_at'] = isset( $product['fetched_at'] ) ? (string) $product['fetched_at'] : '';
-		$fields['currency'] = '_lasery_source_currency';
-		$fields['fetched_at'] = '_lasery_source_updated_at';
+		foreach ( $fields as $field => $key ) {
+			if ( ! array_key_exists( $field, $product ) ) {
+				continue;
+			}
+			update_post_meta( $post_id, $key, wp_slash( $product[ $field ] ) );
+			if ( get_post_meta( $post_id, $key, true ) !== $product[ $field ] ) {
+				return false;
+			}
+		}
+		return true;
+	} finally {
+		lasery_xtool_product_state_changed( $post_id, $before );
 	}
-	foreach ( $fields as $field => $key ) {
-		if ( ! array_key_exists( $field, $product ) ) {
-			continue;
-		}
-		update_post_meta( $post_id, $key, wp_slash( $product[ $field ] ) );
-		if ( get_post_meta( $post_id, $key, true ) !== $product[ $field ] ) {
-			return false;
-		}
-	}
-	return true;
 }

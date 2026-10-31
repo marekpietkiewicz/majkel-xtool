@@ -335,6 +335,7 @@
     let pending = 0;
     let timer = 0;
     let native = false;
+    let leaving = false;
     // Line values, the number of pieces and the total (when every line has a price) for the typed quantities.
     const showPrices = () => {
       const { locale } = cartForm.dataset;
@@ -360,12 +361,15 @@
       cartForm.querySelectorAll('[data-cart-sum]').forEach((element) => { element.textContent = total; });
     };
     // Lines still in the cart get their new prices; a number changed since it was sent stays as typed.
-    const apply = (page, url) => {
+    const apply = (page, url, keepDetails = false) => {
       const fresh = new Map(Array.from(page.querySelectorAll('[data-cart-line]'), (line) => [line.dataset.cartLine, line]));
       const lines = Array.from(cartForm.querySelectorAll('[data-cart-line]'));
       if (!fresh.size || Array.from(fresh.keys()).some((key) => !lines.some((line) => line.dataset.cartLine === key))) {
-        window.location.replace(url);
-        return;
+        if (!keepDetails) {
+          leaving = true;
+          window.location.replace(url);
+        }
+        return false;
       }
       const focused = document.activeElement;
       lines.forEach((line, index) => {
@@ -395,12 +399,14 @@
       // Numbers typed while this change was on its way keep their prices.
       showPrices();
       cartForm.elements.snapshot.value = page.querySelector('[name="snapshot"]').value;
+      cartForm.elements._wpnonce.value = page.querySelector('[name="_wpnonce"]').value;
       const freshSends = page.querySelectorAll('[data-cart-send]');
       sends.forEach((button, i) => { button.disabled = freshSends[i].disabled; });
       if (cartCount) showCartCount();
       const message = page.querySelector('[data-cart-toast]').textContent.trim();
       const total = cartForm.querySelector('.order-summary-price');
       if (message) showToast(`${message} ${cartForm.querySelector('.order-summary-total').textContent}: ${total.textContent}`);
+      return true;
     };
     // Changes go one after another, so the last response always holds the whole cart.
     const send = (form, submitter) => {
@@ -409,11 +415,19 @@
         try {
           if (native) return;
           // The field being typed in is left as it is; the server ignores a number it cannot read.
-          quantities().forEach((input) => {
-            if (input !== document.activeElement) normaliseQuantity(input);
-            input.dataset.sent = input.value;
-          });
-          const body = new FormData(form);
+          const body = new FormData();
+          if (form === cartForm) {
+            // A cart update needs no customer details from the order form.
+            body.append('language', cartForm.elements.language.value);
+            body.append('_wpnonce', cartForm.elements._wpnonce.value);
+            quantities().forEach((input) => {
+              if (input !== document.activeElement) normaliseQuantity(input);
+              input.dataset.sent = input.value;
+              body.append(input.name, input.value);
+            });
+          } else {
+            new FormData(form).forEach((value, name) => body.append(name, value));
+          }
           if (submitter.name) body.append(submitter.name, submitter.value);
           // Attributes, because form.action would be the removal form's field named "action".
           const response = await fetch(submitter.getAttribute('formaction') || form.getAttribute('action'), { method: 'POST', body, credentials: 'same-origin' });
@@ -423,7 +437,22 @@
         } catch (error) {
           // Without a usable response the browser submits the change itself.
           native = true;
-          form.requestSubmit(submitter);
+          const fallback = document.createElement('form');
+          fallback.method = 'post';
+          fallback.action = submitter.getAttribute('formaction') || form.getAttribute('action');
+          const fields = form === cartForm
+            ? [['language', cartForm.elements.language.value], ['_wpnonce', cartForm.elements._wpnonce.value], ...Array.from(quantities(), (input) => [input.name, input.value])]
+            : Array.from(new FormData(form));
+          if (submitter.name) fields.push([submitter.name, submitter.value]);
+          fields.forEach(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            fallback.append(input);
+          });
+          document.body.append(fallback);
+          fallback.submit();
         } finally {
           pending -= 1;
         }
@@ -457,25 +486,85 @@
       flush();
     });
     let sending = false;
+    let outcomeUnknown = false;
+    let lockedControls = [];
+    const unlockCart = () => {
+      lockedControls.forEach((control) => { control.disabled = false; });
+      lockedControls = [];
+    };
+    const showOrderError = (message) => {
+      document.querySelectorAll('[data-cart-error]').forEach((notice) => notice.remove());
+      const notice = document.createElement('p');
+      notice.className = 'order-form-notice order-form-notice--error';
+      notice.setAttribute('role', 'alert');
+      notice.setAttribute('data-cart-error', '');
+      notice.tabIndex = -1;
+      notice.textContent = message;
+      cartForm.before(notice);
+      notice.focus();
+    };
     cartForm.addEventListener('submit', (event) => {
-      // Only the fallback above submits the update button.
-      if (event.submitter === update) return;
+      if (sending || outcomeUnknown || leaving) {
+        event.preventDefault();
+        return;
+      }
+      if (event.submitter === update) {
+        event.preventDefault();
+        clearTimeout(timer);
+        timer = 0;
+        send(cartForm, update);
+        return;
+      }
+      event.preventDefault();
       // The order includes the typed quantities; it waits for changes on their way, so the cart it empties stays empty.
       clearTimeout(timer);
       timer = 0;
       if (pending) {
-        event.preventDefault();
         const submitter = event.submitter;
-        queue.then(() => { if (!native && !submitter.disabled) cartForm.requestSubmit(submitter); });
+        queue.then(() => { if (!native && !leaving && (!submitter || !submitter.disabled)) cartForm.requestSubmit(submitter || undefined); });
         return;
       }
-      // One order per click: a second submit would only hit the rate limit. Back restores the buttons.
+      // Never automatically repeat an order: a lost response may follow successful delivery.
       sending = true;
+      const body = new FormData(cartForm);
+      lockedControls = [update, ...quantities(), ...document.querySelectorAll('[form="cart-remove"]')].filter((control) => !control.disabled);
+      lockedControls.forEach((control) => { control.disabled = true; });
       sends.forEach((button) => { button.disabled = true; });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      fetch(cartForm.getAttribute('action'), { method: 'POST', body, credentials: 'same-origin', signal: controller.signal })
+        .then(async (response) => {
+          if (!response.ok) throw new Error(String(response.status));
+          const result = new URL(response.url).searchParams.get('cart');
+          if (result === 'sent' || result === 'sent_no_receipt') {
+            leaving = true;
+            window.location.assign(response.url);
+            return;
+          }
+          // A failed mail attempt has an uncertain outcome; the message may already have been accepted.
+          if (!['invalid', 'busy', 'changed'].includes(result)) throw new Error('Unknown order outcome');
+          const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+          const notice = page.querySelector('[data-cart-error]');
+          if (!notice) throw new Error('Missing order result');
+          unlockCart();
+          const updated = apply(page, response.url, true);
+          if (!updated) sends.forEach((button) => { button.disabled = true; });
+          sending = false;
+          showOrderError(notice.textContent.trim());
+        })
+        .catch(() => {
+          outcomeUnknown = true;
+          sending = false;
+          sends.forEach((button) => { button.disabled = true; });
+          showOrderError(cartForm.dataset.orderUnknown);
+        })
+        .finally(() => clearTimeout(timeout));
     });
     window.addEventListener('pageshow', () => {
       if (!sending) return;
       sending = false;
+      leaving = false;
+      unlockCart();
       sends.forEach((button) => { button.disabled = false; });
     });
     if (removeForm) {
@@ -529,7 +618,7 @@
     window.addEventListener('resize', () => { measure(); schedule(); }, { passive: true });
   }
 
-  /* Search: the small index of the current language is fetched once and searched in the browser. */
+  /* Search: the server returns only the best matches for the current query. */
   const searchDialog = document.querySelector('[data-search]');
   const searchOpeners = document.querySelectorAll('[data-search-open]');
   if (searchDialog && searchOpeners.length && typeof searchDialog.showModal === 'function') {
@@ -538,33 +627,9 @@
     const results = searchDialog.querySelector('[data-search-results]');
     const status = searchDialog.querySelector('[data-search-status]');
     const labels = searchDialog.dataset;
-    let entries = null;
-    let loading = null;
-
-    // Case- and accent-insensitive, so "laser swiatlowodowy" finds "Laser światłowodowy"
-    // (the same folding as the results page without JavaScript).
-    const normalize = (text) => String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l').replace(/ß/g, 's');
-    const load = () => {
-      loading = loading || fetch(labels.endpoint, { credentials: 'omit' })
-        .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
-        .then((index) => {
-          entries = index.map((item) => ({ item, title: normalize(item[1]), text: normalize(`${item[1]} ${item[2]} ${item[6]}`) }));
-        })
-        .catch(() => { loading = null; });
-      return loading;
-    };
-    // Every word must match; words at the start of the title rank highest.
-    const score = (entry, terms) => {
-      let total = 0;
-      for (const term of terms) {
-        if (!entry.text.includes(term)) return 0;
-        if (entry.title.startsWith(term)) total += 8;
-        else if (entry.title.includes(` ${term}`)) total += 5;
-        else if (entry.title.includes(term)) total += 3;
-        else total += 1;
-      }
-      return total;
-    };
+    let sequence = 0;
+    let timer = 0;
+    let controller = null;
     const element = (tag, className, text) => {
       const node = document.createElement(tag);
       if (className) node.className = className;
@@ -587,57 +652,64 @@
       link.append(media, body);
       return link;
     };
-    const render = () => {
-      if (!entries) return;
-      const query = input.value.trim();
-      const terms = normalize(query).split(/\s+/).filter(Boolean);
+    const render = (matches, query) => {
       results.replaceChildren();
-      if (!terms.length) {
-        status.textContent = '';
-        return;
-      }
-      const matches = entries
-        .map((entry) => ({ item: entry.item, score: score(entry, terms) }))
-        .filter((match) => match.score > 0)
-        .sort((a, b) => b.score - a.score);
       // The group with the best match comes first, so Enter opens the best match.
-      const groups = [['p', labels.labelProducts, 8], ['a', labels.labelArticles, 4]];
-      if (matches.length && matches[0].item[0] === 'a') groups.reverse();
-      let truncated = false;
-      groups.forEach(([type, heading, limit]) => {
-        const found = matches.filter((match) => match.item[0] === type);
+      const groups = [['p', labels.labelProducts], ['a', labels.labelArticles]];
+      if (matches.items.length && matches.items[0][0] === 'a') groups.reverse();
+      groups.forEach(([type, heading]) => {
+        const found = matches.items.filter((item) => item[0] === type);
         if (!found.length) return;
-        truncated = truncated || found.length > limit;
         const group = element('section', 'search-group');
-        group.append(element('p', 'search-group-title', heading), ...found.slice(0, limit).map((match) => resultLink(match.item)));
+        group.append(element('p', 'search-group-title', heading), ...found.map(resultLink));
         results.append(group);
       });
       // Functions as replacements keep "$&" and similar in the query literal.
-      if (!matches.length) results.append(element('p', 'search-empty', labels.labelEmpty.replace('%s', () => query)));
-      if (truncated) {
-        const all = element('a', 'search-all', labels.labelAll.replace('%d', () => String(matches.length)));
+      if (!matches.count) results.append(element('p', 'search-empty', labels.labelEmpty.replace('%s', () => query)));
+      if (matches.count > matches.items.length) {
+        const all = element('a', 'search-all', labels.labelAll.replace('%d', () => String(matches.count)));
         all.href = `${form.action}?${new URLSearchParams(new FormData(form))}`;
         results.append(all);
       }
-      status.textContent = labels.labelCount.replace('%d', () => String(matches.length));
+      status.textContent = labels.labelCount.replace('%d', () => String(matches.count));
+    };
+    const clear = () => {
+      ++sequence;
+      clearTimeout(timer);
+      if (controller) controller.abort();
+      controller = null;
+      results.replaceChildren();
+      status.textContent = '';
+    };
+    const search = () => {
+      const query = input.value.trim();
+      if (!query || !searchDialog.open) return;
+      const current = sequence;
+      controller = new AbortController();
+      const url = new URL(labels.endpoint, window.location.href);
+      url.searchParams.set('q', query);
+      fetch(url, { credentials: 'omit', cache: 'no-store', signal: controller.signal })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+        .then((matches) => {
+          if (current === sequence && searchDialog.open && Array.isArray(matches.items) && Number.isInteger(matches.count)) render(matches, query);
+        })
+        .catch(() => {});
     };
     const open = (event) => {
       if (event) event.preventDefault();
       if (searchDialog.open) return;
+      clear();
       searchDialog.showModal();
       input.focus();
       input.select();
-      load().then(render);
+      search();
     };
 
     searchOpeners.forEach((opener) => {
       opener.addEventListener('click', open);
-      // Start downloading the index before the first click.
-      opener.addEventListener('pointerenter', load, { once: true });
-      opener.addEventListener('focus', load, { once: true });
     });
-    // Loading again after a failed request, so typing retries.
-    input.addEventListener('input', () => load().then(render));
+    input.addEventListener('input', () => { clear(); timer = setTimeout(search, 200); });
+    searchDialog.addEventListener('close', clear);
     // Enter opens the best match; without one, the form shows the results page.
     form.addEventListener('submit', (event) => {
       const first = results.querySelector('a');

@@ -70,7 +70,8 @@ function lasery_xtool_cents( $price ) {
 function lasery_xtool_cart_lines( $items ) {
 	$lines = array();
 	foreach ( $items as list( $post_id, $variant_id, $quantity ) ) {
-		if ( LASERY_XTOOL_PRODUCT_TYPE !== get_post_type( $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		$product = get_post( $post_id );
+		if ( ! $product || LASERY_XTOOL_PRODUCT_TYPE !== $product->post_type || 'publish' !== $product->post_status || '' !== $product->post_password ) {
 			continue;
 		}
 		$line = array( 'key' => lasery_xtool_cart_key( array( $post_id, $variant_id ) ), 'product' => $post_id, 'variant' => null, 'quantity' => $quantity, 'amount' => null, 'error' => '' );
@@ -263,12 +264,13 @@ function lasery_xtool_cart_sitemap( $args, $post_type ) {
 function lasery_xtool_render_cart() {
 	$language = lasery_xtool_order_language();
 	$text = lasery_xtool_order_texts( $language );
+	$outcome_unknown = str_replace( '%s', lasery_xtool_order_contact_email(), $text['outcome_unknown'] );
 	$lines = lasery_xtool_cart_lines( lasery_xtool_cart_items() );
 	$orderable = $lines && ! array_filter( array_column( $lines, 'error' ) );
 	$result = isset( $_GET['cart'] ) && is_string( $_GET['cart'] ) ? sanitize_key( wp_unslash( $_GET['cart'] ) ) : '';
 	// Confirmations of cart changes pass by themselves (a toast); errors stay on the page.
 	$toast = in_array( $result, array( 'added', 'limit', 'updated', 'removed' ), true ) ? $text[ 'cart_' . $result ] : '';
-	$error = in_array( $result, array( 'full', 'failed', 'invalid', 'busy', 'changed' ), true ) ? $text[ 'cart_' . $result ] ?? $text[ $result ] : '';
+	$error = 'failed' === $result ? $outcome_unknown : ( in_array( $result, array( 'full', 'invalid', 'busy', 'changed' ), true ) ? $text[ 'cart_' . $result ] ?? $text[ $result ] : '' );
 	$sent = in_array( $result, array( 'sent', 'sent_no_receipt' ), true ) ? $text[ $result ] : '';
 	$archive = get_post_type_archive_link( LASERY_XTOOL_PRODUCT_TYPE );
 	$archive = $archive ? add_query_arg( 'lang', $language, $archive ) : home_url( '/' );
@@ -300,7 +302,7 @@ function lasery_xtool_render_cart() {
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 		</form>
 		<?php // One form, so the order includes changed quantities even when the cart was not updated. ?>
-		<form class="order-form-grid" method="post" action="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_order', admin_url( 'admin-post.php' ) ) ); ?>" data-cart-form<?php echo lasery_xtool_price_format_attributes( $language, $text ); ?>>
+		<form class="order-form-grid" method="post" action="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_order', admin_url( 'admin-post.php' ) ) ); ?>" data-cart-form data-order-unknown="<?php echo esc_attr( $outcome_unknown ); ?>"<?php echo lasery_xtool_price_format_attributes( $language, $text ); ?>>
 			<?php // The first submit button is the default for Enter: it sends the order (the script makes Enter in a quantity field update the cart). ?>
 			<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
@@ -386,6 +388,7 @@ function lasery_xtool_render_cart() {
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>
 				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
+				<p class="order-summary-note"><?php echo esc_html( $text['seller_note'] ); ?></p>
 				<p class="order-summary-privacy"><?php echo esc_html( $text['privacy'] ); ?> <?php $privacy_url = get_privacy_policy_url(); if ( $privacy_url ) : ?><a href="<?php echo esc_url( add_query_arg( 'lang', $language, $privacy_url ) ); ?>"><?php echo esc_html( $text['privacy_link'] ); ?></a><?php endif; ?></p>
 			</aside>
 		</form>
@@ -509,7 +512,7 @@ function lasery_xtool_order_emails_customer( $lines, $language ) {
 		'title'    => sprintf( $text['customer_subject'], lasery_xtool_cart_subject( $lines, $language ) ),
 		'intro'    => $text['customer_body'],
 		'sections' => array( array( 'heading' => $text['items'], 'rows' => lasery_xtool_cart_email_rows( $lines, $text, $language, false ) ) ),
-		'note'     => $text['price_note'] . "\n" . $text['reply_note'],
+		'note'     => $text['price_note'] . "\n" . $text['seller_note'] . "\n" . $text['reply_note'],
 		'footer'   => lasery_xtool_mail_from_name() . ' · ' . lasery_xtool_order_contact_email() . $company,
 	);
 }

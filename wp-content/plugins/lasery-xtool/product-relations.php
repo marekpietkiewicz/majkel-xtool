@@ -28,7 +28,7 @@ function lasery_xtool_sku_index() {
 	if ( null === $index ) {
 		global $wpdb;
 		$index = array();
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = '_lasery_source_variants' AND p.post_type = %s AND p.post_status = 'publish' ORDER BY m.post_id", LASERY_XTOOL_PRODUCT_TYPE ) );
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = '_lasery_source_variants' AND p.post_type = %s AND p.post_status = 'publish' AND p.post_password = '' ORDER BY m.post_id", LASERY_XTOOL_PRODUCT_TYPE ) );
 		foreach ( $rows as $row ) {
 			$variants = maybe_unserialize( $row->meta_value );
 			foreach ( is_array( $variants ) ? $variants : array() as $variant ) {
