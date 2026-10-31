@@ -48,6 +48,9 @@ $to_blocks = static function ( $blocks ) {
             case 'ul':
                 $html[] = "<!-- wp:list -->\n" . $list( 'ul', $block[1] ) . "\n<!-- /wp:list -->";
                 break;
+            case 'ol':
+                $html[] = "<!-- wp:list {\"ordered\":true} -->\n" . $list( 'ol', $block[1] ) . "\n<!-- /wp:list -->";
+                break;
             case 'table':
                 $head = '<thead><tr>' . implode( '', array_map( static function ( $cell ) { return '<th>' . esc_html( $cell ) . '</th>'; }, $block[1] ) ) . '</tr></thead>';
                 $rows = '';

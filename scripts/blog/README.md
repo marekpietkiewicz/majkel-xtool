@@ -38,6 +38,23 @@ Opublikowane artykuły (klucz — temat):
 | `stone-engraving` | Grawerowanie kamienia: łupek, granit, marmur, płytki |
 | `xtool-x1` | xTool X1: Laser Swap, wersje i zestawy |
 
+Przygotowane do publikacji:
+
+| Klucz | Temat |
+|---|---|
+| `laser-accessories` | Akcesoria do lasera xTool: co dokupić i w jakiej kolejności |
+| `christmas-laser` | Ozdoby świąteczne i prezenty z lasera (sezonowy) |
+| `engraving-pricing` | Jak wycenić grawerowanie laserem: wzór i cennik |
+| `laser-maintenance` | Konserwacja lasera: soczewki, filtry, stół |
+| `screen-printing` | Sitodruk w domu z xTool Screen Printer |
+| `fabric-cutting` | Cięcie tkanin i filcu laserem |
+| `heat-press` | Prasa termotransferowa xTool WonderPress 3D |
+| `jewelry-engraving` | Grawerowanie biżuterii laserem |
+| `fume-extraction` | Oczyszczacz powietrza czy wyciąg za okno |
+| `laser-welding-materials` | Spawanie laserowe stali nierdzewnej i aluminium |
+| `buy-xtool` | Gdzie kupić xTool w Polsce: zamówienie krok po kroku |
+| `home-laser-engraver` | Grawerka laserowa do domu dla początkujących |
+
 Dopisz tu każdy nowy artykuł.
 
 ## 2. Fakty
@@ -89,7 +106,7 @@ Bloki to zwykły tekst, który skrypt koduje do HTML, więc nie wstawiaj znaczni
 
 - `[ 'p', 'Akapit.' ]`
 - `[ 'h2', 'Nagłówek' ]`, `[ 'h3', 'Podtytuł' ]`
-- `[ 'ul', [ 'punkt', 'punkt' ] ]`
+- `[ 'ul', [ 'punkt', 'punkt' ] ]`, a dla kroków po kolei `[ 'ol', [ 'krok', 'krok' ] ]` (lista numerowana)
 - `[ 'table', [ 'Nagłówek 1', 'Nagłówek 2' ], [ [ 'komórka', 'komórka' ], … ] ]`
 - `[ 'products', '<ID xTool>,<ID xTool>' ]` — karty produktów z aktualną ceną
 
