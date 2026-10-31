@@ -9,8 +9,8 @@
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
     return;
 }
-if ( ! function_exists( 'lasery_xtool_parse_product' ) ) {
-    WP_CLI::error( 'Activate the lasery-xtool plugin first.' );
+if ( ! function_exists( 'lasery_xtool_parse_product' ) || ! function_exists( 'lasery_xtool_f2_safety_text' ) || ! function_exists( 'lasery_xtool_p3_conveyor_safety_text' ) ) {
+    WP_CLI::error( 'Activate the updated lasery-xtool plugin first.' );
 }
 if ( ! isset( $args[0], $args[1] ) || ! is_dir( $args[0] ) || ! ctype_digit( $args[1] ) ) {
     WP_CLI::error( 'Supply the private snapshot directory and its Unix fetch timestamp.' );
