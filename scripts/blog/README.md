@@ -29,6 +29,14 @@ Opublikowane artykuły (klucz — temat):
 | `sticker-cutter` | Ploter do naklejek czy laser: druk i cięcie na xTool M2 |
 | `laser-school` | Laser do szkoły i pracowni technicznej |
 | `xtool-f2-comparison` | xTool F2, F2 Ultra czy F2 Ultra UV: porównanie |
+| `metal-cutting` | Laserowe cięcie blachy w małym warsztacie (MetalFab) |
+| `laser-marking` | Znakowanie laserowe w małej produkcji: numery seryjne, kody QR |
+| `photo-engraving` | Grawerowanie zdjęć laserem: drewno, łupek, szkło, metal i kolor |
+| `leather-engraving` | Grawerowanie i cięcie skóry laserem |
+| `paper-cutting` | Cięcie papieru i kartonu laserem: zaproszenia, opakowania, makiety |
+| `event-engraving` | Grawerowanie na eventach: personalizacja na żywo z F2 |
+| `stone-engraving` | Grawerowanie kamienia: łupek, granit, marmur, płytki |
+| `xtool-x1` | xTool X1: Laser Swap, wersje i zestawy |
 
 Dopisz tu każdy nowy artykuł.
 
