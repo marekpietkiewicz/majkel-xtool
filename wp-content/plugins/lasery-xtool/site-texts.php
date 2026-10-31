@@ -75,7 +75,10 @@ function lasery_xtool_text_groups( $language ) {
 			'process_heading' => 'Nagłówek: zgłoszenie i płatność', 'process' => 'Zgłoszenie i płatność',
 			'rights_heading' => 'Nagłówek: reklamacje i zwroty', 'rights' => 'Prawa kupującego',
 			'contact' => 'Kontakt z prowadzącym stronę', 'seller_contact' => 'Kontakt ze sprzedawcą',
-			'links_heading' => 'Nagłówek: dokumenty xTool', 'terms' => 'Etykieta warunków xTool',
+			'service_title' => 'Regulamin: tytuł', 'service_scope' => 'Regulamin: zakres usług', 'service_requirements' => 'Regulamin: wymagania i zakaz treści bezprawnych',
+			'commercial_disclosure' => 'Informacja o reklamie i możliwej prowizji',
+			'service_duration' => 'Regulamin: rozpoczęcie i zakończenie korzystania', 'service_complaints' => 'Regulamin: reklamacje serwisu',
+			'links_heading' => 'Nagłówek: dokumenty xTool', 'terms' => 'Etykieta warunków xTool', 'aftersales' => 'Etykieta polityki posprzedażowej xTool',
 			'returns' => 'Etykieta zwrotów xTool', 'support' => 'Etykieta pomocy xTool',
 		);
 		$groups['purchase_info'] = array( 'Informacje o zakupach', $pairs( lasery_xtool_purchase_info_default_texts( $language ), $labels ) );

@@ -10,6 +10,7 @@
             ?>
             <p class="eyebrow"><?php echo esc_html(lasery_xtool_text('products_eyebrow')); ?></p>
             <h1 class="page-title"><?php esc_html_e('Produkty xTool', 'lasery-xtool'); ?></h1>
+            <p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p>
             <nav class="filter-chips" aria-label="<?php esc_attr_e('Rodzaj produktów', 'lasery-xtool'); ?>">
                 <?php foreach ($filters as $value => $label) : ?>
                     <a class="chip" href="<?php echo esc_url($value === '' ? $archive : add_query_arg('kind', $value, $archive)); ?>"<?php if ($kind === $value) : ?> aria-current="page"<?php endif; ?>><?php echo esc_html($label); ?></a>
@@ -46,6 +47,7 @@
                 <?php if ($ids) : ?>
                     <section class="search-page-section">
                         <h2 class="section-title section-title--sm"><?php echo esc_html($heading); ?></h2>
+                        <?php if ($type === 'p') : ?><p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p><?php endif; ?>
                         <div class="<?php echo esc_attr($grid); ?>">
                             <?php foreach (get_posts(['post_type' => $post_type, 'has_password' => false, 'post__in' => $ids, 'orderby' => 'post__in', 'posts_per_page' => -1]) as $position => $post) : setup_postdata($post); ?>
                                 <?php get_template_part('template-parts/' . $card, null, ['position' => $position]); ?>

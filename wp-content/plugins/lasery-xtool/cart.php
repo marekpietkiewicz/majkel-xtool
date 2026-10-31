@@ -404,6 +404,7 @@ function lasery_xtool_render_cart() {
 					<dd class="order-summary-price" data-cart-sum><?php echo esc_html( $total ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
+				<?php if ( function_exists( 'lasery_xtool_purchase_info_texts' ) ) : ?><p class="commercial-disclosure"><?php echo esc_html( lasery_xtool_purchase_info_texts( $language )['commercial_disclosure'] ); ?></p><?php endif; ?>
 				<?php $purchase_info = function_exists( 'lasery_xtool_purchase_info_url' ) ? lasery_xtool_purchase_info_url( $language ) : ''; ?>
 				<?php if ( $purchase_info && function_exists( 'lasery_xtool_purchase_info_title' ) ) : ?>
 					<p class="order-summary-note"><a href="<?php echo esc_url( $purchase_info ); ?>"><?php echo esc_html( lasery_xtool_purchase_info_title( $language ) ); ?></a></p>

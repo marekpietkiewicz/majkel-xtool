@@ -19,24 +19,33 @@ const fixture = JSON.parse(php(`
  ]);
  update_post_meta($f2, '_lasery_source_currency', 'EUR');
  update_post_meta($f2, '_lasery_source_updated_at', (string) time());
- echo wp_json_encode(['id'=>$id, 'f2'=>$f2]);
+ $articles = [];
+ foreach (['pl','en','de','ru','uk'] as $lang) {
+   $article = wp_insert_post(['post_type'=>'post','post_status'=>'publish','post_title'=>'Article test '.$lang,'post_content'=>'[lasery_produkty ids="'.$id.'"]']);
+   update_post_meta($article, '_lasery_language', $lang);
+   $articles[$lang] = $article;
+ }
+ lasery_xtool_search_refresh();
+ echo wp_json_encode(['id'=>$id, 'f2'=>$f2, 'articles'=>$articles]);
 `));
 const expected = {
- pl: ['Informacje o zakupach', 'Reklamacje i zwroty', 'Sprzedawcą jest xTool'],
- en: ['Purchase information', 'Complaints and returns', 'xTool is the seller'],
- de: ['Informationen zum Kauf', 'Reklamation und Rückgabe', 'Verkäufer ist xTool'],
- ru: ['Информация о покупке', 'Претензии и возврат', 'Продавцом является xTool'],
- uk: ['Інформація про покупку', 'Рекламації та повернення', 'Продавцем є xTool'],
+ pl: ['Informacje o zakupach', 'Reklamacje i zwroty', 'Sprzedawcą jest xTool', 'Regulamin korzystania z serwisu', '14 dni', 'Reklama produktów xTool.', 'prowizję'],
+ en: ['Purchase information', 'Complaints and returns', 'xTool is the seller', 'Website terms of use', '14 days', 'xTool product advertising.', 'commission'],
+ de: ['Informationen zum Kauf', 'Reklamation und Rückgabe', 'Verkäufer ist xTool', 'Nutzungsbedingungen der Website', '14 Tagen', 'Werbung für xTool-Produkte.', 'Provision'],
+ ru: ['Информация о покупке', 'Претензии и возврат', 'Продавцом является xTool', 'Правила пользования сайтом', '14 дней', 'Реклама продукции xTool.', 'комиссию'],
+ uk: ['Інформація про покупку', 'Рекламації та повернення', 'Продавцем є xTool', 'Правила користування сайтом', '14 днів', 'Реклама продукції xTool.', 'комісію'],
 };
 (async () => {
  let browser;
  try {
   browser = await chromium.launch({headless:true,...(process.env.CHROME_BIN ? {executablePath:process.env.CHROME_BIN} : {})});
-  for (const [language, [title, rights, seller]] of Object.entries(expected)) {
+  for (const [language, [title, rights, seller, serviceTitle, complaintPeriod, advertising, commission]] of Object.entries(expected)) {
    const context = await browser.newContext();
    await context.addCookies([{name:'lasery_cart', value:encodeURIComponent(`${fixture.id}::1`), url:base}]);
    const page = await context.newPage();
    await page.goto(`${base}/?pagename=koszyk&lang=${language}`);
+   assert((await page.locator('.order-summary .commercial-disclosure').innerText()).includes(advertising));
+   assert((await page.locator('.order-summary .commercial-disclosure').innerText()).includes(commission));
    const link = page.locator('[data-cart-form] .order-summary a').filter({hasText:title});
    assert.equal(await link.count(), 1, `${language}: cart information link`);
    assert(await link.evaluate(node => Boolean(node.compareDocumentPosition(document.querySelector('[data-cart-send]:not(.visually-hidden)')) & Node.DOCUMENT_POSITION_FOLLOWING)), `${language}: link appears before submit`);
@@ -45,6 +54,9 @@ const expected = {
    const footer = page.locator('footer nav[aria-labelledby="footer-info"] a').filter({hasText:title});
    assert.equal(await footer.count(), 1, `${language}: footer information link`);
    assert.equal(await footer.getAttribute('href'), url);
+   const serviceLink = page.locator('footer nav[aria-labelledby="footer-info"] a').filter({hasText:serviceTitle});
+   assert.equal(await serviceLink.count(), 1, `${language}: site terms link`);
+   assert.equal(await serviceLink.getAttribute('href'), `${url}#regulamin`);
    const response = await page.goto(url);
    assert(response.ok(), `${language}: document returned ${response.status()}`);
    assert.equal(await page.locator('main h1').textContent(), title);
@@ -53,7 +65,24 @@ const expected = {
    assert((await page.locator('main').innerText()).includes(seller));
    assert((await page.locator('main').innerText()).includes('Makeblock Europe B.V.'));
    assert((await page.locator('main').innerText()).includes('Oostergracht 48, 3763 LZ Soest, Netherlands'));
-   for (const href of ['mailto:service.eu@xtool.com', 'tel:+4921186089128', 'https://www.xtool.eu/pl-pl/pages/imprint-1', 'https://www.xtool.eu/pl-pl/pages/contact-us', 'https://www.xtool.eu/policies/terms-of-service', 'https://www.xtool.eu/policies/refund-policy', 'https://support.xtool.com/']) assert.equal(await page.locator(`main a[href="${href}"]`).count(), 1, `${language}: ${href}`);
+   assert.equal(await page.locator('#regulamin h2').textContent(), serviceTitle);
+   assert((await page.locator('#regulamin').innerText()).includes(complaintPeriod));
+   for (const href of ['mailto:service.eu@xtool.com', 'tel:+4921186089128', 'https://www.xtool.eu/pl-pl/pages/imprint-1', 'https://www.xtool.eu/pl-pl/pages/contact-us', 'https://www.xtool.eu/policies/terms-of-service', 'https://www.xtool.eu/policies/refund-policy', 'https://www.xtool.eu/pages/aftersale-policies-v3', 'https://support.xtool.com/']) assert.equal(await page.locator(`main a[href="${href}"]`).count(), 1, `${language}: ${href}`);
+   await page.goto(`${base}/?post_type=lasery_product&p=${fixture.id}&lang=${language}`);
+   assert((await page.locator('.product-summary .commercial-disclosure').innerText()).includes(advertising));
+   assert((await page.locator('.product-summary .commercial-disclosure').innerText()).includes(commission));
+   await page.goto(`${base}/?p=${fixture.articles[language]}`);
+   assert((await page.locator('.article-header .commercial-disclosure').innerText()).includes(advertising));
+   assert((await page.locator('.article-header .commercial-disclosure').innerText()).includes(commission));
+   await page.goto(`${base}/?lang=${language}`);
+   assert((await page.locator('.hero > .wrap .commercial-disclosure').innerText()).includes(commission));
+   await page.locator('[data-search-open]').first().click();
+   assert(await page.locator('[data-search] .commercial-disclosure').isVisible());
+   assert((await page.locator('[data-search] .commercial-disclosure').innerText()).includes(advertising));
+   await page.goto(`${base}/?post_type=lasery_product&lang=${language}`);
+   assert((await page.locator('.page-hero .commercial-disclosure').innerText()).includes(commission));
+   await page.goto(`${base}/?s=Purchase+information+test&lang=${language}`);
+   assert((await page.locator('.search-page-section .commercial-disclosure').innerText()).includes(commission));
    await context.close();
   }
   console.log('Purchase information: five languages, footer and pre-submit links, seller, rights and official xTool links passed.');
@@ -83,6 +112,6 @@ const expected = {
   }
  } finally {
   if (browser) await browser.close();
-  php(`wp_delete_post(${fixture.id}, true); wp_delete_post(${fixture.f2}, true);`);
+  php(`wp_delete_post(${fixture.id}, true); wp_delete_post(${fixture.f2}, true); foreach (${JSON.stringify(Object.values(fixture.articles))} as $id) wp_delete_post($id, true); lasery_xtool_search_refresh();`);
  }
 })().catch(error => { console.error(error); process.exitCode=1; });
