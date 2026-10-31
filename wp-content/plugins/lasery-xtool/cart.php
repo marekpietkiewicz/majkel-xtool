@@ -323,7 +323,7 @@ function lasery_xtool_render_cart() {
 								</div>
 								<div class="cart-line-actions">
 									<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
-									<?php lasery_xtool_quantity_field( 'cart-quantity-' . $index, 'quantity[' . $line['key'] . ']', $line['quantity'] ); ?>
+									<?php lasery_xtool_quantity_field( 'cart-quantity-' . $index, 'quantity[' . $line['key'] . ']', $line['quantity'], $text ); ?>
 									<button type="submit" form="cart-remove" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $line['key'] ); ?>"><?php echo lasery_xtool_order_icon( 'trash' ); ?><span class="visually-hidden"><?php echo esc_html( $text['remove'] . ': ' . $title ); ?></span></button>
 									<p class="cart-line-total" data-cart-update-part><?php echo esc_html( $line['error'] || ! $line['amount'] ? '' : lasery_xtool_cart_line_value( $line, $line['quantity'], $text, $language ) ); ?></p>
 								</div>

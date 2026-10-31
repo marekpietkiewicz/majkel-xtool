@@ -140,12 +140,15 @@
 
   /* Cart: the number of items comes from the cart cookie, so pages stay cacheable for everyone. */
   const cartCount = document.querySelector('[data-cart-count]');
-  const showCartCount = () => {
+  const cartCookie = () => {
     const cookie = document.cookie.split('; ').find((part) => part.startsWith('lasery_cart='));
+    return cookie ? cookie.slice('lasery_cart='.length) : '';
+  };
+  const showCartCount = () => {
     let count = 0;
     try {
       // The same entries the server accepts: "product:variant:quantity", at most 30.
-      count = decodeURIComponent(cookie ? cookie.slice('lasery_cart='.length) : '').split('|').slice(0, 30)
+      count = decodeURIComponent(cartCookie()).split('|').slice(0, 30)
         .filter((item) => /^[1-9]\d{0,19}:(?:[1-9]\d{0,19})?:(?:[1-9]\d?|100)$/.test(item))
         .reduce((sum, item) => sum + Number(item.split(':')[2]), 0);
     } catch (error) {
@@ -159,8 +162,8 @@
     window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
   /* Quantities and prices of several pieces. */
-  // A typed quantity from 1 to 100 (leading zeros allowed), or NaN.
-  const quantityOf = (input) => (/^\s*\d{1,3}\s*$/.test(input.value) && Number(input.value) >= 1 && Number(input.value) <= 100 ? Number(input.value) : NaN);
+  // A typed quantity the field's pattern accepts (1 to 100, leading zeros allowed), or NaN.
+  const quantityOf = (input) => (input.validity.valid ? Number(input.value) : NaN);
   // A number out of range becomes the nearest allowed one; anything else, the last saved number.
   const normaliseQuantity = (input) => {
     const value = /^\s*\d+\s*$/.test(input.value) ? Number(input.value) : NaN;
@@ -175,6 +178,12 @@
   };
 
   /* Cart confirmations show for a moment; the address drops the result, so a reload does not repeat it. */
+  const forgetCartResult = () => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('cart')) return;
+    url.searchParams.delete('cart');
+    history.replaceState(history.state, '', url);
+  };
   const toast = document.querySelector('[data-cart-toast]');
   let toastTimer = 0;
   const showToast = (message) => {
@@ -198,11 +207,7 @@
   if (toast) {
     const message = toast.textContent.trim();
     if (message) showToast(message);
-    const url = new URL(window.location.href);
-    if (/^(?:added|updated|removed)$/.test(url.searchParams.get('cart') || '')) {
-      url.searchParams.delete('cart');
-      history.replaceState(history.state, '', url);
-    }
+    if (/^(?:added|updated|removed)$/.test(new URL(window.location.href).searchParams.get('cart') || '')) forgetCartResult();
   }
   // Errors stay; focus goes to them instead of the top of the page.
   const cartError = document.querySelector('[data-cart-error]');
@@ -210,17 +215,6 @@
     cartError.tabIndex = -1;
     cartError.focus();
   }
-
-  // A cart error from the server's answer replaces the one shown, and gets focus.
-  const showCartError = (page, before) => {
-    document.querySelectorAll('[data-cart-error]').forEach((error) => error.remove());
-    const error = page.querySelector('[data-cart-error]');
-    if (!error) return false;
-    before.before(error);
-    error.tabIndex = -1;
-    error.focus();
-    return true;
-  };
 
   /* Product page: the chosen variant and the price of the typed quantity in the summary; adding keeps the page. */
   document.querySelectorAll('[data-order-form]').forEach((form) => {
@@ -240,13 +234,7 @@
         price.append(each);
       }
     };
-    form.addEventListener('change', (event) => {
-      const input = event.target;
-      if (input === quantity) {
-        normaliseQuantity(quantity);
-        showPrice();
-      }
-      if (input.name !== 'variant' || input.type !== 'radio') return;
+    const chooseVariant = (input) => {
       const option = input.closest('.variant-option');
       if (variant) variant.textContent = option.querySelector('.variant-option-title').textContent;
       if (input.dataset.amount) {
@@ -256,8 +244,21 @@
         delete price.dataset.amount;
         price.textContent = option.querySelector('.variant-option-price').textContent;
       }
+    };
+    form.addEventListener('change', (event) => {
+      const input = event.target;
+      if (input === quantity) {
+        normaliseQuantity(quantity);
+        showPrice();
+      } else if (input.name === 'variant' && input.type === 'radio') {
+        chooseVariant(input);
+      }
     });
     quantity.addEventListener('input', showPrice);
+    // Some browsers keep the chosen variant after a reload.
+    const restored = form.querySelector('input[type="radio"][name="variant"]:checked');
+    if (restored) chooseVariant(restored);
+    const cartLink = form.querySelector('[data-cart-link]');
     let adding = false;
     let native = false;
     form.addEventListener('submit', async (event) => {
@@ -266,32 +267,38 @@
       if (adding) return;
       adding = true;
       form.classList.add('is-adding');
-      let response = null;
+      const before = cartCookie();
       try {
-        response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin' });
+        const response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin' });
         if (!response.ok) throw new Error(String(response.status));
-        // The answer is the cart page with a confirmation, or a page with the reason it was not added.
+        // The answer is the cart page with a confirmation, or a page with the reason the product was not added,
+        // which opens as it is (an unavailable variant is then no longer offered).
         const page = new DOMParser().parseFromString(await response.text(), 'text/html');
-        const added = page.querySelector('[data-cart-toast]');
-        if (!showCartError(page, form)) {
-          if (!added) throw new Error('No confirmation');
-          showToast(added.textContent.trim());
-          const cartLink = form.querySelector('[data-cart-link]');
-          if (cartLink) cartLink.classList.add('btn', 'btn-secondary', 'btn-block');
+        if (page.querySelector('[data-cart-error]')) {
+          window.location.assign(response.url);
+          return;
         }
+        const added = page.querySelector('[data-cart-toast]');
+        const message = added ? added.textContent.trim() : '';
+        if (!message) throw new Error('No confirmation');
+        showToast(message);
+        document.querySelectorAll('[data-cart-error]').forEach((error) => error.remove());
+        forgetCartResult();
+        if (cartLink) cartLink.classList.add('btn', 'btn-secondary', 'btn-block');
         if (cartCount) showCartCount();
       } catch (error) {
-        // The server may have added the product already, so its answer opens as a page; without one the browser sends the form.
-        if (response) {
-          window.location.assign(response.url);
-        } else {
-          native = true;
-          form.requestSubmit(event.submitter);
+        // The cookie tells whether the server added the product: then the cart opens, so it is never added twice;
+        // otherwise the browser sends the form itself and shows the server's answer.
+        if (cartLink && cartCookie() !== before) {
+          window.location.assign(cartLink.href);
+          return;
         }
-      } finally {
-        adding = false;
-        form.classList.remove('is-adding');
+        native = true;
+        form.requestSubmit(event.submitter);
       }
+      // While another page opens, the button stays busy.
+      adding = false;
+      form.classList.remove('is-adding');
     });
   });
 

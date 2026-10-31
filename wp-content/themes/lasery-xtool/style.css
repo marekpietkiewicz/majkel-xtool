@@ -409,7 +409,7 @@ h1, h2, h3, .product-card-title { overflow-wrap: break-word; hyphens: auto; hyph
 /* With JavaScript the cart updates on every change, so the update button is only needed without it. */
 .js [data-cart-update] { display: none; }
 .cart-empty-actions { margin-top: 20px; }
-.cart .order-form-notice:focus { outline: none; }
+[data-cart-error]:focus { outline: none; }
 @media (min-width: 640px) {
   .cart-items { padding: 4px 24px; }
   .cart-line { grid-template-columns: 88px minmax(0, 1fr) auto; grid-template-areas: "media body actions"; gap: 20px; padding: 20px 0; }

@@ -231,7 +231,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Zaktualizuj koszyk',
 			'total' => 'Razem (orientacyjnie)',
 			'items' => 'Produkty',
-			'each' => '%s / szt.', 'pieces' => '%d szt.', 'unit_price' => 'Cena za sztukę', 'line_total' => 'Wartość', 'sent_title' => 'Dziękujemy za zamówienie',
+			'each' => '%s / szt.', 'pieces' => '%d szt.', 'quantity_hint' => 'Liczba od 1 do 100', 'unit_price' => 'Cena za sztukę', 'line_total' => 'Wartość', 'sent_title' => 'Dziękujemy za zamówienie',
 			'view_product' => 'Zobacz produkt', 'close' => 'Zamknij',
 		),
 		'en' => array(
@@ -260,7 +260,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Update cart',
 			'total' => 'Total (estimated)',
 			'items' => 'Products',
-			'each' => '%s each', 'pieces' => '%d pcs', 'unit_price' => 'Unit price', 'line_total' => 'Subtotal', 'sent_title' => 'Thank you for your order',
+			'each' => '%s each', 'pieces' => '%d pcs', 'quantity_hint' => 'A number from 1 to 100', 'unit_price' => 'Unit price', 'line_total' => 'Subtotal', 'sent_title' => 'Thank you for your order',
 			'view_product' => 'View product', 'close' => 'Close',
 		),
 		'de' => array(
@@ -289,7 +289,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Warenkorb aktualisieren',
 			'total' => 'Summe (unverbindlich)',
 			'items' => 'Produkte',
-			'each' => '%s / Stk.', 'pieces' => '%d Stk.', 'unit_price' => 'Stückpreis', 'line_total' => 'Summe', 'sent_title' => 'Vielen Dank für Ihre Bestellung',
+			'each' => '%s / Stk.', 'pieces' => '%d Stk.', 'quantity_hint' => 'Eine Zahl von 1 bis 100', 'unit_price' => 'Stückpreis', 'line_total' => 'Summe', 'sent_title' => 'Vielen Dank für Ihre Bestellung',
 			'view_product' => 'Produkt ansehen', 'close' => 'Schließen',
 		),
 		'ru' => array(
@@ -318,7 +318,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Обновить корзину',
 			'total' => 'Итого (ориентировочно)',
 			'items' => 'Товары',
-			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Цена за штуку', 'line_total' => 'Сумма', 'sent_title' => 'Спасибо за заказ',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'quantity_hint' => 'Число от 1 до 100', 'unit_price' => 'Цена за штуку', 'line_total' => 'Сумма', 'sent_title' => 'Спасибо за заказ',
 			'view_product' => 'Смотреть товар', 'close' => 'Закрыть',
 		),
 		'uk' => array(
@@ -347,7 +347,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Оновити кошик',
 			'total' => 'Разом (орієнтовно)',
 			'items' => 'Товари',
-			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Ціна за штуку', 'line_total' => 'Сума', 'sent_title' => 'Дякуємо за замовлення',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'quantity_hint' => 'Число від 1 до 100', 'unit_price' => 'Ціна за штуку', 'line_total' => 'Сума', 'sent_title' => 'Дякуємо за замовлення',
 			'view_product' => 'Переглянути товар', 'close' => 'Закрити',
 		),
 	);
@@ -470,10 +470,10 @@ function lasery_xtool_order_icon( $name ) {
 
 /**
  * A quantity field: a whole number from 1 to 100 (leading zeros allowed), which the browser checks
- * also without JavaScript. A text field, so the mouse wheel cannot change it by accident.
+ * also without JavaScript and explains with the title. A text field, so the mouse wheel cannot change it by accident.
  */
-function lasery_xtool_quantity_field( $id, $name, $quantity ) {
-	printf( '<input class="quantity-input" id="%s" name="%s" type="text" inputmode="numeric" pattern="0*(?:[1-9][0-9]?|100)" maxlength="3" autocomplete="off" value="%d" required data-quantity>', esc_attr( $id ), esc_attr( $name ), (int) $quantity );
+function lasery_xtool_quantity_field( $id, $name, $quantity, $text ) {
+	printf( '<input class="quantity-input" id="%s" name="%s" type="text" inputmode="numeric" pattern="0*(?:[1-9][0-9]?|100)" maxlength="3" autocomplete="off" title="%s" value="%d" required data-quantity>', esc_attr( $id ), esc_attr( $name ), esc_attr( $text['quantity_hint'] ), (int) $quantity );
 }
 
 /** Prices as cents with their currency, which the script multiplies by the typed quantity. */
@@ -568,7 +568,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<?php elseif ( $uses_source_variants ) : ?>
 						<p class="order-form-notice order-form-notice--error"><?php echo esc_html( $variants && ! $fresh ? $text['stale'] : $text['unavailable'] ); ?></p>
 					<?php endif; ?>
-					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><?php lasery_xtool_quantity_field( 'order-quantity', 'quantity', 1 ); ?></p>
+					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><?php lasery_xtool_quantity_field( 'order-quantity', 'quantity', 1, $text ); ?></p>
 				</fieldset>
 			</div>
 			<aside class="order-summary" aria-labelledby="order-summary-title">
