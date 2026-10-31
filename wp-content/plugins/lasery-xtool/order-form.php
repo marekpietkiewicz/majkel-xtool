@@ -202,7 +202,6 @@ function lasery_xtool_order_product_title( $post_id, $language ) {
 	return sanitize_text_field( html_entity_decode( wp_strip_all_tags( $title, true ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 }
 
-/** Texts are kept together until the site has a configured multilingual plugin. */
 /** The built-in order, cart and email texts of a language (Polish for unknown languages), with placeholders. */
 function lasery_xtool_order_default_texts( $language ) {
 	$texts = array(
@@ -540,7 +539,9 @@ function lasery_xtool_render_order_form( $post_id ) {
 								<div class="variant-option">
 									<label class="variant-option-choice">
 										<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required<?php echo lasery_xtool_amount_attributes( $amount ); ?> <?php checked( $selected === $variant ); ?><?php if ( $set ) : ?> aria-describedby="<?php echo esc_attr( $set_id ); ?>"<?php endif; ?>>
-										<span class="variant-option-title"><?php echo esc_html( lasery_xtool_variant_label( $variant ) ); ?></span>
+										<?php // A nameless variant (a set without options) is called by the product's name. ?>
+										<?php $variant_label = lasery_xtool_variant_label( $variant ); ?>
+										<span class="variant-option-title"><?php echo esc_html( '' !== $variant_label ? $variant_label : lasery_xtool_order_product_title( $post_id, $language ) ); ?></span>
 										<span class="variant-option-price"><?php echo esc_html( $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $text['no_price'] ); ?></span>
 										<?php if ( $set ) : ?><span class="variant-option-more" aria-hidden="true"><?php echo esc_html( $text['set_more'] ); ?></span><?php endif; ?>
 									</label>
@@ -589,7 +590,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 				<dl class="order-summary-list">
 					<?php if ( $available_variants && ! $single ) : ?>
 						<dt><?php echo esc_html( $text['variant'] ); ?></dt>
-						<dd data-order-summary-variant><?php echo esc_html( $selected ? lasery_xtool_variant_label( $selected ) : $text['summary_empty'] ); ?></dd>
+						<dd data-order-summary-variant><?php echo esc_html( $selected ? ( '' !== lasery_xtool_variant_label( $selected ) ? lasery_xtool_variant_label( $selected ) : lasery_xtool_order_product_title( $post_id, $language ) ) : $text['summary_empty'] ); ?></dd>
 					<?php endif; ?>
 					<dt><?php echo esc_html( $text['price'] ); ?></dt>
 					<?php // The price of the chosen quantity; with several pieces the script adds the price of one. ?>

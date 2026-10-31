@@ -78,6 +78,15 @@ function lasery_xtool_text_placeholders( $text ) {
 	return $matches[0];
 }
 
+/**
+ * Whether a changed text may replace a built-in one: the same placeholders, and in texts with
+ * placeholders no other "%" (the site fills them in with sprintf, which would fail on "100%").
+ */
+function lasery_xtool_text_fits( $text, $default ) {
+	$placeholders = lasery_xtool_text_placeholders( $default );
+	return lasery_xtool_text_placeholders( $text ) === $placeholders && ( ! $placeholders || false === strpos( preg_replace( '/%(?:\d+\$)?[sd]/', '', $text ), '%' ) );
+}
+
 add_action( 'admin_menu', 'lasery_xtool_site_texts_menu' );
 function lasery_xtool_site_texts_menu() {
 	add_submenu_page( 'edit.php?post_type=' . LASERY_XTOOL_PRODUCT_TYPE, 'Teksty strony', 'Teksty strony', 'manage_options', 'lasery-xtool-texts', 'lasery_xtool_site_texts_page' );
@@ -96,7 +105,7 @@ function lasery_xtool_site_texts_page() {
 	?>
 	<div class="wrap">
 		<h1>Teksty strony</h1>
-		<p>Puste pole oznacza tekst wbudowany (pokazany w polu na szaro). Wpisz własny tekst, aby go zastąpić; usuń go, aby wrócić do wbudowanego. Znaczniki takie jak <code>%s</code> i <code>%d</code> muszą zostać w tekście. Zmiany dotyczą tylko wybranego języka.</p>
+		<p>Puste pole oznacza tekst wbudowany (pokazany w polu na szaro). Wpisz własny tekst, aby go zastąpić; usuń go, aby wrócić do wbudowanego. Znaczniki takie jak <code>%s</code> i <code>%d</code> muszą zostać w tekście, a w tekstach z takimi znacznikami nie można użyć innego znaku <code>%</code>. Zmiany dotyczą tylko wybranego języka.</p>
 		<p>Treść produktów, artykułów, strony głównej (Wygląd → Dostosuj) i polityki prywatności edytuje się w ich własnych miejscach.</p>
 		<nav class="nav-tab-wrapper" aria-label="Języki tekstów">
 			<?php foreach ( $languages as $code => $label ) : ?>
@@ -104,7 +113,7 @@ function lasery_xtool_site_texts_page() {
 			<?php endforeach; ?>
 		</nav>
 		<?php if ( 'saved' === $result ) : ?><div class="notice notice-success"><p>Zapisano teksty.</p></div><?php endif; ?>
-		<?php if ( $rejected ) : ?><div class="notice notice-warning"><p><?php echo esc_html( sprintf( 'Pominięto zmienione teksty: %d. Muszą zawierać te same znaczniki (%%s, %%d) co tekst wbudowany.', $rejected ) ); ?></p></div><?php endif; ?>
+		<?php if ( $rejected ) : ?><div class="notice notice-warning"><p><?php echo esc_html( sprintf( 'Pominięto zmienione teksty: %d. Muszą zawierać te same znaczniki (%%s, %%d) co tekst wbudowany i nie mogą mieć w nich innego znaku %%.', $rejected ) ); ?></p></div><?php endif; ?>
 		<?php if ( 'save_failed' === $result ) : ?><div class="notice notice-error"><p>Nie udało się zapisać tekstów. Spróbuj ponownie.</p></div><?php endif; ?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="lasery_xtool_save_texts">
@@ -150,7 +159,7 @@ function lasery_xtool_handle_site_texts() {
 			if ( '' === $text || $text === $default ) {
 				continue;
 			}
-			if ( lasery_xtool_text_placeholders( $text ) !== lasery_xtool_text_placeholders( $default ) ) {
+			if ( ! lasery_xtool_text_fits( $text, $default ) ) {
 				++$rejected;
 				continue;
 			}
@@ -161,8 +170,11 @@ function lasery_xtool_handle_site_texts() {
 	update_option( 'lasery_xtool_text_overrides', $all );
 	$result = get_option( 'lasery_xtool_text_overrides', null ) === $all ? 'saved' : 'save_failed';
 	if ( 'saved' === $result ) {
-		// The texts appear on every page.
+		// The texts appear on every page and in the cached search index.
 		do_action( 'litespeed_purge_all' );
+		if ( function_exists( 'lasery_xtool_search_refresh' ) ) {
+			lasery_xtool_search_refresh();
+		}
 	}
 	wp_safe_redirect( add_query_arg( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'page' => 'lasery-xtool-texts', 'language' => $language, 'result' => $result, 'rejected' => $rejected ), admin_url( 'edit.php' ) ) );
 	exit;
