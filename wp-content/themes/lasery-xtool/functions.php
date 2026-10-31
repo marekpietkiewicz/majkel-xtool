@@ -8,6 +8,7 @@ require_once __DIR__ . '/privacy-defaults.php';
 require_once __DIR__ . '/customizer.php';
 require_once __DIR__ . '/template-tags.php';
 require_once __DIR__ . '/search-index.php';
+require_once __DIR__ . '/seo.php';
 
 add_action('after_setup_theme', function () {
     load_theme_textdomain('lasery-xtool', get_template_directory() . '/languages');
@@ -104,10 +105,18 @@ add_filter('pings_open', '__return_false');
 // Category, tag and archive feed links would point to the Polish feed.
 remove_action('wp_head', 'feed_links_extra', 3);
 
+// The fonts of the first screen: Latin, plus Polish letters (ą, ł…) or Cyrillic.
 add_action('wp_head', function () {
     $fonts = get_template_directory_uri() . '/assets/fonts/';
-    foreach (['geologica-latin-wght-normal.woff2', 'manrope-latin-wght-normal.woff2'] as $file) {
-        printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($fonts . $file));
+    $subsets = ['latin'];
+    $extra = ['pl' => 'latin-ext', 'ru' => 'cyrillic', 'uk' => 'cyrillic'][lasery_xtool_interface_language()] ?? '';
+    if ($extra !== '') {
+        $subsets[] = $extra;
+    }
+    foreach ($subsets as $subset) {
+        foreach (['geologica', 'manrope'] as $family) {
+            printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($fonts . $family . '-' . $subset . '-wght-normal.woff2'));
+        }
     }
 }, 1);
 
@@ -160,8 +169,7 @@ add_filter('locale', function ($locale) {
     if (is_admin() && (!isset($_POST['action']) || !is_string($_POST['action']) || $_POST['action'] !== 'lasery_xtool_order')) {
         return $locale;
     }
-    $locales = ['pl' => 'pl_PL', 'en' => 'en_US', 'de' => 'de_DE', 'ru' => 'ru_RU', 'uk' => 'uk'];
-    return $locales[lasery_xtool_interface_language()];
+    return lasery_xtool_locales()[lasery_xtool_interface_language()];
 });
 
 add_filter('post_type_link', function ($url, $post) {
@@ -193,51 +201,6 @@ add_action('template_redirect', function () {
         do_action('litespeed_control_set_nocache', 'lasery-xtool blog page redirect');
         wp_safe_redirect(remove_query_arg('strona'), $page < 2 ? 301 : 302);
         exit;
-    }
-});
-
-/** Description and language alternates for the pages visitors land on. */
-add_action('wp_head', function () {
-    $description = '';
-    $url = '';
-    if (is_front_page()) {
-        $description = lasery_xtool_text('hero_description');
-        $url = home_url('/');
-    } elseif (is_singular('lasery_product')) {
-        $description = lasery_xtool_display_summary(get_queried_object_id());
-        $url = get_permalink(get_queried_object_id());
-    } elseif (is_singular('post')) {
-        $description = get_the_excerpt(get_queried_object_id());
-    } elseif (is_page('blog')) {
-        $description = lasery_xtool_text('blog_description');
-        // Further pages differ per language, so only the first one has alternates.
-        $url = lasery_xtool_blog_listing()[0] > 1 ? '' : get_permalink(get_queried_object_id());
-    } elseif (is_post_type_archive('lasery_product')) {
-        $kind = lasery_xtool_requested_kind();
-        $url = $kind === '' ? get_post_type_archive_link('lasery_product') : add_query_arg('kind', $kind, get_post_type_archive_link('lasery_product'));
-    }
-    // Articles link their translations, which have their own URLs.
-    if (is_singular('post') && function_exists('lasery_xtool_post_translations')) {
-        $translations = lasery_xtool_post_translations(get_queried_object_id());
-        if (count($translations) > 1) {
-            foreach ($translations as $language => $id) {
-                printf('<link rel="alternate" hreflang="%s" href="%s">' . "\n", esc_attr($language), esc_url(get_permalink($id)));
-            }
-            if (isset($translations['pl'])) {
-                printf('<link rel="alternate" hreflang="x-default" href="%s">' . "\n", esc_url(get_permalink($translations['pl'])));
-            }
-        }
-    }
-    if ($description !== '') {
-        // Descriptions are plain text, so they are shortened without stripping tags (which would cut "<5 mm").
-        printf('<meta name="description" content="%s">' . "\n", esc_attr(mb_strimwidth($description, 0, 160, '…')));
-    }
-    if (is_string($url) && $url !== '') {
-        $url = remove_query_arg('lang', $url);
-        foreach (array_keys(lasery_xtool_languages()) as $language) {
-            printf('<link rel="alternate" hreflang="%s" href="%s">' . "\n", esc_attr($language), esc_url(add_query_arg('lang', $language, $url)));
-        }
-        printf('<link rel="alternate" hreflang="x-default" href="%s">' . "\n", esc_url($url));
     }
 });
 
