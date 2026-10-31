@@ -52,7 +52,8 @@ function lasery_xtool_redirect_old_urls() {
 	$product = isset( $match[1] ) ? get_page_by_path( $match[1], OBJECT, LASERY_XTOOL_PRODUCT_TYPE ) : null;
 	$target = $product && 'publish' === $product->post_status ? get_permalink( $product ) : get_post_type_archive_link( LASERY_XTOOL_PRODUCT_TYPE );
 	if ( $target ) {
-		wp_safe_redirect( $target, 301 );
+		// Without a language the theme sends the visitor on to theirs.
+		wp_safe_redirect( isset( $_GET['lang'] ) ? $target : remove_query_arg( 'lang', $target ), 301 );
 		exit;
 	}
 }

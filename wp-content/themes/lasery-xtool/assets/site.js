@@ -40,6 +40,11 @@
     details.addEventListener('focusout', (event) => {
       if (details.open && !details.contains(event.relatedTarget)) details.open = false;
     });
+    // A language chosen here opens pages that have none in their address (typed or shared links).
+    details.addEventListener('click', (event) => {
+      const link = event.target.closest('a[hreflang]');
+      if (link) document.cookie = `lasery_lang=${link.hreflang}; path=/; max-age=31536000; samesite=lax${window.location.protocol === 'https:' ? '; secure' : ''}`;
+    });
   });
 
   /* Order form: show the chosen variant and its price in the summary. */
