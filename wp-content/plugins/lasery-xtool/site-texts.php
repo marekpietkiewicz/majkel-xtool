@@ -151,12 +151,16 @@ function lasery_xtool_handle_site_texts() {
 	$posted = isset( $_POST['texts'] ) && is_array( $_POST['texts'] ) ? wp_unslash( $_POST['texts'] ) : array();
 	$all = get_option( 'lasery_xtool_text_overrides', array() );
 	$all = is_array( $all ) ? $all : array();
-	$all[ $language ] = array();
+	$all[ $language ] = isset( $all[ $language ] ) && is_array( $all[ $language ] ) ? $all[ $language ] : array();
 	$rejected = 0;
 	foreach ( lasery_xtool_text_groups( $language ) as $group => list( , $rows ) ) {
 		foreach ( $rows as $key => list( , $default ) ) {
-			$text = isset( $posted[ $group ][ $key ] ) && is_string( $posted[ $group ][ $key ] ) ? sanitize_text_field( $posted[ $group ][ $key ] ) : '';
+			if ( ! isset( $posted[ $group ][ $key ] ) || ! is_string( $posted[ $group ][ $key ] ) ) {
+				continue;
+			}
+			$text = sanitize_text_field( $posted[ $group ][ $key ] );
 			if ( '' === $text || $text === $default ) {
+				unset( $all[ $language ][ $group ][ $key ] );
 				continue;
 			}
 			if ( ! lasery_xtool_text_fits( $text, $default ) ) {
@@ -164,6 +168,9 @@ function lasery_xtool_handle_site_texts() {
 				continue;
 			}
 			$all[ $language ][ $group ][ $key ] = $text;
+		}
+		if ( empty( $all[ $language ][ $group ] ) ) {
+			unset( $all[ $language ][ $group ] );
 		}
 	}
 	$all = array_filter( $all );
