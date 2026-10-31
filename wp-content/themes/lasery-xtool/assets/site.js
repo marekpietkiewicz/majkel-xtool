@@ -55,6 +55,97 @@
     });
   });
 
+  /* Set contents: a larger photo of a part, as a card on hover or keyboard focus, or in a sheet after a tap on touch screens. */
+  document.querySelectorAll('[data-set-previews]').forEach((section) => {
+    const card = section.querySelector('[data-set-card]');
+    const sheet = section.querySelector('[data-set-sheet]');
+    if (!card || !sheet) return;
+    const parts = '.variant-set-item[data-set-preview]';
+    const hover = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const fill = (target, item) => {
+      const link = item.querySelector('a');
+      const image = target.querySelector('[data-set-image]');
+      image.srcset = item.dataset.setPreviewSrcset;
+      image.src = item.dataset.setPreview;
+      target.querySelector('[data-set-title]').textContent = link.textContent.trim();
+      target.querySelector('[data-set-details]').textContent = Array.from(item.querySelectorAll('small, .variant-set-quantity'), (detail) => detail.textContent.trim()).join(' · ');
+      target.querySelector('[data-set-link]').href = link.href;
+    };
+    let current = null;
+    let showTimer = 0;
+    let hideTimer = 0;
+    // Under the part, or above it when there is no room below; always within the window and under the header.
+    const place = () => {
+      const box = current.getBoundingClientRect();
+      const ceiling = (header ? header.getBoundingClientRect().bottom : 0) + 8;
+      const top = box.bottom + 8 + card.offsetHeight <= window.innerHeight - 8 ? box.bottom + 8 : Math.max(ceiling, box.top - card.offsetHeight - 8);
+      card.style.top = `${top}px`;
+      card.style.left = `${Math.max(8, Math.min(box.left, document.documentElement.clientWidth - card.offsetWidth - 8))}px`;
+    };
+    const show = (item) => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      if (current === item) return;
+      current = item;
+      fill(card, item);
+      card.hidden = false;
+      place();
+    };
+    const hide = () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      card.hidden = true;
+      current = null;
+    };
+    // A short delay, so moving the mouse across the list does not flash cards; the card itself can be hovered.
+    section.addEventListener('pointerover', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      const item = event.target.closest(parts);
+      if (item) {
+        clearTimeout(hideTimer);
+        clearTimeout(showTimer);
+        if (item !== current) showTimer = setTimeout(() => show(item), current ? 0 : 300);
+      } else if (card.contains(event.target)) {
+        clearTimeout(hideTimer);
+      }
+    });
+    section.addEventListener('pointerout', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      const to = event.relatedTarget;
+      if (to && (to.closest(parts) || card.contains(to))) return;
+      clearTimeout(showTimer);
+      hideTimer = setTimeout(hide, 250);
+    });
+    section.addEventListener('focusin', (event) => {
+      const item = event.target.closest(parts);
+      if (item && event.target.matches(':focus-visible')) show(item);
+    });
+    section.addEventListener('focusout', (event) => {
+      if (current && event.target.closest(parts) === current) hide();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && current) hide();
+    });
+    window.addEventListener('scroll', () => { if (current) place(); }, { passive: true });
+    window.addEventListener('resize', () => { if (current) hide(); });
+    // Touch screens have no hover: a tap on a part opens the sheet, whose button leads to the product.
+    section.addEventListener('click', (event) => {
+      const item = event.target.closest(parts);
+      if (!item) return;
+      // With a mouse the whole part leads to its page, like its name.
+      if (hover.matches || typeof sheet.showModal !== 'function') {
+        if (!event.target.closest('a')) item.querySelector('a').click();
+        return;
+      }
+      event.preventDefault();
+      fill(sheet, item);
+      sheet.showModal();
+    });
+    sheet.addEventListener('click', (event) => {
+      if (event.target === sheet || event.target.closest('[data-set-close]')) sheet.close();
+    });
+  });
+
   /* Cart: the number of items comes from the cart cookie, so pages stay cacheable for everyone. */
   const cartCount = document.querySelector('[data-cart-count]');
   const showCartCount = () => {
@@ -75,38 +166,208 @@
     showCartCount();
     window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
-  // After a cart change the page reloads; focus goes to the result instead of the top of the page.
-  const cartNotice = document.querySelector('.cart .order-form-notice[role="status"]');
-  if (cartNotice) {
-    cartNotice.tabIndex = -1;
-    cartNotice.focus();
+  /* Quantity fields: − and + change the number within its limits; screen readers hear the new number. */
+  const quantityStatus = document.createElement('p');
+  quantityStatus.className = 'visually-hidden';
+  quantityStatus.setAttribute('aria-live', 'polite');
+  if (document.querySelector('[data-quantity]')) document.body.append(quantityStatus);
+  const syncQuantity = (field) => {
+    const input = field.querySelector('input');
+    const value = Number(input.value);
+    field.querySelector('[data-step="-1"]').setAttribute('aria-disabled', String(!(value > Number(input.min))));
+    field.querySelector('[data-step="1"]').setAttribute('aria-disabled', String(!(value < Number(input.max))));
+  };
+  // A whole number within the limits ("05" and "1e1" become 5 and 10); otherwise the last saved number.
+  const normaliseQuantity = (input) => {
+    const value = Math.round(input.valueAsNumber);
+    input.value = Number.isFinite(value) ? String(Math.min(Number(input.max), Math.max(Number(input.min), value))) : input.dataset.saved || input.defaultValue;
+    syncQuantity(input.closest('[data-quantity]'));
+  };
+  document.querySelectorAll('[data-quantity]').forEach(syncQuantity);
+  document.addEventListener('click', (event) => {
+    const step = event.target.closest('[data-quantity] [data-step]');
+    if (!step || step.getAttribute('aria-disabled') === 'true') return;
+    const input = step.closest('[data-quantity]').querySelector('input');
+    input.value = String(Math.min(Number(input.max), Math.max(Number(input.min), Math.round(Number(input.value) || 0) + Number(step.dataset.step))));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    quantityStatus.textContent = input.value;
+  });
+  document.addEventListener('input', (event) => {
+    const field = event.target.closest('[data-quantity]');
+    if (field) syncQuantity(field);
+  });
+  document.addEventListener('submit', (event) => event.target.querySelectorAll('[data-quantity] input').forEach(normaliseQuantity), true);
+
+  /* Cart confirmations show for a moment; the address drops the result, so a reload does not repeat it. */
+  const toast = document.querySelector('[data-cart-toast]');
+  let toastTimer = 0;
+  // Emptied first, so screen readers also announce a message that repeats the previous one.
+  const showToast = (message) => {
+    clearTimeout(toastTimer);
+    toast.textContent = '';
+    toastTimer = setTimeout(() => {
+      toast.textContent = message;
+      toast.classList.add('is-shown');
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('is-shown');
+        toastTimer = setTimeout(() => { toast.textContent = ''; }, 300);
+      }, 4000);
+    }, 100);
+  };
+  if (toast) {
+    const message = toast.textContent.trim();
+    if (message) showToast(message);
+    const url = new URL(window.location.href);
+    if (/^(?:added|updated|removed)$/.test(url.searchParams.get('cart') || '')) {
+      url.searchParams.delete('cart');
+      history.replaceState(history.state, '', url);
+    }
   }
-  // The order includes the quantities in the form; Enter in a quantity field recalculates the cart instead.
-  document.querySelectorAll('[data-cart-form]').forEach((form) => {
-    const update = form.querySelector('[data-cart-update]');
-    const send = form.querySelector('[data-cart-send]');
-    const unsaved = form.querySelector('[data-cart-unsaved]');
-    form.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' || !event.target.matches('[data-cart-quantity]')) return;
+  // Errors stay; focus goes to them instead of the top of the page.
+  const cartError = document.querySelector('[data-cart-error]');
+  if (cartError) {
+    cartError.tabIndex = -1;
+    cartError.focus();
+  }
+
+  /* Cart: changes are saved at once, and prices and totals come from the server's new cart page. */
+  const cartForm = document.querySelector('[data-cart-form]');
+  if (cartForm) {
+    const update = cartForm.querySelector('[data-cart-update]');
+    const removeForm = document.getElementById('cart-remove');
+    const sends = cartForm.querySelectorAll('[data-cart-send]');
+    const quantities = () => cartForm.querySelectorAll('.cart-line [data-quantity] input');
+    quantities().forEach((input) => { input.dataset.saved = input.value; });
+    let queue = Promise.resolve();
+    let pending = 0;
+    let timer = 0;
+    let native = false;
+    // Lines still in the cart get their new prices; a number changed since it was sent stays as typed.
+    const apply = (page, url) => {
+      const fresh = new Map(Array.from(page.querySelectorAll('[data-cart-line]'), (line) => [line.dataset.cartLine, line]));
+      const lines = Array.from(cartForm.querySelectorAll('[data-cart-line]'));
+      if (!fresh.size || Array.from(fresh.keys()).some((key) => !lines.some((line) => line.dataset.cartLine === key))) {
+        window.location.replace(url);
+        return;
+      }
+      const focused = document.activeElement;
+      lines.forEach((line, index) => {
+        const next = fresh.get(line.dataset.cartLine);
+        if (!next) {
+          // Focus goes to a neighbour's quantity, so a repeated key press cannot remove the next product.
+          if (line.contains(focused)) {
+            const neighbour = lines.slice(index + 1).concat(lines.slice(0, index).reverse()).find((other) => fresh.has(other.dataset.cartLine));
+            neighbour.querySelector('[data-quantity] input').focus();
+          }
+          line.remove();
+          return;
+        }
+        line.className = next.className;
+        const parts = next.querySelectorAll('[data-cart-update-part]');
+        line.querySelectorAll('[data-cart-update-part]').forEach((part, i) => part.replaceWith(parts[i]));
+        const input = line.querySelector('[data-quantity] input');
+        const saved = next.querySelector('[data-quantity] input').value;
+        if (input.value === input.dataset.sent) input.value = saved;
+        input.dataset.saved = saved;
+        syncQuantity(input.closest('[data-quantity]'));
+      });
+      const totals = page.querySelectorAll('[data-cart-total]');
+      cartForm.querySelectorAll('[data-cart-total]').forEach((total, i) => total.replaceWith(totals[i]));
+      cartForm.elements.snapshot.value = page.querySelector('[name="snapshot"]').value;
+      const freshSends = page.querySelectorAll('[data-cart-send]');
+      sends.forEach((button, i) => { button.disabled = freshSends[i].disabled; });
+      if (cartCount) showCartCount();
+      const message = page.querySelector('[data-cart-toast]').textContent.trim();
+      const total = cartForm.querySelector('.order-summary-price');
+      if (message) showToast(`${message} ${cartForm.querySelector('.order-summary-total').textContent}: ${total.textContent}`);
+    };
+    // Changes go one after another, so the last response always holds the whole cart.
+    const send = (form, submitter) => {
+      pending += 1;
+      cartForm.classList.add('is-updating');
+      queue = queue.then(async () => {
+        try {
+          if (native) return;
+          // The field being typed in is left as it is; the server ignores a number it cannot read.
+          quantities().forEach((input) => {
+            if (input !== document.activeElement) normaliseQuantity(input);
+            input.dataset.sent = input.value;
+          });
+          const body = new FormData(form);
+          if (submitter.name) body.append(submitter.name, submitter.value);
+          // Attributes, because form.action would be the removal form's field named "action".
+          const response = await fetch(submitter.getAttribute('formaction') || form.getAttribute('action'), { method: 'POST', body, credentials: 'same-origin' });
+          if (!response.ok) throw new Error(String(response.status));
+          const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+          if (pending === 1) apply(page, response.url);
+        } catch (error) {
+          // Without a usable response the browser submits the change itself.
+          native = true;
+          form.requestSubmit(submitter);
+        } finally {
+          pending -= 1;
+          if (!pending) cartForm.classList.remove('is-updating');
+        }
+      });
+    };
+    const flush = () => {
+      clearTimeout(timer);
+      timer = 0;
+      send(cartForm, update);
+    };
+    const isQuantity = (element) => element.matches('.cart-line [data-quantity] input');
+    cartForm.addEventListener('input', (event) => {
+      if (!isQuantity(event.target)) return;
+      clearTimeout(timer);
+      timer = event.target.validity.valid ? setTimeout(flush, 500) : 0;
+    });
+    // A number out of range is brought within the limits (0 becomes 1: the bin removes a product).
+    cartForm.addEventListener('change', (event) => {
+      if (!isQuantity(event.target) || event.target.validity.valid) return;
+      normaliseQuantity(event.target);
+      flush();
+    });
+    // Enter in a quantity saves it instead of sending the order.
+    cartForm.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' || !isQuantity(event.target)) return;
       event.preventDefault();
-      update.click();
+      normaliseQuantity(event.target);
+      flush();
     });
-    form.addEventListener('input', (event) => {
-      if (event.target.matches('[data-cart-quantity]')) unsaved.hidden = false;
-    });
-    // One order per click: a second submit would only hit the rate limit. Back restores the button.
     let sending = false;
-    form.addEventListener('submit', (event) => {
+    cartForm.addEventListener('submit', (event) => {
+      // Only the fallback above submits the update button.
       if (event.submitter === update) return;
+      // The order includes the typed quantities; it waits for changes on their way, so the cart it empties stays empty.
+      clearTimeout(timer);
+      timer = 0;
+      if (pending) {
+        event.preventDefault();
+        const submitter = event.submitter;
+        queue.then(() => { if (!native && !submitter.disabled) cartForm.requestSubmit(submitter); });
+        return;
+      }
+      // One order per click: a second submit would only hit the rate limit. Back restores the buttons.
       sending = true;
-      send.disabled = true;
+      sends.forEach((button) => { button.disabled = true; });
     });
     window.addEventListener('pageshow', () => {
       if (!sending) return;
       sending = false;
-      send.disabled = false;
+      sends.forEach((button) => { button.disabled = false; });
     });
-  });
+    if (removeForm) {
+      removeForm.addEventListener('submit', (event) => {
+        if (native) return;
+        event.preventDefault();
+        const line = event.submitter.closest('.cart-line');
+        if (line.classList.contains('is-removing')) return;
+        line.classList.add('is-removing');
+        if (timer) flush();
+        send(removeForm, event.submitter);
+      });
+    }
+  }
 
   /* Articles: reading progress and the current section in the table of contents. */
   const progress = document.querySelector('[data-reading-progress]');

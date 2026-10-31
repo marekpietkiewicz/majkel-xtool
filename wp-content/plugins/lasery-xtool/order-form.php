@@ -208,7 +208,7 @@ function lasery_xtool_order_texts( $language ) {
 		'pl' => array(
 			'title' => 'Zamów produkt', 'intro' => 'Wybierz wariant i liczbę sztuk, a potem dodaj produkt do koszyka. W koszyku podasz dane do zamówienia.',
 			'first_name' => 'Imię', 'last_name' => 'Nazwisko', 'email' => 'Adres e-mail', 'phone' => 'Telefon (opcjonalnie)', 'address1' => 'Ulica i numer', 'address2' => 'Dodatkowy adres (opcjonalnie)', 'city' => 'Miasto', 'zip' => 'Kod pocztowy', 'country' => 'Kraj dostawy', 'select_country' => 'Wybierz kraj', 'variant' => 'Wariant lub konfiguracja', 'unavailable' => 'Obecnie brak dostępnych wariantów.', 'stale' => 'Dane oferty wymagają aktualizacji. Skontaktuj się z nami.', 'changed' => 'Dane oferty zmieniły się. Sprawdź koszyk i wyślij zamówienie ponownie.', 'quantity' => 'Liczba sztuk', 'invoice' => 'Dane do faktury (opcjonalnie)', 'notes' => 'Dodatkowe informacje (opcjonalnie)', 'submit' => 'Wyślij zamówienie',
-			'privacy_link' => 'Polityka prywatności', 'privacy' => 'Dane wykorzystamy wyłącznie do obsługi zamówienia.', 'sent' => 'Dziękujemy! Zamówienie zostało wysłane, a na Twój adres wysłaliśmy potwierdzenie. Po sprawdzeniu dostępności i ceny prześlemy Ci link do płatności.', 'sent_no_receipt' => 'Zamówienie zostało wysłane, ale nie udało się wysłać potwierdzenia na Twój adres. Nie wysyłaj go ponownie; w razie pytań napisz na Michal@laseryxtool.pl.', 'failed' => 'Nie udało się wysłać zamówienia. Spróbuj ponownie lub napisz na Michal@laseryxtool.pl.', 'invalid' => 'Sprawdź dane formularza i spróbuj ponownie.', 'busy' => 'Odczekaj chwilę przed ponownym wysłaniem zamówienia.',
+			'privacy_link' => 'Polityka prywatności', 'privacy' => 'Dane wykorzystamy wyłącznie do obsługi zamówienia.', 'sent' => 'Zamówienie zostało wysłane, a na Twój adres wysłaliśmy potwierdzenie. Po sprawdzeniu dostępności i ceny prześlemy Ci link do płatności.', 'sent_no_receipt' => 'Zamówienie zostało wysłane, ale nie udało się wysłać potwierdzenia na Twój adres. Nie wysyłaj go ponownie; w razie pytań napisz na Michal@laseryxtool.pl.', 'failed' => 'Nie udało się wysłać zamówienia. Spróbuj ponownie lub napisz na Michal@laseryxtool.pl.', 'invalid' => 'Sprawdź dane formularza i spróbuj ponownie.', 'busy' => 'Odczekaj chwilę przed ponownym wysłaniem zamówienia.',
 			'owner_subject' => 'Nowe zamówienie: %s', 'customer_subject' => 'Otrzymaliśmy Twoje zamówienie: %s', 'customer_body' => 'Dziękujemy za zamówienie. Potwierdzimy dostępność, ostateczną cenę i koszt dostawy, a następnie wyślemy Ci link do płatności. Do tego czasu nie musisz nic robić.', 'price' => 'Cena orientacyjna', 'no_price' => 'Cena do potwierdzenia', 'price_note' => 'Ostateczna cena, VAT i koszt dostawy mogą się różnić.',
 			'summary' => 'Podsumowanie', 'contact' => 'Dane kontaktowe', 'address' => 'Adres dostawy', 'extras' => 'Faktura i uwagi', 'summary_empty' => 'Wybierz wariant powyżej', 'next_steps' => 'Po wysłaniu zamówienia potwierdzimy dostępność i cenę, a następnie wyślemy link do płatności.',
 			'reply_note' => 'Masz pytania? Odpowiedz na tę wiadomość.',
@@ -224,18 +224,20 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_added' => 'Produkt został dodany do koszyka.',
 			'cart_full' => 'Koszyk może zawierać najwyżej %d różnych produktów.',
 			'cart_updated' => 'Koszyk został zaktualizowany.',
-			'cart_unsaved' => 'Suma nie uwzględnia jeszcze zmienionych ilości: przelicz ją przyciskiem „Zaktualizuj koszyk”. Zamówienie obejmie nowe ilości.',
+			'cart_removed' => 'Produkt został usunięty z koszyka.',
 			'cart_unavailable' => 'Ten wariant jest obecnie niedostępny.',
 			'cart_stale' => 'Dane tej oferty wymagają aktualizacji. Usuń produkt albo skontaktuj się z nami.',
 			'remove' => 'Usuń',
 			'update' => 'Zaktualizuj koszyk',
 			'total' => 'Razem (orientacyjnie)',
 			'items' => 'Produkty',
+			'each' => '%s / szt.', 'pieces' => '%d szt.', 'unit_price' => 'Cena za sztukę', 'line_total' => 'Wartość', 'decrease' => 'Zmniejsz liczbę sztuk', 'increase' => 'Zwiększ liczbę sztuk', 'sent_title' => 'Dziękujemy za zamówienie',
+			'view_product' => 'Zobacz produkt', 'close' => 'Zamknij',
 		),
 		'en' => array(
 			'title' => 'Order this product', 'intro' => 'Choose a variant and quantity, then add the product to your cart. You will enter your order details in the cart.',
 			'first_name' => 'First name', 'last_name' => 'Last name', 'email' => 'Email address', 'phone' => 'Phone number (optional)', 'address1' => 'Street address', 'address2' => 'Additional address (optional)', 'city' => 'City', 'zip' => 'Postal code', 'country' => 'Delivery country', 'select_country' => 'Choose a country', 'variant' => 'Variant or configuration', 'unavailable' => 'No variants are currently available.', 'stale' => 'The offer needs updating. Please contact us.', 'changed' => 'The offer has changed. Please check your cart and send the order again.', 'quantity' => 'Quantity', 'invoice' => 'Billing details (optional)', 'notes' => 'Additional information (optional)', 'submit' => 'Send order',
-			'privacy_link' => 'Privacy policy', 'privacy' => 'We use your details only to handle your order.', 'sent' => 'Thank you! Your order has been sent and we have emailed you a confirmation. Once we confirm availability and price, we will send you a payment link.', 'sent_no_receipt' => 'Your order was sent, but we could not send your confirmation email. Please do not send it again; contact Michal@laseryxtool.pl with any questions.', 'failed' => 'Your order could not be sent. Please try again or email Michal@laseryxtool.pl.', 'invalid' => 'Please check the form and try again.', 'busy' => 'Please wait a moment before sending another order.',
+			'privacy_link' => 'Privacy policy', 'privacy' => 'We use your details only to handle your order.', 'sent' => 'Your order has been sent and we have emailed you a confirmation. Once we confirm availability and price, we will send you a payment link.', 'sent_no_receipt' => 'Your order was sent, but we could not send your confirmation email. Please do not send it again; contact Michal@laseryxtool.pl with any questions.', 'failed' => 'Your order could not be sent. Please try again or email Michal@laseryxtool.pl.', 'invalid' => 'Please check the form and try again.', 'busy' => 'Please wait a moment before sending another order.',
 			'owner_subject' => 'New order: %s', 'customer_subject' => 'We received your order: %s', 'customer_body' => 'Thank you for your order. We will confirm availability, the final price and delivery cost, then send you a payment link. You do not need to do anything until then.', 'price' => 'Estimated price', 'no_price' => 'Price to be confirmed', 'price_note' => 'The final price, VAT and delivery costs may differ.',
 			'summary' => 'Summary', 'contact' => 'Contact details', 'address' => 'Delivery address', 'extras' => 'Invoice and notes', 'summary_empty' => 'Choose a variant above', 'next_steps' => 'After you send the order, we will confirm availability and price, then send you a payment link.',
 			'reply_note' => 'Questions? Just reply to this email.',
@@ -251,18 +253,20 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_added' => 'The product has been added to your cart.',
 			'cart_full' => 'Your cart can hold up to %d different products.',
 			'cart_updated' => 'Your cart has been updated.',
-			'cart_unsaved' => 'The total does not include your changes yet: recalculate it with “Update cart”. The order will use the new quantities.',
+			'cart_removed' => 'The product has been removed from your cart.',
 			'cart_unavailable' => 'This variant is currently unavailable.',
 			'cart_stale' => 'The offer details need updating. Remove the product or contact us.',
 			'remove' => 'Remove',
 			'update' => 'Update cart',
 			'total' => 'Total (estimated)',
 			'items' => 'Products',
+			'each' => '%s each', 'pieces' => '%d pcs', 'unit_price' => 'Unit price', 'line_total' => 'Subtotal', 'decrease' => 'Decrease quantity', 'increase' => 'Increase quantity', 'sent_title' => 'Thank you for your order',
+			'view_product' => 'View product', 'close' => 'Close',
 		),
 		'de' => array(
 			'title' => 'Produkt bestellen', 'intro' => 'Wählen Sie Variante und Anzahl und legen Sie das Produkt in den Warenkorb. Die Bestelldaten geben Sie im Warenkorb an.',
 			'first_name' => 'Vorname', 'last_name' => 'Nachname', 'email' => 'E-Mail-Adresse', 'phone' => 'Telefonnummer (optional)', 'address1' => 'Straße und Hausnummer', 'address2' => 'Adresszusatz (optional)', 'city' => 'Ort', 'zip' => 'Postleitzahl', 'country' => 'Lieferland', 'select_country' => 'Land auswählen', 'variant' => 'Variante oder Konfiguration', 'unavailable' => 'Derzeit sind keine Varianten verfügbar.', 'stale' => 'Die Angebotsdaten müssen aktualisiert werden. Bitte kontaktieren Sie uns.', 'changed' => 'Das Angebot hat sich geändert. Bitte prüfen Sie den Warenkorb und senden Sie die Bestellung erneut.', 'quantity' => 'Anzahl', 'invoice' => 'Rechnungsdaten (optional)', 'notes' => 'Weitere Informationen (optional)', 'submit' => 'Bestellung senden',
-			'privacy_link' => 'Datenschutzerklärung', 'privacy' => 'Wir verwenden Ihre Daten ausschließlich zur Bearbeitung Ihrer Bestellung.', 'sent' => 'Vielen Dank! Ihre Bestellung wurde gesendet, und wir haben Ihnen eine Bestätigung geschickt. Nach Prüfung von Verfügbarkeit und Preis senden wir Ihnen einen Zahlungslink.', 'sent_no_receipt' => 'Ihre Bestellung wurde gesendet, aber die Bestätigungs-E-Mail konnte nicht versendet werden. Bitte senden Sie sie nicht erneut; bei Fragen schreiben Sie an Michal@laseryxtool.pl.', 'failed' => 'Ihre Bestellung konnte nicht gesendet werden. Versuchen Sie es erneut oder schreiben Sie an Michal@laseryxtool.pl.', 'invalid' => 'Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.', 'busy' => 'Bitte warten Sie einen Moment, bevor Sie eine weitere Bestellung senden.',
+			'privacy_link' => 'Datenschutzerklärung', 'privacy' => 'Wir verwenden Ihre Daten ausschließlich zur Bearbeitung Ihrer Bestellung.', 'sent' => 'Ihre Bestellung wurde gesendet, und wir haben Ihnen eine Bestätigung geschickt. Nach Prüfung von Verfügbarkeit und Preis senden wir Ihnen einen Zahlungslink.', 'sent_no_receipt' => 'Ihre Bestellung wurde gesendet, aber die Bestätigungs-E-Mail konnte nicht versendet werden. Bitte senden Sie sie nicht erneut; bei Fragen schreiben Sie an Michal@laseryxtool.pl.', 'failed' => 'Ihre Bestellung konnte nicht gesendet werden. Versuchen Sie es erneut oder schreiben Sie an Michal@laseryxtool.pl.', 'invalid' => 'Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.', 'busy' => 'Bitte warten Sie einen Moment, bevor Sie eine weitere Bestellung senden.',
 			'owner_subject' => 'Neue Bestellung: %s', 'customer_subject' => 'Wir haben Ihre Bestellung erhalten: %s', 'customer_body' => 'Vielen Dank für Ihre Bestellung. Wir bestätigen Verfügbarkeit, Endpreis und Lieferkosten und senden Ihnen anschließend einen Zahlungslink. Bis dahin müssen Sie nichts weiter tun.', 'price' => 'Unverbindlicher Preis', 'no_price' => 'Preis wird bestätigt', 'price_note' => 'Endpreis, MwSt. und Lieferkosten können abweichen.',
 			'summary' => 'Zusammenfassung', 'contact' => 'Kontaktdaten', 'address' => 'Lieferadresse', 'extras' => 'Rechnung und Hinweise', 'summary_empty' => 'Wählen Sie oben eine Variante', 'next_steps' => 'Nach dem Absenden bestätigen wir Verfügbarkeit und Preis und senden Ihnen anschließend einen Zahlungslink.',
 			'reply_note' => 'Fragen? Antworten Sie einfach auf diese E-Mail.',
@@ -278,18 +282,20 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_added' => 'Das Produkt wurde in den Warenkorb gelegt.',
 			'cart_full' => 'Der Warenkorb kann höchstens %d verschiedene Produkte enthalten.',
 			'cart_updated' => 'Der Warenkorb wurde aktualisiert.',
-			'cart_unsaved' => 'Die Summe enthält Ihre Änderungen noch nicht: Berechnen Sie sie mit „Warenkorb aktualisieren“ neu. Die Bestellung enthält die neuen Mengen.',
+			'cart_removed' => 'Das Produkt wurde aus dem Warenkorb entfernt.',
 			'cart_unavailable' => 'Diese Variante ist derzeit nicht verfügbar.',
 			'cart_stale' => 'Die Angebotsdaten müssen aktualisiert werden. Entfernen Sie das Produkt oder kontaktieren Sie uns.',
 			'remove' => 'Entfernen',
 			'update' => 'Warenkorb aktualisieren',
 			'total' => 'Summe (unverbindlich)',
 			'items' => 'Produkte',
+			'each' => '%s / Stk.', 'pieces' => '%d Stk.', 'unit_price' => 'Stückpreis', 'line_total' => 'Summe', 'decrease' => 'Anzahl verringern', 'increase' => 'Anzahl erhöhen', 'sent_title' => 'Vielen Dank für Ihre Bestellung',
+			'view_product' => 'Produkt ansehen', 'close' => 'Schließen',
 		),
 		'ru' => array(
 			'title' => 'Заказать товар', 'intro' => 'Выберите вариант и количество, затем добавьте товар в корзину. Данные для заказа вы укажете в корзине.',
 			'first_name' => 'Имя', 'last_name' => 'Фамилия', 'email' => 'Адрес электронной почты', 'phone' => 'Телефон (необязательно)', 'address1' => 'Улица и номер дома', 'address2' => 'Дополнительный адрес (необязательно)', 'city' => 'Город', 'zip' => 'Почтовый индекс', 'country' => 'Страна доставки', 'select_country' => 'Выберите страну', 'variant' => 'Вариант или конфигурация', 'unavailable' => 'Сейчас нет доступных вариантов.', 'stale' => 'Данные предложения требуют обновления. Свяжитесь с нами.', 'changed' => 'Предложение изменилось. Проверьте корзину и отправьте заказ ещё раз.', 'quantity' => 'Количество', 'invoice' => 'Данные для счёта (необязательно)', 'notes' => 'Дополнительная информация (необязательно)', 'submit' => 'Отправить заказ',
-			'privacy_link' => 'Политика конфиденциальности', 'privacy' => 'Мы используем ваши данные только для обработки заказа.', 'sent' => 'Спасибо! Заказ отправлен, а на ваш адрес мы отправили подтверждение. После проверки наличия и цены мы пришлём ссылку для оплаты.', 'sent_no_receipt' => 'Заказ отправлен, но письмо с подтверждением отправить не удалось. Не отправляйте его повторно; по вопросам пишите на Michal@laseryxtool.pl.', 'failed' => 'Не удалось отправить заказ. Попробуйте ещё раз или напишите на Michal@laseryxtool.pl.', 'invalid' => 'Проверьте данные формы и попробуйте ещё раз.', 'busy' => 'Подождите немного перед повторной отправкой заказа.',
+			'privacy_link' => 'Политика конфиденциальности', 'privacy' => 'Мы используем ваши данные только для обработки заказа.', 'sent' => 'Заказ отправлен, а на ваш адрес мы отправили подтверждение. После проверки наличия и цены мы пришлём ссылку для оплаты.', 'sent_no_receipt' => 'Заказ отправлен, но письмо с подтверждением отправить не удалось. Не отправляйте его повторно; по вопросам пишите на Michal@laseryxtool.pl.', 'failed' => 'Не удалось отправить заказ. Попробуйте ещё раз или напишите на Michal@laseryxtool.pl.', 'invalid' => 'Проверьте данные формы и попробуйте ещё раз.', 'busy' => 'Подождите немного перед повторной отправкой заказа.',
 			'owner_subject' => 'Новый заказ: %s', 'customer_subject' => 'Мы получили ваш заказ: %s', 'customer_body' => 'Спасибо за заказ. Мы подтвердим наличие, окончательную цену и стоимость доставки, а затем пришлём ссылку для оплаты. До тех пор ничего делать не нужно.', 'price' => 'Ориентировочная цена', 'no_price' => 'Цена уточняется', 'price_note' => 'Окончательная цена, НДС и стоимость доставки могут отличаться.',
 			'summary' => 'Итог', 'contact' => 'Контактные данные', 'address' => 'Адрес доставки', 'extras' => 'Счёт и комментарии', 'summary_empty' => 'Выберите вариант выше', 'next_steps' => 'После отправки заказа мы подтвердим наличие и цену, а затем пришлём ссылку для оплаты.',
 			'reply_note' => 'Есть вопросы? Просто ответьте на это письмо.',
@@ -305,18 +311,20 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_added' => 'Товар добавлен в корзину.',
 			'cart_full' => 'В корзине может быть не более %d разных товаров.',
 			'cart_updated' => 'Корзина обновлена.',
-			'cart_unsaved' => 'Итог ещё не учитывает изменённое количество: пересчитайте его кнопкой «Обновить корзину». В заказ попадёт новое количество.',
+			'cart_removed' => 'Товар удалён из корзины.',
 			'cart_unavailable' => 'Этот вариант сейчас недоступен.',
 			'cart_stale' => 'Данные предложения требуют обновления. Удалите товар или свяжитесь с нами.',
 			'remove' => 'Удалить',
 			'update' => 'Обновить корзину',
 			'total' => 'Итого (ориентировочно)',
 			'items' => 'Товары',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Цена за штуку', 'line_total' => 'Сумма', 'decrease' => 'Уменьшить количество', 'increase' => 'Увеличить количество', 'sent_title' => 'Спасибо за заказ',
+			'view_product' => 'Смотреть товар', 'close' => 'Закрыть',
 		),
 		'uk' => array(
 			'title' => 'Замовити товар', 'intro' => 'Оберіть варіант і кількість, а потім додайте товар до кошика. Дані для замовлення ви вкажете в кошику.',
 			'first_name' => 'Ім’я', 'last_name' => 'Прізвище', 'email' => 'Адреса електронної пошти', 'phone' => 'Телефон (необов’язково)', 'address1' => 'Вулиця і номер будинку', 'address2' => 'Додаткова адреса (необов’язково)', 'city' => 'Місто', 'zip' => 'Поштовий індекс', 'country' => 'Країна доставки', 'select_country' => 'Оберіть країну', 'variant' => 'Варіант або конфігурація', 'unavailable' => 'Зараз немає доступних варіантів.', 'stale' => 'Дані пропозиції потребують оновлення. Зв’яжіться з нами.', 'changed' => 'Пропозиція змінилася. Перевірте кошик і надішліть замовлення ще раз.', 'quantity' => 'Кількість', 'invoice' => 'Дані для рахунку (необов’язково)', 'notes' => 'Додаткова інформація (необов’язково)', 'submit' => 'Надіслати замовлення',
-			'privacy_link' => 'Політика конфіденційності', 'privacy' => 'Ми використовуємо ваші дані лише для обробки замовлення.', 'sent' => 'Дякуємо! Замовлення надіслано, а на вашу адресу ми надіслали підтвердження. Після перевірки наявності й ціни ми надішлемо посилання для оплати.', 'sent_no_receipt' => 'Замовлення надіслано, але лист із підтвердженням надіслати не вдалося. Не надсилайте його повторно; із запитаннями пишіть на Michal@laseryxtool.pl.', 'failed' => 'Не вдалося надіслати замовлення. Спробуйте ще раз або напишіть на Michal@laseryxtool.pl.', 'invalid' => 'Перевірте дані форми та спробуйте ще раз.', 'busy' => 'Зачекайте трохи перед повторним надсиланням замовлення.',
+			'privacy_link' => 'Політика конфіденційності', 'privacy' => 'Ми використовуємо ваші дані лише для обробки замовлення.', 'sent' => 'Замовлення надіслано, а на вашу адресу ми надіслали підтвердження. Після перевірки наявності й ціни ми надішлемо посилання для оплати.', 'sent_no_receipt' => 'Замовлення надіслано, але лист із підтвердженням надіслати не вдалося. Не надсилайте його повторно; із запитаннями пишіть на Michal@laseryxtool.pl.', 'failed' => 'Не вдалося надіслати замовлення. Спробуйте ще раз або напишіть на Michal@laseryxtool.pl.', 'invalid' => 'Перевірте дані форми та спробуйте ще раз.', 'busy' => 'Зачекайте трохи перед повторним надсиланням замовлення.',
 			'owner_subject' => 'Нове замовлення: %s', 'customer_subject' => 'Ми отримали ваше замовлення: %s', 'customer_body' => 'Дякуємо за замовлення. Ми підтвердимо наявність, остаточну ціну та вартість доставки, а потім надішлемо посилання для оплати. До того часу нічого робити не потрібно.', 'price' => 'Орієнтовна ціна', 'no_price' => 'Ціна уточнюється', 'price_note' => 'Остаточна ціна, ПДВ і вартість доставки можуть відрізнятися.',
 			'summary' => 'Підсумок', 'contact' => 'Контактні дані', 'address' => 'Адреса доставки', 'extras' => 'Рахунок і примітки', 'summary_empty' => 'Оберіть варіант вище', 'next_steps' => 'Після надсилання замовлення ми підтвердимо наявність і ціну, а потім надішлемо посилання для оплати.',
 			'reply_note' => 'Маєте запитання? Просто дайте відповідь на цей лист.',
@@ -332,13 +340,15 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_added' => 'Товар додано до кошика.',
 			'cart_full' => 'У кошику може бути не більше %d різних товарів.',
 			'cart_updated' => 'Кошик оновлено.',
-			'cart_unsaved' => 'Підсумок ще не враховує змінену кількість: перерахуйте його кнопкою «Оновити кошик». До замовлення потрапить нова кількість.',
+			'cart_removed' => 'Товар видалено з кошика.',
 			'cart_unavailable' => 'Цей варіант зараз недоступний.',
 			'cart_stale' => 'Дані пропозиції потребують оновлення. Видаліть товар або зв’яжіться з нами.',
 			'remove' => 'Видалити',
 			'update' => 'Оновити кошик',
 			'total' => 'Разом (орієнтовно)',
 			'items' => 'Товари',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Ціна за штуку', 'line_total' => 'Сума', 'decrease' => 'Зменшити кількість', 'increase' => 'Збільшити кількість', 'sent_title' => 'Дякуємо за замовлення',
+			'view_product' => 'Переглянути товар', 'close' => 'Закрити',
 		),
 	);
 	$text = isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
@@ -453,6 +463,26 @@ function lasery_xtool_source_is_fresh( $post_id ) {
 	return is_string( $fetched_at ) && ctype_digit( $fetched_at ) && (int) $fetched_at <= time() && (int) $fetched_at >= time() - DAY_IN_SECONDS;
 }
 
+/** A theme icon for order and cart buttons. */
+function lasery_xtool_order_icon( $name ) {
+	return function_exists( 'lasery_xtool_icon' ) ? lasery_xtool_icon( $name ) : '';
+}
+
+/**
+ * A quantity field (1–100) between − and + buttons, which work with JavaScript; $name_suffix
+ * names the product for buttons in lists such as the cart.
+ */
+function lasery_xtool_quantity_field( $id, $name, $quantity, $text, $name_suffix = '' ) {
+	$suffix = '' !== $name_suffix ? ': ' . $name_suffix : '';
+	?>
+	<span class="quantity" data-quantity>
+		<button type="button" class="quantity-step" data-step="-1" aria-label="<?php echo esc_attr( $text['decrease'] . $suffix ); ?>" aria-controls="<?php echo esc_attr( $id ); ?>" aria-disabled="<?php echo $quantity <= 1 ? 'true' : 'false'; ?>"><?php echo lasery_xtool_order_icon( 'minus' ); ?></button>
+		<input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" type="number" inputmode="numeric" min="1" max="100" value="<?php echo esc_attr( $quantity ); ?>" required>
+		<button type="button" class="quantity-step" data-step="1" aria-label="<?php echo esc_attr( $text['increase'] . $suffix ); ?>" aria-controls="<?php echo esc_attr( $id ); ?>" aria-disabled="<?php echo $quantity >= 100 ? 'true' : 'false'; ?>"><?php echo lasery_xtool_order_icon( 'plus' ); ?></button>
+	</span>
+	<?php
+}
+
 /** Variant and quantity on the product page; the customer details are entered in the cart. */
 function lasery_xtool_render_order_form( $post_id ) {
 	if ( LASERY_XTOOL_PRODUCT_TYPE !== get_post_type( $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
@@ -467,8 +497,9 @@ function lasery_xtool_render_order_form( $post_id ) {
 	$selected = 1 === count( $available_variants ) ? $available_variants[0] : null;
 	$selected_amount = $selected ? lasery_xtool_variant_amount( $post_id, $selected ) : ( $uses_source_variants ? null : lasery_xtool_order_price_amount( $post_id ) );
 	$cart = lasery_xtool_cart_url( $language );
+	$previews = false;
 	?>
-	<section class="order-form" id="zamow" aria-labelledby="order-form-title">
+	<section class="order-form" id="zamow" aria-labelledby="order-form-title" data-set-previews>
 		<header class="order-form-header">
 			<h2 id="order-form-title"><?php echo esc_html( $text['title'] ); ?></h2>
 			<p><?php echo esc_html( $text['intro'] ); ?></p>
@@ -508,7 +539,10 @@ function lasery_xtool_render_order_form( $post_id ) {
 											<ul class="variant-set-list">
 												<?php foreach ( $set as $part ) : ?>
 													<?php $part_title = lasery_xtool_order_product_title( $part['product'], $language ); ?>
-													<li class="variant-set-item">
+													<?php // Other products of the set get a larger photo for the preview (script). ?>
+													<?php $photo = $part['product'] !== $post_id ? (int) get_post_thumbnail_id( $part['product'] ) : 0; ?>
+													<?php $previews = $previews || $photo; ?>
+													<li class="variant-set-item"<?php if ( $photo ) : ?> data-set-preview="<?php echo esc_url( (string) wp_get_attachment_image_url( $photo, 'medium_large' ) ); ?>" data-set-preview-srcset="<?php echo esc_attr( (string) wp_get_attachment_image_srcset( $photo, 'medium_large' ) ); ?>"<?php endif; ?>>
 														<?php echo get_the_post_thumbnail( $part['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?>
 														<span class="variant-set-name">
 															<?php if ( $part['product'] === $post_id ) : ?>
@@ -530,7 +564,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<?php elseif ( $uses_source_variants ) : ?>
 						<p class="order-form-notice order-form-notice--error"><?php echo esc_html( $variants && ! $fresh ? $text['stale'] : $text['unavailable'] ); ?></p>
 					<?php endif; ?>
-					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><input id="order-quantity" name="quantity" type="number" min="1" max="100" value="1" required></p>
+					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><?php lasery_xtool_quantity_field( 'order-quantity', 'quantity', 1, $text ); ?></p>
 				</fieldset>
 			</div>
 			<aside class="order-summary" aria-labelledby="order-summary-title">
@@ -553,6 +587,27 @@ function lasery_xtool_render_order_form( $post_id ) {
 				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
 			</aside>
 		</form>
+		<?php if ( $previews ) : ?>
+			<?php // Mouse: a card on hover or focus. The part's own link stays the way for keyboards and screen readers. ?>
+			<div class="set-card" data-set-card hidden aria-hidden="true">
+				<a class="set-card-link" href="#" tabindex="-1" data-set-link>
+					<span class="set-card-media"><img alt="" sizes="256px" data-set-image></span>
+					<span class="set-card-title" data-set-title></span>
+					<span class="set-card-details" data-set-details></span>
+					<span class="set-card-more"><?php echo esc_html( $text['view_product'] ); ?><?php echo lasery_xtool_order_icon( 'arrow-right' ); ?></span>
+				</a>
+			</div>
+			<?php // Touch screens: a sheet after a tap, so choosing a set does not leave the page. ?>
+			<dialog class="set-sheet" aria-labelledby="set-sheet-title" data-set-sheet>
+				<div class="set-sheet-body">
+					<button type="button" class="set-sheet-close" data-set-close><span class="visually-hidden"><?php echo esc_html( $text['close'] ); ?></span><?php echo lasery_xtool_order_icon( 'close' ); ?></button>
+					<div class="set-sheet-media"><img alt="" sizes="(min-width: 600px) 440px, 100vw" data-set-image></div>
+					<h3 id="set-sheet-title" data-set-title></h3>
+					<p class="set-sheet-details" data-set-details></p>
+					<a class="btn btn-primary btn-block" href="#" data-set-link><?php echo esc_html( $text['view_product'] ); ?><?php echo lasery_xtool_order_icon( 'arrow-right' ); ?></a>
+				</div>
+			</dialog>
+		<?php endif; ?>
 	</section>
 	<?php
 }
