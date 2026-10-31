@@ -138,6 +138,9 @@ function lasery_xtool_seo_page() {
             $description = lasery_xtool_display_summary($post->ID);
         } elseif (is_page('blog')) {
             $description = lasery_xtool_text('blog_description');
+        } elseif (is_privacy_policy()) {
+            // The first sentence on how the data is used.
+            $description = preg_replace('/(?<=[.!?])\s.*$/su', '', lasery_xtool_seo_text(lasery_xtool_privacy_texts($language)['purposes_text']));
         }
     }
     if ($canonical === '' && isset($alternates[$language])) {

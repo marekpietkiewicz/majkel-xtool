@@ -164,6 +164,13 @@ add_filter('document_title_parts', function ($parts) {
         }
     } elseif (is_page('koszyk') && function_exists('lasery_xtool_order_texts')) {
         $parts['title'] = lasery_xtool_order_texts($language)['cart_title'];
+    } elseif (is_page('blog')) {
+        // The page title is Polish; later list pages are numbered like the catalogue's.
+        $parts['title'] = __('Blog', 'lasery-xtool');
+        $page = lasery_xtool_blog_listing()[0];
+        if ($page > 1) {
+            $parts['page'] = sprintf(__('Strona %d', 'lasery-xtool'), $page);
+        }
     } elseif (is_privacy_policy()) {
         $parts['title'] = lasery_xtool_privacy_texts($language)['title'];
     } elseif (is_search()) {

@@ -221,7 +221,7 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_empty' => 'Koszyk jest pusty.',
 			'browse' => 'Zobacz produkty',
 			'continue' => 'Kontynuuj zakupy',
-			'cart_added' => 'Produkt został dodany do koszyka.',
+			'cart_added' => 'Produkt został dodany do koszyka.', 'cart_limit' => 'W koszyku jest teraz 100 szt. tego produktu – to najwięcej w jednej pozycji.',
 			'cart_full' => 'Koszyk może zawierać najwyżej %d różnych produktów.',
 			'cart_updated' => 'Koszyk został zaktualizowany.',
 			'cart_removed' => 'Produkt został usunięty z koszyka.',
@@ -250,7 +250,7 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_empty' => 'Your cart is empty.',
 			'browse' => 'Browse products',
 			'continue' => 'Continue shopping',
-			'cart_added' => 'The product has been added to your cart.',
+			'cart_added' => 'The product has been added to your cart.', 'cart_limit' => 'Your cart now holds 100 pieces of this product, the most one line can have.',
 			'cart_full' => 'Your cart can hold up to %d different products.',
 			'cart_updated' => 'Your cart has been updated.',
 			'cart_removed' => 'The product has been removed from your cart.',
@@ -279,7 +279,7 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_empty' => 'Ihr Warenkorb ist leer.',
 			'browse' => 'Produkte ansehen',
 			'continue' => 'Weiter einkaufen',
-			'cart_added' => 'Das Produkt wurde in den Warenkorb gelegt.',
+			'cart_added' => 'Das Produkt wurde in den Warenkorb gelegt.', 'cart_limit' => 'Im Warenkorb sind jetzt 100 Stück dieses Produkts – mehr geht in einer Position nicht.',
 			'cart_full' => 'Der Warenkorb kann höchstens %d verschiedene Produkte enthalten.',
 			'cart_updated' => 'Der Warenkorb wurde aktualisiert.',
 			'cart_removed' => 'Das Produkt wurde aus dem Warenkorb entfernt.',
@@ -308,7 +308,7 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_empty' => 'Корзина пуста.',
 			'browse' => 'Смотреть товары',
 			'continue' => 'Продолжить покупки',
-			'cart_added' => 'Товар добавлен в корзину.',
+			'cart_added' => 'Товар добавлен в корзину.', 'cart_limit' => 'В корзине теперь 100 шт. этого товара — это максимум для одной позиции.',
 			'cart_full' => 'В корзине может быть не более %d разных товаров.',
 			'cart_updated' => 'Корзина обновлена.',
 			'cart_removed' => 'Товар удалён из корзины.',
@@ -337,7 +337,7 @@ function lasery_xtool_order_texts( $language ) {
 			'cart_empty' => 'Кошик порожній.',
 			'browse' => 'Переглянути товари',
 			'continue' => 'Продовжити покупки',
-			'cart_added' => 'Товар додано до кошика.',
+			'cart_added' => 'Товар додано до кошика.', 'cart_limit' => 'У кошику тепер 100 шт. цього товару — це максимум для однієї позиції.',
 			'cart_full' => 'У кошику може бути не більше %d різних товарів.',
 			'cart_updated' => 'Кошик оновлено.',
 			'cart_removed' => 'Товар видалено з кошика.',
@@ -498,6 +498,8 @@ function lasery_xtool_render_order_form( $post_id ) {
 	$fresh = lasery_xtool_source_is_fresh( $post_id );
 	$available_variants = $fresh ? lasery_xtool_available_variants( $post_id ) : array();
 	$selected = 1 === count( $available_variants ) ? $available_variants[0] : null;
+	// The only variant of a product without options has no name to choose by.
+	$single = $selected && '' === lasery_xtool_variant_label( $selected );
 	$selected_amount = $selected ? lasery_xtool_variant_amount( $post_id, $selected ) : ( $uses_source_variants ? null : lasery_xtool_order_price_amount( $post_id ) );
 	$cart = lasery_xtool_cart_url( $language );
 	$previews = false;
@@ -518,12 +520,12 @@ function lasery_xtool_render_order_form( $post_id ) {
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 			<div class="order-form-steps">
 				<fieldset class="order-step">
-					<?php if ( ! $uses_source_variants ) : ?>
-						<input type="hidden" name="variant" value="">
+					<?php if ( ! $uses_source_variants || $single ) : ?>
+						<input type="hidden" name="variant" value="<?php echo esc_attr( $single ? $selected['id'] : '' ); ?>">
 					<?php else : ?>
 						<legend><?php echo esc_html( $text['variant'] ); ?></legend>
 					<?php endif; ?>
-					<?php if ( $available_variants ) : ?>
+					<?php if ( $available_variants && ! $single ) : ?>
 						<div class="variant-options">
 							<?php foreach ( $available_variants as $variant ) : ?>
 								<?php $amount = lasery_xtool_variant_amount( $post_id, $variant ); ?>
@@ -554,7 +556,8 @@ function lasery_xtool_render_order_form( $post_id ) {
 															<?php else : ?>
 																<a href="<?php echo esc_url( add_query_arg( 'lang', $language, get_permalink( $part['product'] ) ) ); ?>"><?php echo esc_html( $part_title ); ?></a>
 															<?php endif; ?>
-															<?php if ( 'Default Title' !== $part['variant']['title'] ) : ?><small><?php echo esc_html( lasery_xtool_variant_label( $part['variant'] ) ); ?></small><?php endif; ?>
+															<?php $part_label = lasery_xtool_variant_label( $part['variant'] ); ?>
+															<?php if ( '' !== $part_label ) : ?><small><?php echo esc_html( $part_label ); ?></small><?php endif; ?>
 														</span>
 														<?php if ( $part['quantity'] > 1 ) : ?><span class="variant-set-quantity">× <?php echo esc_html( $part['quantity'] ); ?></span><?php endif; ?>
 													</li>
@@ -578,7 +581,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<p><?php echo esc_html( lasery_xtool_order_product_title( $post_id, $language ) ); ?></p>
 				</div>
 				<dl class="order-summary-list">
-					<?php if ( $available_variants ) : ?>
+					<?php if ( $available_variants && ! $single ) : ?>
 						<dt><?php echo esc_html( $text['variant'] ); ?></dt>
 						<dd data-order-summary-variant><?php echo esc_html( $selected ? lasery_xtool_variant_label( $selected ) : $text['summary_empty'] ); ?></dd>
 					<?php endif; ?>

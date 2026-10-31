@@ -7,6 +7,7 @@ return [
         'titles' => [ 'pl' => 'Mobilny stojak roboczy do P3', 'de' => 'Mobiler Arbeitsständer für P3', 'ru' => 'Мобильная рабочая подставка для P3', 'uk' => 'Мобільна робоча підставка для P3' ],
         'features' => [
             'pl' => [ 'Mobilny stojak roboczy zaprojektowany do lasera CO₂ xTool P3.', 'Oryginalne akcesorium marki xTool.' ],
+            'en' => [ 'Mobile work stand for the xTool P3 CO₂ laser.', 'Original xTool accessory.' ],
             'de' => [ 'Mobiler Arbeitsständer für den CO₂-Laser xTool P3.', 'Original-Zubehör von xTool.' ],
             'ru' => [ 'Мобильная рабочая подставка для CO₂-лазера xTool P3.', 'Оригинальный аксессуар xTool.' ],
             'uk' => [ 'Мобільна робоча підставка для CO₂-лазера xTool P3.', 'Оригінальний аксесуар xTool.' ],
@@ -17,6 +18,7 @@ return [
         'titles' => [ 'pl' => 'Aluminiowy panel o strukturze plastra miodu do P3', 'de' => 'Aluminium-Wabenplatte für P3', 'ru' => 'Алюминиевая сотовая панель для P3', 'uk' => 'Алюмінієва стільникова панель для P3' ],
         'features' => [
             'pl' => [ 'Panel o strukturze plastra miodu do lasera CO₂ xTool P3.', 'Wykonany z aluminium: bardzo lekki i odporny na rdzę.' ],
+            'en' => [ 'Honeycomb panel for the xTool P3 CO₂ laser.', 'Made of aluminium: ultra-lightweight and rust-free.' ],
             'de' => [ 'Wabenplatte für den CO₂-Laser xTool P3.', 'Aus Aluminium: besonders leicht und rostfrei.' ],
             'ru' => [ 'Сотовая панель для CO₂-лазера xTool P3.', 'Из алюминия: очень лёгкая и не ржавеет.' ],
             'uk' => [ 'Стільникова панель для CO₂-лазера xTool P3.', 'З алюмінію: дуже легка й не іржавіє.' ],
@@ -27,6 +29,7 @@ return [
         'titles' => [ 'pl' => 'Moduł lasera podczerwieni 5 W do P3', 'de' => '5-W-IR-Lasermodul für P3', 'ru' => 'Модуль ИК-лазера 5 Вт для P3', 'uk' => 'Модуль ІЧ-лазера 5 Вт для P3' ],
         'features' => [
             'pl' => [ 'Moduł lasera podczerwieni (IR) o mocy 5 W do xTool P3.', 'Uzupełnia laser CO₂ 80 W w P3 o źródło podczerwieni.' ],
+            'en' => [ '5 W infrared (IR) laser module for the xTool P3.', 'Adds an infrared source to the P3’s 80 W CO₂ laser.' ],
             'de' => [ '5-W-Infrarot-Lasermodul (IR) für den xTool P3.', 'Ergänzt den 80-W-CO₂-Laser des P3 um eine Infrarotquelle.' ],
             'ru' => [ 'Модуль инфракрасного (ИК) лазера мощностью 5 Вт для xTool P3.', 'Дополняет CO₂-лазер 80 Вт в P3 инфракрасным источником.' ],
             'uk' => [ 'Модуль інфрачервоного (ІЧ) лазера потужністю 5 Вт для xTool P3.', 'Доповнює CO₂-лазер 80 Вт у P3 інфрачервоним джерелом.' ],
@@ -47,6 +50,7 @@ return [
         'titles' => [ 'pl' => 'Butla CO₂ do P3 i Fire Safety Set 2', 'de' => 'CO₂-Flasche für P3 und Fire Safety Set 2', 'ru' => 'Баллон CO₂ для P3 и Fire Safety Set 2', 'uk' => 'Балон CO₂ для P3 і Fire Safety Set 2' ],
         'features' => [
             'pl' => [ 'Butla CO₂ do lasera xTool P3 i do automatycznego zestawu gaśniczego Fire Safety Set 2.', 'Według xTool zestaw Fire Safety Set 2 obsługuje obecnie modele X1 i M2.' ],
+            'en' => [ 'CO₂ cylinder for the xTool P3 and the Fire Safety Set 2 automatic fire extinguishing set.', 'According to xTool, the Fire Safety Set 2 currently supports the X1 and M2.' ],
             'de' => [ 'CO₂-Flasche für den xTool P3 und das automatische Feuerlöschset Fire Safety Set 2.', 'Laut xTool unterstützt das Fire Safety Set 2 derzeit X1 und M2.' ],
             'ru' => [ 'Баллон CO₂ для xTool P3 и автоматической системы пожаротушения Fire Safety Set 2.', 'По данным xTool, Fire Safety Set 2 сейчас поддерживает X1 и M2.' ],
             'uk' => [ 'Балон CO₂ для xTool P3 та автоматичної системи пожежогасіння Fire Safety Set 2.', 'За даними xTool, Fire Safety Set 2 наразі підтримує X1 і M2.' ],
@@ -78,6 +82,7 @@ return [
         'titles' => [ 'pl' => 'Moduł lasera diodowego 20 W do M2', 'de' => '20-W-Diodenlasermodul für M2', 'ru' => 'Модуль диодного лазера 20 Вт для M2', 'uk' => 'Модуль діодного лазера 20 Вт для M2' ],
         'features' => [
             'pl' => [ 'Moduł lasera diodowego 20 W o długości fali 455 nm do xTool M2.', 'Oryginalny moduł marki xTool.' ],
+            'en' => [ '20 W 455 nm diode laser module for the xTool M2.', 'Original xTool module.' ],
             'de' => [ '20-W-Diodenlasermodul mit 455 nm Wellenlänge für den xTool M2.', 'Originalmodul von xTool.' ],
             'ru' => [ 'Модуль диодного лазера 20 Вт с длиной волны 455 нм для xTool M2.', 'Оригинальный модуль xTool.' ],
             'uk' => [ 'Модуль діодного лазера 20 Вт із довжиною хвилі 455 нм для xTool M2.', 'Оригінальний модуль xTool.' ],
@@ -88,6 +93,7 @@ return [
         'titles' => [ 'pl' => 'Moduł lasera podczerwieni 3 W do M2', 'de' => '3-W-Infrarot-Lasermodul für M2', 'ru' => 'Модуль ИК-лазера 3 Вт для M2', 'uk' => 'Модуль ІЧ-лазера 3 Вт для M2' ],
         'features' => [
             'pl' => [ 'Moduł lasera podczerwieni 3 W o długości fali 1064 nm do xTool M2.', 'Oryginalny moduł marki xTool.' ],
+            'en' => [ '3 W 1064 nm infrared laser module for the xTool M2.', 'Original xTool module.' ],
             'de' => [ '3-W-Infrarot-Lasermodul mit 1064 nm Wellenlänge für den xTool M2.', 'Originalmodul von xTool.' ],
             'ru' => [ 'Модуль инфракрасного лазера 3 Вт с длиной волны 1064 нм для xTool M2.', 'Оригинальный модуль xTool.' ],
             'uk' => [ 'Модуль інфрачервоного лазера 3 Вт із довжиною хвилі 1064 нм для xTool M2.', 'Оригінальний модуль xTool.' ],
@@ -98,6 +104,7 @@ return [
         'titles' => [ 'pl' => 'Moduł druku atramentowego CMYK do M2', 'de' => 'CMYK-Tintenstrahldruckmodul für M2', 'ru' => 'Модуль струйной печати CMYK для M2', 'uk' => 'Модуль струменевого друку CMYK для M2' ],
         'features' => [
             'pl' => [ 'Moduł druku atramentowego CMYK do xTool M2.', 'Uzupełnia cięcie i grawerowanie w M2 o kolorowy druk atramentowy.' ],
+            'en' => [ 'CMYK inkjet printing module for the xTool M2.', 'Adds colour inkjet printing to the M2’s cutting and engraving.' ],
             'de' => [ 'CMYK-Tintenstrahldruckmodul für den xTool M2.', 'Ergänzt das Schneiden und Gravieren des M2 um farbigen Tintenstrahldruck.' ],
             'ru' => [ 'Модуль струйной печати CMYK для xTool M2.', 'Дополняет резку и гравировку на M2 цветной струйной печатью.' ],
             'uk' => [ 'Модуль струменевого друку CMYK для xTool M2.', 'Доповнює різання та гравіювання на M2 кольоровим струменевим друком.' ],
@@ -118,6 +125,7 @@ return [
         'titles' => [ 'pl' => 'Adapter rury wyciągowej oczyszczacza biurkowego do M2', 'de' => 'Abluftschlauch-Adapter für Desktop-Luftreiniger am M2', 'ru' => 'Адаптер вытяжного шланга настольного очистителя для M2', 'uk' => 'Адаптер витяжного шланга настільного очищувача для M2' ],
         'features' => [
             'pl' => [ 'Adapter przewodu wyciągowego biurkowego oczyszczacza powietrza xTool do lasera M2.', 'Oryginalna część marki xTool.' ],
+            'en' => [ 'Exhaust duct adapter for the xTool desktop air purifier on the M2.', 'Original xTool part.' ],
             'de' => [ 'Abluftschlauch-Adapter für den xTool Desktop-Luftreiniger am M2.', 'Originalteil von xTool.' ],
             'ru' => [ 'Адаптер вытяжного шланга настольного очистителя воздуха xTool для M2.', 'Оригинальная деталь xTool.' ],
             'uk' => [ 'Адаптер витяжного шланга настільного очищувача повітря xTool для M2.', 'Оригінальна деталь xTool.' ],
@@ -130,6 +138,7 @@ return [
         'titles' => [ 'pl' => 'Moduł laserowy 40 W do S1', 'de' => '40-W-Lasermodul für S1', 'ru' => 'Лазерный модуль 40 Вт для S1', 'uk' => 'Лазерний модуль 40 Вт для S1' ],
         'features' => [
             'pl' => [ 'Moduł laserowy 40 W do zabudowanego lasera diodowego xTool S1.', 'Oryginalny moduł marki xTool.' ],
+            'en' => [ '40 W laser module for the xTool S1 enclosed diode laser.', 'Original xTool module.' ],
             'de' => [ '40-W-Lasermodul für den geschlossenen Diodenlaser xTool S1.', 'Originalmodul von xTool.' ],
             'ru' => [ 'Лазерный модуль 40 Вт для закрытого диодного лазера xTool S1.', 'Оригинальный модуль xTool.' ],
             'uk' => [ 'Лазерний модуль 40 Вт для закритого діодного лазера xTool S1.', 'Оригінальний модуль xTool.' ],
@@ -150,6 +159,7 @@ return [
         'titles' => [ 'pl' => 'Moduł lasera podczerwieni 1064 nm do S1', 'de' => '1064-nm-Infrarot-Lasermodul für S1', 'ru' => 'Модуль ИК-лазера 1064 нм для S1', 'uk' => 'Модуль ІЧ-лазера 1064 нм для S1' ],
         'features' => [
             'pl' => [ 'Moduł lasera podczerwieni o długości fali 1064 nm do xTool S1.', 'Oryginalny moduł marki xTool.' ],
+            'en' => [ '1064 nm infrared laser module for the xTool S1.', 'Original xTool module.' ],
             'de' => [ 'Infrarot-Lasermodul mit 1064 nm Wellenlänge für den xTool S1.', 'Originalmodul von xTool.' ],
             'ru' => [ 'Модуль инфракрасного лазера с длиной волны 1064 нм для xTool S1.', 'Оригинальный модуль xTool.' ],
             'uk' => [ 'Модуль інфрачервоного лазера з довжиною хвилі 1064 нм для xTool S1.', 'Оригінальний модуль xTool.' ],
@@ -160,6 +170,7 @@ return [
         'titles' => [ 'pl' => 'Panel o strukturze plastra miodu do S1', 'de' => 'Wabenplatte für S1', 'ru' => 'Сотовая панель для S1', 'uk' => 'Стільникова панель для S1' ],
         'features' => [
             'pl' => [ 'Panel o strukturze plastra miodu do zabudowanego lasera diodowego xTool S1.', 'Oryginalne akcesorium marki xTool.' ],
+            'en' => [ 'Honeycomb panel for the xTool S1 enclosed diode laser.', 'Original xTool accessory.' ],
             'de' => [ 'Wabenplatte für den geschlossenen Diodenlaser xTool S1.', 'Original-Zubehör von xTool.' ],
             'ru' => [ 'Сотовая панель для закрытого диодного лазера xTool S1.', 'Оригинальный аксессуар xTool.' ],
             'uk' => [ 'Стільникова панель для закритого діодного лазера xTool S1.', 'Оригінальний аксесуар xTool.' ],
@@ -170,6 +181,7 @@ return [
         'titles' => [ 'pl' => 'Podstawa podwyższająca do S1', 'de' => 'Erhöhungsbasis für S1', 'ru' => 'Поднимающее основание для S1', 'uk' => 'Підвищувальна основа для S1' ],
         'features' => [
             'pl' => [ 'Podstawa podwyższająca do lasera xTool S1.', 'Dostępna w kolorze czarnym lub białym.' ],
+            'en' => [ 'Riser base for the xTool S1.', 'Available in black or white.' ],
             'de' => [ 'Erhöhungsbasis für den xTool S1.', 'Erhältlich in Schwarz oder Weiß.' ],
             'ru' => [ 'Поднимающее основание для xTool S1.', 'Доступно в чёрном или белом цвете.' ],
             'uk' => [ 'Підвищувальна основа для xTool S1.', 'Доступна в чорному або білому кольорі.' ],
@@ -202,6 +214,7 @@ return [
         'titles' => [ 'pl' => 'Przenośnik Auto Streamline™ do F2 Ultra UV, F2 Ultra i F1 Ultra', 'de' => 'Auto Streamline™-Förderband für F2 Ultra UV, F2 Ultra und F1 Ultra', 'ru' => 'Конвейер Auto Streamline™ для F2 Ultra UV, F2 Ultra и F1 Ultra', 'uk' => 'Конвеєр Auto Streamline™ для F2 Ultra UV, F2 Ultra і F1 Ultra' ],
         'features' => [
             'pl' => [ 'Przenośnik taśmowy Auto Streamline™ do laserów xTool F2 Ultra UV, F2 Ultra i F1 Ultra.', 'Pozwala prowadzić obróbkę seryjną z podawaniem materiału przenośnikiem.' ],
+            'en' => [ 'Auto Streamline™ conveyor for the xTool F2 Ultra UV, F2 Ultra and F1 Ultra lasers.', 'Enables batch processing with conveyor material feeding.' ],
             'de' => [ 'Auto Streamline™-Förderband für die xTool-Laser F2 Ultra UV, F2 Ultra und F1 Ultra.', 'Ermöglicht Serienbearbeitung mit Materialzufuhr per Förderband.' ],
             'ru' => [ 'Конвейер Auto Streamline™ для лазеров xTool F2 Ultra UV, F2 Ultra и F1 Ultra.', 'Позволяет вести серийную обработку с подачей материала конвейером.' ],
             'uk' => [ 'Конвеєр Auto Streamline™ для лазерів xTool F2 Ultra UV, F2 Ultra і F1 Ultra.', 'Дає змогу вести серійну обробку з подаванням матеріалу конвеєром.' ],
@@ -396,6 +409,7 @@ return [
         'titles' => [ 'pl' => 'Wymienna podkładka tuszowa i zgarniacz do O1 Omni Printer', 'de' => 'Ersatzset Tintenpad und Abstreifer für O1 Omni Printer', 'ru' => 'Сменная чернильная подушка и скребок для O1 Omni Printer', 'uk' => 'Змінна чорнильна подушка та скребок для O1 Omni Printer' ],
         'features' => [
             'pl' => [ 'Zestaw wymienny z podkładką tuszową i zgarniaczem do drukarki xTool O1 Omni Printer.', 'Oryginalny zestaw marki xTool.' ],
+            'en' => [ 'Replacement ink pad and scraper kit for the xTool O1 Omni Printer.', 'Original xTool kit.' ],
             'de' => [ 'Ersatzset mit Tintenpad und Abstreifer für den xTool O1 Omni Printer.', 'Original-Set von xTool.' ],
             'ru' => [ 'Сменный комплект с чернильной подушкой и скребком для принтера xTool O1 Omni Printer.', 'Оригинальный комплект xTool.' ],
             'uk' => [ 'Змінний комплект із чорнильною подушкою та скребком для принтера xTool O1 Omni Printer.', 'Оригінальний комплект xTool.' ],
@@ -408,6 +422,7 @@ return [
         'titles' => [ 'pl' => 'Zestaw konserwacyjny do xTool Apparel Printer Plus', 'de' => 'Wartungsset für xTool Apparel Printer Plus', 'ru' => 'Набор для обслуживания xTool Apparel Printer Plus', 'uk' => 'Набір для обслуговування xTool Apparel Printer Plus' ],
         'features' => [
             'pl' => [ 'Zestaw konserwacyjny do drukarek DTF xTool Apparel Printer i Apparel Printer Plus.', 'Do Apparel Printer Plus wybierz wariant „For Apparel Printer Plus”.' ],
+            'en' => [ 'Maintenance kit for the xTool Apparel Printer and Apparel Printer Plus DTF printers.', 'For the Apparel Printer Plus, choose the “For Apparel Printer Plus” variant.' ],
             'de' => [ 'Wartungsset für die DTF-Drucker xTool Apparel Printer und Apparel Printer Plus.', 'Für den Apparel Printer Plus die Variante „For Apparel Printer Plus“ wählen.' ],
             'ru' => [ 'Набор для обслуживания DTF-принтеров xTool Apparel Printer и Apparel Printer Plus.', 'Для Apparel Printer Plus выберите вариант «For Apparel Printer Plus».' ],
             'uk' => [ 'Набір для обслуговування DTF-принтерів xTool Apparel Printer і Apparel Printer Plus.', 'Для Apparel Printer Plus виберіть варіант «For Apparel Printer Plus».' ],
@@ -562,6 +577,7 @@ return [
         'titles' => [ 'pl' => 'Filtry do oczyszczacza xTool SafetyPro™ AP2 Max', 'de' => 'Filter für den xTool SafetyPro™ AP2 Max Luftreiniger', 'ru' => 'Фильтры для очистителя воздуха xTool SafetyPro™ AP2 Max', 'uk' => 'Фільтри для очищувача повітря xTool SafetyPro™ AP2 Max' ],
         'features' => [
             'pl' => [ 'Filtry zamienne do oczyszczacza powietrza xTool SafetyPro™ AP2 Max.', 'Do wyboru: filtr wstępny, średniej skuteczności, warstwa węgla aktywnego, gęsta siatka węglowa, filtr formaldehydu i filtr HEPA.' ],
+            'en' => [ 'Replacement filters for the xTool SafetyPro™ AP2 Max air purifier.', 'Available as pre-filter, medium filter, activated carbon layer, ultra-dense carbon mesh, formaldehyde filter and HEPA filter.' ],
             'de' => [ 'Ersatzfilter für den Luftreiniger xTool SafetyPro™ AP2 Max.', 'Erhältlich als Vorfilter, Mittelfilter, Aktivkohleschicht, ultradichtes Kohlenetz, Formaldehydfilter und HEPA-Filter.' ],
             'ru' => [ 'Сменные фильтры для очистителя воздуха xTool SafetyPro™ AP2 Max.', 'На выбор: предфильтр, фильтр средней очистки, слой активированного угля, сверхплотная угольная сетка, фильтр от формальдегида и HEPA-фильтр.' ],
             'uk' => [ 'Змінні фільтри для очищувача повітря xTool SafetyPro™ AP2 Max.', 'На вибір: передфільтр, фільтр середнього очищення, шар активованого вугілля, надщільна вугільна сітка, фільтр від формальдегіду та HEPA-фільтр.' ],
