@@ -34,7 +34,7 @@ Opublikowane artykuły (klucz — temat):
 | `photo-engraving` | Grawerowanie zdjęć laserem: drewno, łupek, szkło, metal i kolor |
 | `leather-engraving` | Grawerowanie i cięcie skóry laserem |
 | `paper-cutting` | Cięcie papieru i kartonu laserem: zaproszenia, opakowania, makiety |
-| `event-engraving` | Grawerowanie na eventach: personalizacja na żywo z F2 |
+| `event-engraving` | Grawerowanie na eventach: przeniesiony do szkiców, wymaga przepisania zgodnie z instrukcją bezpieczeństwa F2 |
 | `stone-engraving` | Grawerowanie kamienia: łupek, granit, marmur, płytki |
 | `xtool-x1` | xTool X1: Laser Swap, wersje i zestawy |
 
