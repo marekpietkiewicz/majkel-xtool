@@ -36,6 +36,7 @@ $email = lasery_xtool_contact_email();
                     <?php if ($safety_url) : ?><li><a href="<?php echo esc_url($safety_url); ?>"><?php echo esc_html(lasery_xtool_safety_texts()['title']); ?></a></li><?php endif; ?>
                     <?php $purchase_url = lasery_xtool_purchase_info_url(); ?>
                     <?php if ($purchase_url) : ?><li><a href="<?php echo esc_url($purchase_url); ?>"><?php echo esc_html(lasery_xtool_purchase_info_title()); ?></a></li><?php endif; ?>
+                    <?php if ($purchase_url) : ?><li><a href="<?php echo esc_url($purchase_url . '#regulamin'); ?>"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['service_title']); ?></a></li><?php endif; ?>
                     <?php if ($privacy_url) : ?>
                         <li><a href="<?php echo esc_url(lasery_xtool_language_url($privacy_url)); ?>"><?php echo esc_html($consent_text['privacy']); ?></a></li>
                     <?php endif; ?>
@@ -66,6 +67,7 @@ $email = lasery_xtool_contact_email();
         <input type="hidden" name="lang" value="<?php echo esc_attr(lasery_xtool_interface_language()); ?>">
         <button type="button" class="search-close" data-search-close><span aria-hidden="true">Esc</span><span class="visually-hidden"><?php esc_html_e('Zamknij', 'lasery-xtool'); ?></span></button>
     </form>
+    <p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p>
     <p class="visually-hidden" role="status" data-search-status></p>
     <div class="search-dialog-results" id="search-results" data-search-results></div>
 </dialog>

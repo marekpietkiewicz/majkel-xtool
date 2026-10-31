@@ -301,7 +301,12 @@ function lasery_xtool_product_offer($post_id, $url) {
     if (!$lowest) {
         return null;
     }
-    $offer = ['url' => $url, 'priceCurrency' => $lowest[1], 'availability' => 'https://schema.org/InStock', 'seller' => ['@type' => 'Organization', 'name' => 'xTool']];
+    $offer = ['url' => $url, 'priceCurrency' => $lowest[1], 'seller' => ['@type' => 'Organization', 'name' => 'xTool']];
+    // A manual estimate does not establish availability. Source prices only reach here
+    // when at least one source variant is both available and fresh.
+    if (lasery_xtool_uses_source_variants($post_id)) {
+        $offer['availability'] = 'https://schema.org/InStock';
+    }
     if (!$lowest[2]) {
         return ['@type' => 'Offer', 'price' => $lowest[0]] + $offer;
     }

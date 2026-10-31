@@ -7,7 +7,9 @@ const container = process.env.WP_TEST_CONTAINER;
 const compose = process.env.WP_TEST_COMPOSE;
 const project = process.env.WP_TEST_PROJECT;
 if (!container || !compose || !project) throw new Error('A disposable local WordPress container and Compose project are required');
-const manifest = require('../scripts/blog/safety-corrections.json');
+const selection = process.env.SAFETY_TEST_SET || 'original';
+if (!['original', 'f2-eyewear'].includes(selection)) throw new Error('Unknown test set');
+const manifest = require(selection === 'original' ? '../scripts/blog/safety-corrections.json' : '../scripts/blog/safety-corrections-f2-eyewear.json');
 const encoded = Buffer.from(JSON.stringify(manifest)).toString('base64');
 const php = (script) => execFileSync('docker', ['exec', '-i', container, 'php'], { input: `<?php require '/var/www/html/wp-load.php'; ${script}`, encoding: 'utf8' }).trim();
 const data = JSON.parse(php(`
@@ -32,14 +34,16 @@ const snapshot = () => JSON.parse(php(`$ids=${JSON.stringify(ids)};$result=[];fo
 const before = data.map(({id,before}) => ({id,content:before}));
 const after = data.map(({id,after}) => ({id,content:after}));
 const args = ['compose','-p',project,'-f',compose,'run','--rm','--no-deps','-v',`${resolve('scripts')}:/safety-scripts:ro`];
-const run = (apply, fault = false) => {
+const run = (apply, fault = false, set = selection) => {
  const env = ['-e','LASERY_XTOOL_INTEGRATION_TEST=1'];
  if (apply) env.push('-e','LASERY_APPLY_SAFETY_CORRECTIONS=1');
+ if (set !== 'original') env.push('-e',`LASERY_SAFETY_CORRECTION_SET=${set}`);
  return execFileSync('docker',[...args,...env,'cli','wp','eval-file',fault ? '/tests/safety-corrections-fault.php' : '/safety-scripts/apply-safety-corrections.php'],{encoding:'utf8',stdio:['ignore','pipe','pipe']});
 };
 const expectFailure = (action, message) => { let failed=false; try { action(); } catch (error) { failed=true; assert.match(String(error.stderr),message); } assert(failed, 'expected the migration to fail'); };
 try {
  assert.match(run(false),/Preview only/); assert.deepEqual(snapshot(),before);
+ expectFailure(()=>run(true,false,'invalid'),/Unknown safety correction set/); assert.deepEqual(snapshot(),before);
  // If one editor changed a target fragment, no other post may be touched.
  php(`$post=get_post(${ids[0]}); wp_update_post(wp_slash(['ID'=>$post->ID,'post_content'=>str_replace(${JSON.stringify(data[0].before)},'EDITOR CHANGED THIS POST',$post->post_content)]));`);
  const conflict=snapshot(); expectFailure(()=>run(true),/Cannot safely identify/); assert.deepEqual(snapshot(),conflict);
@@ -48,7 +52,7 @@ try {
  expectFailure(()=>run(true,true),/all corrections were rolled back/); assert.deepEqual(snapshot(),before);
  assert.match(run(true),new RegExp(`Updated ${data.length} posts`)); assert.deepEqual(snapshot(),after);
  assert.match(run(true),/Updated 0 posts/); assert.deepEqual(snapshot(),after);
- console.log('Safety corrections: preview, edited-content conflict, transaction rollback, apply and idempotence passed.');
+ console.log(`Safety corrections (${selection}): preview, unknown set, edited-content conflict, transaction rollback, apply and idempotence passed.`);
 } finally {
  php(`foreach(${JSON.stringify(ids)} as $id)wp_delete_post($id,true);`);
 }

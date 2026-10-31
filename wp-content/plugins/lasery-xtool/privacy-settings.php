@@ -41,6 +41,7 @@ function lasery_xtool_privacy_settings_page() {
 	?>
 	<div class="wrap">
 		<h1>Polityka prywatności</h1>
+		<div class="notice notice-warning"><p>Strona nie usuwa automatycznie wiadomości ze skrzynki pocztowej. Sprawdź, czy treść polityki odpowiada rzeczywistym zasadom przechowywania i czy zgłoszenia niezakończone zamówieniem są usuwane zgodnie z opublikowanym terminem. Dotyczy to także własnych wersji językowych.</p></div>
 		<p>Edytuj każdą wersję językową osobno. Zapis dotyczy wyłącznie wybranego języka.</p>
 		<nav class="nav-tab-wrapper" aria-label="Języki polityki prywatności">
 			<?php foreach ( $languages as $code => $label ) : ?>

@@ -20,6 +20,7 @@
             <header class="article-header">
                 <p class="article-meta"><time datetime="<?php echo esc_attr(get_the_date('c')); ?>"><?php echo esc_html(lasery_xtool_post_date($post_id)); ?></time> · <?php echo esc_html(lasery_xtool_reading_time($post_id)); ?></p>
                 <h1 class="article-title"><?php the_title(); ?></h1>
+                <p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p>
                 <?php if (has_excerpt()) : ?><p class="article-lead"><?php echo esc_html(get_the_excerpt()); ?></p><?php endif; ?>
             </header>
             <?php if (has_post_thumbnail()) : ?>

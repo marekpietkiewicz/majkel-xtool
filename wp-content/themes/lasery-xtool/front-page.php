@@ -19,6 +19,7 @@ $benefit_icons = [1 => 'video', 2 => 'bag', 3 => 'chat', 4 => 'shield'];
 ?>
 <section class="hero" aria-labelledby="hero-heading">
     <h1 id="hero-heading" class="visually-hidden"><?php echo esc_html(lasery_xtool_text('hero_title')); ?></h1>
+    <div class="wrap"><p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p></div>
     <?php if ($slides) : ?>
         <div class="swiper hero-swiper" data-hero-swiper role="region" aria-roledescription="carousel" aria-label="<?php esc_attr_e('Wyróżnione produkty', 'lasery-xtool'); ?>"<?php foreach ($slider_labels as $attribute => $label) : ?> <?php echo esc_attr($attribute); ?>="<?php echo esc_attr($label); ?>"<?php endforeach; ?>>
             <div class="swiper-wrapper">

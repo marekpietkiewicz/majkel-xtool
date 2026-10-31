@@ -3,7 +3,13 @@
 if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
     return;
 }
-$manifest = json_decode( file_get_contents( __DIR__ . '/blog/safety-corrections.json' ), true );
+$sets = [ 'original' => 'safety-corrections.json', 'f2-eyewear' => 'safety-corrections-f2-eyewear.json' ];
+$selection = getenv( 'LASERY_SAFETY_CORRECTION_SET' );
+$selection = $selection === false || $selection === '' ? 'original' : $selection;
+if ( ! isset( $sets[ $selection ] ) ) {
+    WP_CLI::error( 'Unknown safety correction set; no posts were updated.' );
+}
+$manifest = json_decode( file_get_contents( __DIR__ . '/blog/' . $sets[ $selection ] ), true );
 if ( ! is_array( $manifest ) || ! $manifest ) {
     WP_CLI::error( 'Safety correction manifest is missing or invalid.' );
 }

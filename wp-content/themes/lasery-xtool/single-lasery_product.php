@@ -77,6 +77,7 @@
                 <div class="product-summary">
                     <p class="eyebrow"><?php echo esc_html(lasery_xtool_kind_label($post_id)); ?></p>
                     <h1 class="product-title"><?php echo esc_html($title); ?></h1>
+                    <p class="commercial-disclosure"><?php echo esc_html(lasery_xtool_purchase_info_texts(lasery_xtool_interface_language())['commercial_disclosure']); ?></p>
                     <div class="price-box">
                         <p class="price price--large"><?php echo $price !== '' ? $price : esc_html__('Cena na zapytanie', 'lasery-xtool'); ?></p>
                         <p class="price-box-note"><?php esc_html_e('Cena orientacyjna z oficjalnego sklepu xTool. Przed płatnością potwierdzimy ostateczną kwotę i koszt dostawy.', 'lasery-xtool'); ?></p>
