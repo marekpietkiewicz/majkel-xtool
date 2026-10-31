@@ -268,8 +268,9 @@
       adding = true;
       form.classList.add('is-adding');
       const before = cartCookie();
+      let response = null;
       try {
-        const response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin' });
+        response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin' });
         if (!response.ok) throw new Error(String(response.status));
         // The answer is the cart page with a confirmation, or a page with the reason the product was not added,
         // which opens as it is (an unavailable variant is then no longer offered).
@@ -287,16 +288,22 @@
         if (cartLink) cartLink.classList.add('btn', 'btn-secondary', 'btn-block');
         if (cartCount) showCartCount();
       } catch (error) {
-        // The cookie tells whether the server added the product: then the cart opens, so it is never added twice;
-        // otherwise the browser sends the form itself and shows the server's answer.
-        if (cartLink && cartCookie() !== before) {
-          window.location.assign(cartLink.href);
+        // The cookie tells whether the server added the product: then another page opens (the cart, or the
+        // server's answer), so it is never added twice; otherwise the browser sends the form itself.
+        if (cartCookie() !== before) {
+          window.location.assign(cartLink ? cartLink.href : (response && response.redirected ? response.url : window.location.href));
           return;
         }
         native = true;
         form.requestSubmit(event.submitter);
       }
-      // While another page opens, the button stays busy.
+      // Free again, unless another page is opening (the returns above keep it busy).
+      adding = false;
+      form.classList.remove('is-adding');
+    });
+    // Back from that page may restore this one as it was.
+    window.addEventListener('pageshow', (event) => {
+      if (!event.persisted) return;
       adding = false;
       form.classList.remove('is-adding');
     });
