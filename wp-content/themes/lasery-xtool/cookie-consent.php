@@ -130,6 +130,6 @@ function lasery_xtool_render_consent_banner() {
 add_action('wp_footer', 'lasery_xtool_render_consent_banner', 5);
 
 function lasery_xtool_enqueue_consent() {
-    wp_enqueue_script('lasery-xtool-consent', get_template_directory_uri() . '/assets/cookie-consent.js', [], wp_get_theme()->get('Version'), ['in_footer' => true, 'strategy' => 'defer']);
+    wp_enqueue_script('lasery-xtool-consent', get_template_directory_uri() . '/assets/cookie-consent.js', [], lasery_xtool_asset_version('assets/cookie-consent.js'), ['in_footer' => true, 'strategy' => 'defer']);
 }
 add_action('wp_enqueue_scripts', 'lasery_xtool_enqueue_consent', 20);

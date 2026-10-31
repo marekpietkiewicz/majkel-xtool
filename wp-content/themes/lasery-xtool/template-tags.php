@@ -50,8 +50,6 @@ function lasery_xtool_icon($name) {
         'mail' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         'calendar' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
         'search' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
-        'minus' => '<path d="M5 12h14"/>',
-        'plus' => '<path d="M12 5v14M5 12h14"/>',
         'trash' => '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     ];
     if (!isset($paths[$name])) {

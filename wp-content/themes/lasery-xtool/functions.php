@@ -18,18 +18,25 @@ add_action('after_setup_theme', function () {
     register_nav_menus(['primary' => __('Menu główne', 'lasery-xtool')]);
 });
 
+/**
+ * A theme file's version in its URL: the time it last changed. Browsers keep the theme's files for a year,
+ * so a new release must change their URLs.
+ */
+function lasery_xtool_asset_version($file) {
+    return (string) filemtime(get_template_directory() . '/' . $file);
+}
+
 add_action('wp_enqueue_scripts', function () {
-    $version = wp_get_theme()->get('Version');
     $assets = get_template_directory_uri() . '/assets/';
     $script = ['in_footer' => true, 'strategy' => 'defer'];
-    wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], $version);
+    wp_enqueue_style('lasery-xtool', get_stylesheet_uri(), [], lasery_xtool_asset_version('style.css'));
     $sliders = is_front_page() || is_singular('lasery_product');
     if ($sliders) {
         wp_enqueue_script('lasery-xtool-swiper', $assets . 'lib/swiper/swiper-bundle.min.js', [], '14.3.0', $script);
     }
-    wp_enqueue_script('lasery-xtool-site', $assets . 'site.js', $sliders ? ['lasery-xtool-swiper'] : [], $version, $script);
+    wp_enqueue_script('lasery-xtool-site', $assets . 'site.js', $sliders ? ['lasery-xtool-swiper'] : [], lasery_xtool_asset_version('assets/site.js'), $script);
     if (is_singular('lasery_product')) {
-        wp_enqueue_script_module('lasery-xtool-lightbox', $assets . 'lightbox.js', [], $version);
+        wp_enqueue_script_module('lasery-xtool-lightbox', $assets . 'lightbox.js', [], lasery_xtool_asset_version('assets/lightbox.js'));
     }
     // Only blog articles render block content edited in the block editor.
     if (!is_singular('post')) {

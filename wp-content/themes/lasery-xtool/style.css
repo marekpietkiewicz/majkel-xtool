@@ -112,7 +112,8 @@ address { font-style: normal; }
 .lang-menu summary::-webkit-details-marker { display: none; }
 .lang-menu summary:hover, .lang-menu[open] summary { background: var(--surface); }
 .lang-menu summary .icon { width: 18px; height: 18px; }
-.flag { width: 20px; height: 15px; flex-shrink: 0; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px rgb(13 15 18 / 14%); }
+/* A thin edge and a soft shadow, so white stripes (Poland, Russia) stand out on white. */
+.flag { width: 20px; height: 15px; flex-shrink: 0; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px rgb(13 15 18 / 22%), 0 1px 3px rgb(13 15 18 / 22%); }
 .lang-menu summary .icon-chevron-down { width: 14px; height: 14px; transition: transform .2s; }
 .lang-menu[open] summary .icon-chevron-down { transform: rotate(180deg); }
 .lang-menu-list { position: absolute; top: calc(100% + 8px); right: 0; z-index: 10; min-width: 190px; margin: 0; padding: 6px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
@@ -409,8 +410,6 @@ h1, h2, h3, .product-card-title { overflow-wrap: break-word; hyphens: auto; hyph
 .js [data-cart-update] { display: none; }
 .cart-empty-actions { margin-top: 20px; }
 .cart .order-form-notice:focus { outline: none; }
-/* Prices fade while the server recalculates them. */
-[data-cart-form].is-updating :is(.cart-line-total, .cart-items-total strong, .order-summary-list dd) { opacity: .45; transition: opacity .2s; }
 @media (min-width: 640px) {
   .cart-items { padding: 4px 24px; }
   .cart-line { grid-template-columns: 88px minmax(0, 1fr) auto; grid-template-areas: "media body actions"; gap: 20px; padding: 20px 0; }
@@ -599,24 +598,13 @@ html:not(.js) .cart-toast:empty { display: none; }
 .order-step-number { display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: var(--ink); color: #fff; font-size: .85rem; }
 .field-grid { display: grid; gap: 14px; }
 .field label { display: block; margin-bottom: 6px; font-size: .875rem; font-weight: 700; }
-.order-form input:not([type="hidden"]):not([type="radio"]), .order-form select, .order-form textarea { width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); font: inherit; transition: border-color .15s, box-shadow .15s; }
+.order-form input:not([type="hidden"], [type="radio"]), .order-form select, .order-form textarea { width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--line-strong); border-radius: 12px; background: #fff; color: var(--ink); font: inherit; transition: border-color .15s, box-shadow .15s; }
 .order-form textarea { min-height: 96px; resize: vertical; }
 .order-form input:focus-visible, .order-form select:focus-visible, .order-form textarea:focus-visible { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px rgb(255 90 31 / 22%); }
 .field-quantity { margin-top: 16px; }
-/* Quantity: a number between − and + (the buttons work with JavaScript). */
-.quantity { display: inline-flex; align-items: center; height: 44px; border: 1px solid var(--line-strong); border-radius: 999px; background: #fff; transition: border-color .15s, box-shadow .15s; }
-.quantity:focus-within { border-color: var(--ink); box-shadow: 0 0 0 4px rgb(255 90 31 / 22%); }
-.order-form .quantity input[type="number"] { width: 4.5ch; min-width: 44px; min-height: 0; height: 100%; padding: 0 4px; border: 0; border-radius: 999px; background: none; font-weight: 700; text-align: center; }
-.order-form .quantity input[type="number"]:focus-visible { box-shadow: none; }
-/* Without JavaScript the browser's own arrows sit in the field. */
-html:not(.js) .order-form .quantity input[type="number"] { width: 6.5em; padding-left: 12px; }
-.js .quantity input { -moz-appearance: textfield; appearance: textfield; }
-.js .quantity input::-webkit-inner-spin-button, .js .quantity input::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
-.quantity-step { display: none; place-items: center; width: 42px; height: 100%; padding: 0; border: 0; border-radius: 999px; background: none; color: var(--ink); cursor: pointer; }
-.js .quantity-step { display: grid; }
-.quantity-step:hover { background: var(--surface); }
-.quantity-step[aria-disabled="true"] { background: none; color: var(--line-strong); cursor: default; }
-.quantity-step .icon { width: 16px; height: 16px; }
+/* Quantity: a short field for up to three digits, also on phones. */
+.order-form input.quantity-input { width: 5.5em; font-weight: 700; text-align: center; }
+.cart-line-actions input.quantity-input { width: 4.5em; min-height: 44px; padding-block: 8px; }
 .variant-options { display: grid; gap: 10px; }
 .variant-option { border: 1.5px solid var(--line); border-radius: 14px; transition: border-color .15s, box-shadow .15s, background-color .15s; }
 .variant-option:hover { border-color: var(--line-strong); }
@@ -680,6 +668,9 @@ html:has(.set-sheet[open]) { overflow: hidden; }
 .order-summary-list dt { color: var(--muted); }
 .order-summary-list dd { font-weight: 600; text-align: right; }
 .order-summary-list .order-summary-price { font: 700 1.35rem/1.2 var(--font-display); }
+.order-summary-each { display: block; margin-top: 4px; color: var(--muted); font: 600 .8rem/1.4 var(--font-text); }
+/* The button waits while the product goes to the cart. */
+[data-order-form].is-adding [type="submit"] { opacity: .7; cursor: progress; }
 .order-summary-list .order-summary-total { color: var(--ink); font-weight: 700; }
 /* A narrow summary puts each value under its label, so long prices and variants never overflow. */
 @container order-summary (max-width: 299.98px) {

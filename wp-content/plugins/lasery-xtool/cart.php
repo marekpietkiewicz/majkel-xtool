@@ -296,7 +296,7 @@ function lasery_xtool_render_cart() {
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
 		</form>
 		<?php // One form, so the order includes changed quantities even when the cart was not updated. ?>
-		<form class="order-form-grid" method="post" action="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_order', admin_url( 'admin-post.php' ) ) ); ?>" data-cart-form>
+		<form class="order-form-grid" method="post" action="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_order', admin_url( 'admin-post.php' ) ) ); ?>" data-cart-form<?php echo lasery_xtool_price_format_attributes( $language, $text ); ?>>
 			<?php // The first submit button is the default for Enter: it sends the order (the script makes Enter in a quantity field update the cart). ?>
 			<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
@@ -304,13 +304,13 @@ function lasery_xtool_render_cart() {
 			<?php wp_nonce_field( 'lasery_xtool_order' ); ?>
 			<div class="order-form-trap" aria-hidden="true"><label for="order-website">Website</label><input id="order-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
 			<div class="order-form-steps">
-				<?php // With JavaScript, changes replace the parts marked data-cart-update-part and data-cart-total from the server's new cart page. ?>
+				<?php // With JavaScript, prices follow a typed quantity at once; then the server's new cart page replaces the parts marked data-cart-update-part and data-cart-total. ?>
 				<div class="cart-items">
 					<ul class="cart-lines">
 						<?php foreach ( $lines as $index => $line ) : ?>
 							<?php $title = lasery_xtool_order_product_title( $line['product'], $language ); ?>
 							<?php $link = add_query_arg( 'lang', $language, get_permalink( $line['product'] ) ); ?>
-							<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>" data-cart-line="<?php echo esc_attr( $line['key'] ); ?>">
+							<li class="cart-line<?php echo $line['error'] ? ' cart-line--error' : ''; ?>" data-cart-line="<?php echo esc_attr( $line['key'] ); ?>"<?php echo lasery_xtool_amount_attributes( $line['amount'] ); ?>>
 								<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
 								<div class="cart-line-body">
 									<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></p>
@@ -323,14 +323,14 @@ function lasery_xtool_render_cart() {
 								</div>
 								<div class="cart-line-actions">
 									<label class="visually-hidden" for="cart-quantity-<?php echo esc_attr( $index ); ?>"><?php echo esc_html( $text['quantity'] . ': ' . $title ); ?></label>
-									<?php lasery_xtool_quantity_field( 'cart-quantity-' . $index, 'quantity[' . $line['key'] . ']', $line['quantity'], $text, $title ); ?>
+									<?php lasery_xtool_quantity_field( 'cart-quantity-' . $index, 'quantity[' . $line['key'] . ']', $line['quantity'] ); ?>
 									<button type="submit" form="cart-remove" class="cart-line-remove" name="remove" value="<?php echo esc_attr( $line['key'] ); ?>"><?php echo lasery_xtool_order_icon( 'trash' ); ?><span class="visually-hidden"><?php echo esc_html( $text['remove'] . ': ' . $title ); ?></span></button>
 									<p class="cart-line-total" data-cart-update-part><?php echo esc_html( $line['error'] || ! $line['amount'] ? '' : lasery_xtool_cart_line_value( $line, $line['quantity'], $text, $language ) ); ?></p>
 								</div>
 							</li>
 						<?php endforeach; ?>
 					</ul>
-					<p class="cart-items-total" data-cart-total><span><?php echo esc_html( $text['total'] ); ?></span> <strong><?php echo esc_html( $total ); ?></strong></p>
+					<p class="cart-items-total" data-cart-total><span><?php echo esc_html( $text['total'] ); ?></span> <strong data-cart-sum><?php echo esc_html( $total ); ?></strong></p>
 					<p class="cart-items-actions">
 						<a class="cart-continue" href="<?php echo esc_url( $archive ); ?>"><?php echo lasery_xtool_order_icon( 'chevron-left' ); ?><?php echo esc_html( $text['continue'] ); ?></a>
 						<button type="submit" class="btn btn-secondary btn-sm" formaction="<?php echo esc_url( add_query_arg( 'action', 'lasery_xtool_cart_update', admin_url( 'admin-post.php' ) ) ); ?>" formnovalidate data-cart-update><?php echo esc_html( $text['update'] ); ?></button>
@@ -374,9 +374,9 @@ function lasery_xtool_render_cart() {
 				<h2 id="order-summary-title"><?php echo esc_html( $text['summary'] ); ?></h2>
 				<dl class="order-summary-list" data-cart-total>
 					<dt><?php echo esc_html( $text['items'] ); ?></dt>
-					<dd><?php echo esc_html( sprintf( $text['pieces'], array_sum( array_column( $lines, 'quantity' ) ) ) ); ?></dd>
+					<dd data-cart-pieces><?php echo esc_html( sprintf( $text['pieces'], array_sum( array_column( $lines, 'quantity' ) ) ) ); ?></dd>
 					<dt class="order-summary-total"><?php echo esc_html( $text['total'] ); ?></dt>
-					<dd class="order-summary-price"><?php echo esc_html( $total ); ?></dd>
+					<dd class="order-summary-price" data-cart-sum><?php echo esc_html( $total ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( ! $orderable ); ?> data-cart-send><?php echo esc_html( $text['submit'] ); ?></button>

@@ -64,7 +64,7 @@ function lasery_xtool_gallery_admin_assets( $hook ) {
 		return;
 	}
 	wp_enqueue_media();
-	wp_enqueue_script( 'lasery-xtool-gallery-editor', plugins_url( 'assets/gallery-editor.js', __FILE__ ), array( 'media-views' ), '1.0.0', true );
+	wp_enqueue_script( 'lasery-xtool-gallery-editor', plugins_url( 'assets/gallery-editor.js', __FILE__ ), array( 'media-views' ), (string) filemtime( __DIR__ . '/assets/gallery-editor.js' ), true );
 }
 
 add_action( 'save_post_' . LASERY_XTOOL_PRODUCT_TYPE, 'lasery_xtool_save_manual_gallery' );

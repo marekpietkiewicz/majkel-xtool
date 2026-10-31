@@ -47,19 +47,6 @@
     });
   });
 
-  /* Order form: show the chosen variant and its price in the summary. */
-  document.querySelectorAll('[data-order-form]').forEach((form) => {
-    const variant = form.querySelector('[data-order-summary-variant]');
-    const price = form.querySelector('[data-order-summary-price]');
-    form.addEventListener('change', (event) => {
-      const input = event.target;
-      if (input.name !== 'variant' || input.type !== 'radio') return;
-      const option = input.closest('.variant-option');
-      if (variant && option) variant.textContent = option.querySelector('.variant-option-title').textContent;
-      if (price) price.textContent = input.dataset.price || '';
-    });
-  });
-
   /* Set contents: a larger photo of a part, as a card on hover or keyboard focus, or in a sheet after a tap on touch screens. */
   document.querySelectorAll('[data-set-previews]').forEach((section) => {
     const card = section.querySelector('[data-set-card]');
@@ -171,37 +158,21 @@
     showCartCount();
     window.addEventListener('pageshow', (event) => { if (event.persisted) showCartCount(); });
   }
-  /* Quantity fields: − and + change the number within its limits; screen readers hear the new number. */
-  const quantityStatus = document.createElement('p');
-  quantityStatus.className = 'visually-hidden';
-  quantityStatus.setAttribute('aria-live', 'polite');
-  if (document.querySelector('[data-quantity]')) document.body.append(quantityStatus);
-  const syncQuantity = (field) => {
-    const input = field.querySelector('input');
-    const value = Number(input.value);
-    field.querySelector('[data-step="-1"]').setAttribute('aria-disabled', String(!(value > Number(input.min))));
-    field.querySelector('[data-step="1"]').setAttribute('aria-disabled', String(!(value < Number(input.max))));
-  };
-  // A whole number within the limits ("05" and "1e1" become 5 and 10); otherwise the last saved number.
+  /* Quantities and prices of several pieces. */
+  // A typed quantity from 1 to 100 (leading zeros allowed), or NaN.
+  const quantityOf = (input) => (/^\s*\d{1,3}\s*$/.test(input.value) && Number(input.value) >= 1 && Number(input.value) <= 100 ? Number(input.value) : NaN);
+  // A number out of range becomes the nearest allowed one; anything else, the last saved number.
   const normaliseQuantity = (input) => {
-    const value = Math.round(input.valueAsNumber);
-    input.value = Number.isFinite(value) ? String(Math.min(Number(input.max), Math.max(Number(input.min), value))) : input.dataset.saved || input.defaultValue;
-    syncQuantity(input.closest('[data-quantity]'));
+    const value = /^\s*\d+\s*$/.test(input.value) ? Number(input.value) : NaN;
+    input.value = Number.isFinite(value) ? String(Math.min(100, Math.max(1, value))) : input.dataset.saved || input.defaultValue;
   };
-  document.querySelectorAll('[data-quantity]').forEach(syncQuantity);
-  document.addEventListener('click', (event) => {
-    const step = event.target.closest('[data-quantity] [data-step]');
-    if (!step || step.getAttribute('aria-disabled') === 'true') return;
-    const input = step.closest('[data-quantity]').querySelector('input');
-    input.value = String(Math.min(Number(input.max), Math.max(Number(input.min), Math.round(Number(input.value) || 0) + Number(step.dataset.step))));
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    quantityStatus.textContent = input.value;
-  });
-  document.addEventListener('input', (event) => {
-    const field = event.target.closest('[data-quantity]');
-    if (field) syncQuantity(field);
-  });
-  document.addEventListener('submit', (event) => event.target.querySelectorAll('[data-quantity] input').forEach(normaliseQuantity), true);
+  document.addEventListener('submit', (event) => event.target.querySelectorAll('[data-quantity]').forEach(normaliseQuantity), true);
+  // Cents in the page's language, written as the server writes prices: thousands always grouped ("1 541,75 €"
+  // in Polish too), "€" where a locale writes the code.
+  const formatPrice = (cents, currency, locale) => {
+    const text = new Intl.NumberFormat(locale, { style: 'currency', currency, useGrouping: 'always' }).format(cents / 100);
+    return currency === 'EUR' ? text.replace('EUR', '€') : text;
+  };
 
   /* Cart confirmations show for a moment; the address drops the result, so a reload does not repeat it. */
   const toast = document.querySelector('[data-cart-toast]');
@@ -240,18 +211,126 @@
     cartError.focus();
   }
 
-  /* Cart: changes are saved at once, and prices and totals come from the server's new cart page. */
+  // A cart error from the server's answer replaces the one shown, and gets focus.
+  const showCartError = (page, before) => {
+    document.querySelectorAll('[data-cart-error]').forEach((error) => error.remove());
+    const error = page.querySelector('[data-cart-error]');
+    if (!error) return false;
+    before.before(error);
+    error.tabIndex = -1;
+    error.focus();
+    return true;
+  };
+
+  /* Product page: the chosen variant and the price of the typed quantity in the summary; adding keeps the page. */
+  document.querySelectorAll('[data-order-form]').forEach((form) => {
+    const variant = form.querySelector('[data-order-summary-variant]');
+    const price = form.querySelector('[data-order-summary-price]');
+    const quantity = form.querySelector('[data-quantity]');
+    const showPrice = () => {
+      const count = quantityOf(quantity);
+      const { amount, currency } = price.dataset;
+      if (!amount || Number.isNaN(count)) return;
+      const { locale } = form.dataset;
+      price.textContent = formatPrice(Number(amount) * count, currency, locale);
+      if (count > 1) {
+        const each = document.createElement('small');
+        each.className = 'order-summary-each';
+        each.textContent = form.dataset.each.replace('%s', formatPrice(Number(amount), currency, locale));
+        price.append(each);
+      }
+    };
+    form.addEventListener('change', (event) => {
+      const input = event.target;
+      if (input === quantity) {
+        normaliseQuantity(quantity);
+        showPrice();
+      }
+      if (input.name !== 'variant' || input.type !== 'radio') return;
+      const option = input.closest('.variant-option');
+      if (variant) variant.textContent = option.querySelector('.variant-option-title').textContent;
+      if (input.dataset.amount) {
+        Object.assign(price.dataset, { amount: input.dataset.amount, currency: input.dataset.currency });
+        showPrice();
+      } else {
+        delete price.dataset.amount;
+        price.textContent = option.querySelector('.variant-option-price').textContent;
+      }
+    });
+    quantity.addEventListener('input', showPrice);
+    let adding = false;
+    let native = false;
+    form.addEventListener('submit', async (event) => {
+      if (native) return;
+      event.preventDefault();
+      if (adding) return;
+      adding = true;
+      form.classList.add('is-adding');
+      let response = null;
+      try {
+        response = await fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), credentials: 'same-origin' });
+        if (!response.ok) throw new Error(String(response.status));
+        // The answer is the cart page with a confirmation, or a page with the reason it was not added.
+        const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+        const added = page.querySelector('[data-cart-toast]');
+        if (!showCartError(page, form)) {
+          if (!added) throw new Error('No confirmation');
+          showToast(added.textContent.trim());
+          const cartLink = form.querySelector('[data-cart-link]');
+          if (cartLink) cartLink.classList.add('btn', 'btn-secondary', 'btn-block');
+        }
+        if (cartCount) showCartCount();
+      } catch (error) {
+        // The server may have added the product already, so its answer opens as a page; without one the browser sends the form.
+        if (response) {
+          window.location.assign(response.url);
+        } else {
+          native = true;
+          form.requestSubmit(event.submitter);
+        }
+      } finally {
+        adding = false;
+        form.classList.remove('is-adding');
+      }
+    });
+  });
+
+  /* Cart: prices follow a typed quantity at once, changes are saved without leaving the page, and the server's new cart page confirms them. */
   const cartForm = document.querySelector('[data-cart-form]');
   if (cartForm) {
     const update = cartForm.querySelector('[data-cart-update]');
     const removeForm = document.getElementById('cart-remove');
     const sends = cartForm.querySelectorAll('[data-cart-send]');
-    const quantities = () => cartForm.querySelectorAll('.cart-line [data-quantity] input');
+    const quantities = () => cartForm.querySelectorAll('.cart-line [data-quantity]');
     quantities().forEach((input) => { input.dataset.saved = input.value; });
     let queue = Promise.resolve();
     let pending = 0;
     let timer = 0;
     let native = false;
+    // Line values, the number of pieces and the total (when every line has a price) for the typed quantities.
+    const showPrices = () => {
+      const { locale } = cartForm.dataset;
+      const sums = new Map();
+      let pieces = 0;
+      let priced = true;
+      cartForm.querySelectorAll('[data-cart-line]:not(.is-removing)').forEach((line) => {
+        const input = line.querySelector('[data-quantity]');
+        const typed = quantityOf(input);
+        const count = Number.isNaN(typed) ? Number(input.dataset.saved) : typed;
+        const { amount, currency } = line.dataset;
+        pieces += count;
+        if (!amount) {
+          priced = false;
+          return;
+        }
+        sums.set(currency, (sums.get(currency) || 0) + Number(amount) * count);
+        line.querySelector('.cart-line-total').textContent = formatPrice(Number(amount) * count, currency, locale);
+      });
+      cartForm.querySelectorAll('[data-cart-pieces]').forEach((element) => { element.textContent = cartForm.dataset.pieces.replace('%d', pieces); });
+      if (!priced || !sums.size) return;
+      const total = Array.from(sums, ([currency, cents]) => formatPrice(cents, currency, locale)).join(' + ');
+      cartForm.querySelectorAll('[data-cart-sum]').forEach((element) => { element.textContent = total; });
+    };
     // Lines still in the cart get their new prices; a number changed since it was sent stays as typed.
     const apply = (page, url) => {
       const fresh = new Map(Array.from(page.querySelectorAll('[data-cart-line]'), (line) => [line.dataset.cartLine, line]));
@@ -267,22 +346,26 @@
           // Focus goes to a neighbour's quantity, so a repeated key press cannot remove the next product.
           if (line.contains(focused)) {
             const neighbour = lines.slice(index + 1).concat(lines.slice(0, index).reverse()).find((other) => fresh.has(other.dataset.cartLine));
-            neighbour.querySelector('[data-quantity] input').focus();
+            neighbour.querySelector('[data-quantity]').focus();
           }
           line.remove();
           return;
         }
         line.className = next.className;
+        delete line.dataset.amount;
+        delete line.dataset.currency;
+        Object.assign(line.dataset, next.dataset);
         const parts = next.querySelectorAll('[data-cart-update-part]');
         line.querySelectorAll('[data-cart-update-part]').forEach((part, i) => part.replaceWith(parts[i]));
-        const input = line.querySelector('[data-quantity] input');
-        const saved = next.querySelector('[data-quantity] input').value;
+        const input = line.querySelector('[data-quantity]');
+        const saved = next.querySelector('[data-quantity]').value;
         if (input.value === input.dataset.sent) input.value = saved;
         input.dataset.saved = saved;
-        syncQuantity(input.closest('[data-quantity]'));
       });
       const totals = page.querySelectorAll('[data-cart-total]');
       cartForm.querySelectorAll('[data-cart-total]').forEach((total, i) => total.replaceWith(totals[i]));
+      // Numbers typed while this change was on its way keep their prices.
+      showPrices();
       cartForm.elements.snapshot.value = page.querySelector('[name="snapshot"]').value;
       const freshSends = page.querySelectorAll('[data-cart-send]');
       sends.forEach((button, i) => { button.disabled = freshSends[i].disabled; });
@@ -294,7 +377,6 @@
     // Changes go one after another, so the last response always holds the whole cart.
     const send = (form, submitter) => {
       pending += 1;
-      cartForm.classList.add('is-updating');
       queue = queue.then(async () => {
         try {
           if (native) return;
@@ -316,7 +398,6 @@
           form.requestSubmit(submitter);
         } finally {
           pending -= 1;
-          if (!pending) cartForm.classList.remove('is-updating');
         }
       });
     };
@@ -325,9 +406,10 @@
       timer = 0;
       send(cartForm, update);
     };
-    const isQuantity = (element) => element.matches('.cart-line [data-quantity] input');
+    const isQuantity = (element) => element.matches('.cart-line [data-quantity]');
     cartForm.addEventListener('input', (event) => {
       if (!isQuantity(event.target)) return;
+      showPrices();
       clearTimeout(timer);
       timer = event.target.validity.valid ? setTimeout(flush, 500) : 0;
     });
@@ -335,6 +417,7 @@
     cartForm.addEventListener('change', (event) => {
       if (!isQuantity(event.target) || event.target.validity.valid) return;
       normaliseQuantity(event.target);
+      showPrices();
       flush();
     });
     // Enter in a quantity saves it instead of sending the order.
@@ -342,6 +425,7 @@
       if (event.key !== 'Enter' || !isQuantity(event.target)) return;
       event.preventDefault();
       normaliseQuantity(event.target);
+      showPrices();
       flush();
     });
     let sending = false;
@@ -373,6 +457,7 @@
         const line = event.submitter.closest('.cart-line');
         if (line.classList.contains('is-removing')) return;
         line.classList.add('is-removing');
+        showPrices();
         if (timer) flush();
         send(removeForm, event.submitter);
       });

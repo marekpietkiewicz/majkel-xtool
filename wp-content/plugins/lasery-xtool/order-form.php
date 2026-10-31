@@ -231,7 +231,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Zaktualizuj koszyk',
 			'total' => 'Razem (orientacyjnie)',
 			'items' => 'Produkty',
-			'each' => '%s / szt.', 'pieces' => '%d szt.', 'unit_price' => 'Cena za sztukę', 'line_total' => 'Wartość', 'decrease' => 'Zmniejsz liczbę sztuk', 'increase' => 'Zwiększ liczbę sztuk', 'sent_title' => 'Dziękujemy za zamówienie',
+			'each' => '%s / szt.', 'pieces' => '%d szt.', 'unit_price' => 'Cena za sztukę', 'line_total' => 'Wartość', 'sent_title' => 'Dziękujemy za zamówienie',
 			'view_product' => 'Zobacz produkt', 'close' => 'Zamknij',
 		),
 		'en' => array(
@@ -260,7 +260,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Update cart',
 			'total' => 'Total (estimated)',
 			'items' => 'Products',
-			'each' => '%s each', 'pieces' => '%d pcs', 'unit_price' => 'Unit price', 'line_total' => 'Subtotal', 'decrease' => 'Decrease quantity', 'increase' => 'Increase quantity', 'sent_title' => 'Thank you for your order',
+			'each' => '%s each', 'pieces' => '%d pcs', 'unit_price' => 'Unit price', 'line_total' => 'Subtotal', 'sent_title' => 'Thank you for your order',
 			'view_product' => 'View product', 'close' => 'Close',
 		),
 		'de' => array(
@@ -289,7 +289,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Warenkorb aktualisieren',
 			'total' => 'Summe (unverbindlich)',
 			'items' => 'Produkte',
-			'each' => '%s / Stk.', 'pieces' => '%d Stk.', 'unit_price' => 'Stückpreis', 'line_total' => 'Summe', 'decrease' => 'Anzahl verringern', 'increase' => 'Anzahl erhöhen', 'sent_title' => 'Vielen Dank für Ihre Bestellung',
+			'each' => '%s / Stk.', 'pieces' => '%d Stk.', 'unit_price' => 'Stückpreis', 'line_total' => 'Summe', 'sent_title' => 'Vielen Dank für Ihre Bestellung',
 			'view_product' => 'Produkt ansehen', 'close' => 'Schließen',
 		),
 		'ru' => array(
@@ -318,7 +318,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Обновить корзину',
 			'total' => 'Итого (ориентировочно)',
 			'items' => 'Товары',
-			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Цена за штуку', 'line_total' => 'Сумма', 'decrease' => 'Уменьшить количество', 'increase' => 'Увеличить количество', 'sent_title' => 'Спасибо за заказ',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Цена за штуку', 'line_total' => 'Сумма', 'sent_title' => 'Спасибо за заказ',
 			'view_product' => 'Смотреть товар', 'close' => 'Закрыть',
 		),
 		'uk' => array(
@@ -347,7 +347,7 @@ function lasery_xtool_order_texts( $language ) {
 			'update' => 'Оновити кошик',
 			'total' => 'Разом (орієнтовно)',
 			'items' => 'Товари',
-			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Ціна за штуку', 'line_total' => 'Сума', 'decrease' => 'Зменшити кількість', 'increase' => 'Збільшити кількість', 'sent_title' => 'Дякуємо за замовлення',
+			'each' => '%s / шт.', 'pieces' => '%d шт.', 'unit_price' => 'Ціна за штуку', 'line_total' => 'Сума', 'sent_title' => 'Дякуємо за замовлення',
 			'view_product' => 'Переглянути товар', 'close' => 'Закрити',
 		),
 	);
@@ -469,18 +469,21 @@ function lasery_xtool_order_icon( $name ) {
 }
 
 /**
- * A quantity field (1–100) between − and + buttons, which work with JavaScript; $name_suffix
- * names the product for buttons in lists such as the cart.
+ * A quantity field: a whole number from 1 to 100 (leading zeros allowed), which the browser checks
+ * also without JavaScript. A text field, so the mouse wheel cannot change it by accident.
  */
-function lasery_xtool_quantity_field( $id, $name, $quantity, $text, $name_suffix = '' ) {
-	$suffix = '' !== $name_suffix ? ': ' . $name_suffix : '';
-	?>
-	<span class="quantity" data-quantity>
-		<button type="button" class="quantity-step" data-step="-1" aria-label="<?php echo esc_attr( $text['decrease'] . $suffix ); ?>" aria-controls="<?php echo esc_attr( $id ); ?>" aria-disabled="<?php echo $quantity <= 1 ? 'true' : 'false'; ?>"><?php echo lasery_xtool_order_icon( 'minus' ); ?></button>
-		<input id="<?php echo esc_attr( $id ); ?>" name="<?php echo esc_attr( $name ); ?>" type="number" inputmode="numeric" min="1" max="100" value="<?php echo esc_attr( $quantity ); ?>" required>
-		<button type="button" class="quantity-step" data-step="1" aria-label="<?php echo esc_attr( $text['increase'] . $suffix ); ?>" aria-controls="<?php echo esc_attr( $id ); ?>" aria-disabled="<?php echo $quantity >= 100 ? 'true' : 'false'; ?>"><?php echo lasery_xtool_order_icon( 'plus' ); ?></button>
-	</span>
-	<?php
+function lasery_xtool_quantity_field( $id, $name, $quantity ) {
+	printf( '<input class="quantity-input" id="%s" name="%s" type="text" inputmode="numeric" pattern="0*(?:[1-9][0-9]?|100)" maxlength="3" autocomplete="off" value="%d" required data-quantity>', esc_attr( $id ), esc_attr( $name ), (int) $quantity );
+}
+
+/** Prices as cents with their currency, which the script multiplies by the typed quantity. */
+function lasery_xtool_amount_attributes( $amount ) {
+	return $amount ? sprintf( ' data-amount="%d" data-currency="%s"', lasery_xtool_cents( $amount[0] ), esc_attr( $amount[1] ) ) : '';
+}
+
+/** The locale and texts with which the script formats prices of several pieces. */
+function lasery_xtool_price_format_attributes( $language, $text ) {
+	return sprintf( ' data-locale="%s" data-each="%s" data-pieces="%s"', esc_attr( str_replace( '_', '-', lasery_xtool_icu_locale( $language ) ) ), esc_attr( $text['each'] ), esc_attr( $text['pieces'] ) );
 }
 
 /** Variant and quantity on the product page; the customer details are entered in the cart. */
@@ -505,9 +508,11 @@ function lasery_xtool_render_order_form( $post_id ) {
 			<p><?php echo esc_html( $text['intro'] ); ?></p>
 		</header>
 		<?php if ( isset( $_GET['cart'] ) && 'unavailable' === $_GET['cart'] ) : ?>
-			<p class="order-form-notice order-form-notice--error" role="status"><?php echo esc_html( $text['cart_unavailable'] ); ?></p>
+			<p class="order-form-notice order-form-notice--error" role="alert" data-cart-error><?php echo esc_html( $text['cart_unavailable'] ); ?></p>
 		<?php endif; ?>
-		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-order-form>
+		<?php // With JavaScript the product is added without leaving the page; the confirmation shows here. ?>
+		<p class="cart-toast" role="status" data-cart-toast></p>
+		<form class="order-form-grid" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" data-order-form<?php echo lasery_xtool_price_format_attributes( $language, $text ); ?>>
 			<input type="hidden" name="action" value="lasery_xtool_cart_add">
 			<input type="hidden" name="product_id" value="<?php echo esc_attr( $post_id ); ?>">
 			<input type="hidden" name="language" value="<?php echo esc_attr( $language ); ?>">
@@ -522,14 +527,13 @@ function lasery_xtool_render_order_form( $post_id ) {
 						<div class="variant-options">
 							<?php foreach ( $available_variants as $variant ) : ?>
 								<?php $amount = lasery_xtool_variant_amount( $post_id, $variant ); ?>
-								<?php $variant_price = $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $text['no_price']; ?>
 								<?php $set = lasery_xtool_set_contents( $post_id, $variant ); ?>
 								<?php $set_id = 'variant-set-' . $variant['id']; ?>
 								<div class="variant-option">
 									<label class="variant-option-choice">
-										<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required data-price="<?php echo esc_attr( $variant_price ); ?>" <?php checked( $selected === $variant ); ?><?php if ( $set ) : ?> aria-describedby="<?php echo esc_attr( $set_id ); ?>"<?php endif; ?>>
+										<input type="radio" name="variant" value="<?php echo esc_attr( $variant['id'] ); ?>" required<?php echo lasery_xtool_amount_attributes( $amount ); ?> <?php checked( $selected === $variant ); ?><?php if ( $set ) : ?> aria-describedby="<?php echo esc_attr( $set_id ); ?>"<?php endif; ?>>
 										<span class="variant-option-title"><?php echo esc_html( lasery_xtool_variant_label( $variant ) ); ?></span>
-										<span class="variant-option-price"><?php echo esc_html( $variant_price ); ?></span>
+										<span class="variant-option-price"><?php echo esc_html( $amount ? lasery_xtool_format_price( $amount[0], $amount[1], $language ) : $text['no_price'] ); ?></span>
 										<?php if ( $set ) : ?><span class="variant-option-more" aria-hidden="true"><?php echo esc_html( $text['set_more'] ); ?></span><?php endif; ?>
 									</label>
 									<?php if ( $set ) : ?>
@@ -564,7 +568,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<?php elseif ( $uses_source_variants ) : ?>
 						<p class="order-form-notice order-form-notice--error"><?php echo esc_html( $variants && ! $fresh ? $text['stale'] : $text['unavailable'] ); ?></p>
 					<?php endif; ?>
-					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><?php lasery_xtool_quantity_field( 'order-quantity', 'quantity', 1, $text ); ?></p>
+					<p class="field field-quantity"><label for="order-quantity"><?php echo esc_html( $text['quantity'] ); ?></label><?php lasery_xtool_quantity_field( 'order-quantity', 'quantity', 1 ); ?></p>
 				</fieldset>
 			</div>
 			<aside class="order-summary" aria-labelledby="order-summary-title">
@@ -579,11 +583,13 @@ function lasery_xtool_render_order_form( $post_id ) {
 						<dd data-order-summary-variant><?php echo esc_html( $selected ? lasery_xtool_variant_label( $selected ) : $text['summary_empty'] ); ?></dd>
 					<?php endif; ?>
 					<dt><?php echo esc_html( $text['price'] ); ?></dt>
-					<dd class="order-summary-price" data-order-summary-price><?php echo esc_html( $selected_amount ? lasery_xtool_format_price( $selected_amount[0], $selected_amount[1], $language ) : ( $available_variants ? '—' : $text['no_price'] ) ); ?></dd>
+					<?php // The price of the chosen quantity; with several pieces the script adds the price of one. ?>
+					<dd class="order-summary-price" data-order-summary-price<?php echo lasery_xtool_amount_attributes( $selected_amount ); ?>><?php echo esc_html( $selected_amount ? lasery_xtool_format_price( $selected_amount[0], $selected_amount[1], $language ) : ( $available_variants ? '—' : $text['no_price'] ) ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( $uses_source_variants && ! $available_variants ); ?>><?php echo esc_html( $text['add'] ); ?></button>
-				<?php if ( '' !== $cart ) : ?><p class="order-summary-note"><a href="<?php echo esc_url( $cart ); ?>"><?php echo esc_html( $text['go_to_cart'] ); ?></a></p><?php endif; ?>
+				<?php // After adding, the script turns the link into a button: the next step. ?>
+				<?php if ( '' !== $cart ) : ?><p class="order-summary-note"><a href="<?php echo esc_url( $cart ); ?>" data-cart-link><?php echo esc_html( $text['go_to_cart'] ); ?></a></p><?php endif; ?>
 				<p class="order-summary-note"><?php echo esc_html( $text['next_steps'] ); ?></p>
 			</aside>
 		</form>
