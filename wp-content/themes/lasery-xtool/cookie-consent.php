@@ -63,8 +63,8 @@ function lasery_xtool_gate_external_content($content) {
 }
 add_filter('the_content', 'lasery_xtool_gate_external_content', 100);
 
-function lasery_xtool_consent_texts() {
-    $language = function_exists('lasery_xtool_interface_language') ? lasery_xtool_interface_language() : 'pl';
+/** The built-in privacy banner texts of a language (Polish for unknown languages). */
+function lasery_xtool_consent_default_texts($language) {
     $texts = [
         'pl' => [
             'title' => 'Ustawienia prywatności',
@@ -103,6 +103,13 @@ function lasery_xtool_consent_texts() {
         ],
     ];
     return isset($texts[$language]) ? $texts[$language] : $texts['pl'];
+}
+
+/** Privacy banner texts of the interface language, with the administrator's changes (plugin: Teksty strony). */
+function lasery_xtool_consent_texts() {
+    $language = function_exists('lasery_xtool_interface_language') ? lasery_xtool_interface_language() : 'pl';
+    $texts = lasery_xtool_consent_default_texts($language);
+    return function_exists('lasery_xtool_apply_text_overrides') ? lasery_xtool_apply_text_overrides('consent', $language, $texts) : $texts;
 }
 
 function lasery_xtool_render_consent_banner() {

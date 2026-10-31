@@ -203,7 +203,8 @@ function lasery_xtool_order_product_title( $post_id, $language ) {
 }
 
 /** Texts are kept together until the site has a configured multilingual plugin. */
-function lasery_xtool_order_texts( $language ) {
+/** The built-in order, cart and email texts of a language (Polish for unknown languages), with placeholders. */
+function lasery_xtool_order_default_texts( $language ) {
 	$texts = array(
 		'pl' => array(
 			'title' => 'Zamów produkt', 'intro' => 'Wybierz wariant i liczbę sztuk, a potem dodaj produkt do koszyka. W koszyku podasz dane do zamówienia.',
@@ -351,7 +352,12 @@ function lasery_xtool_order_texts( $language ) {
 			'view_product' => 'Переглянути товар', 'close' => 'Закрити',
 		),
 	);
-	$text = isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
+	return isset( $texts[ $language ] ) ? $texts[ $language ] : $texts['pl'];
+}
+
+/** Order, cart and email texts as shown: built-in texts with the administrator's changes (Teksty strony). */
+function lasery_xtool_order_texts( $language ) {
+	$text = lasery_xtool_apply_text_overrides( 'order', $language, lasery_xtool_order_default_texts( $language ) );
 	foreach ( array( 'failed', 'sent_no_receipt' ) as $key ) {
 		$text[ $key ] = str_replace( 'Michal@laseryxtool.pl', lasery_xtool_order_contact_email(), $text[ $key ] );
 	}

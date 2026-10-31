@@ -123,6 +123,7 @@ require_once __DIR__ . '/image-sync.php';
 require_once __DIR__ . '/featured-products.php';
 require_once __DIR__ . '/product-translations.php';
 require_once __DIR__ . '/privacy-settings.php';
+require_once __DIR__ . '/site-texts.php';
 require_once __DIR__ . '/gallery-editor.php';
 require_once __DIR__ . '/blog.php';
 
