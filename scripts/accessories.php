@@ -1,5 +1,8 @@
 <?php
 /** Accessories of the site's machines: compatibility and translated names and features (from the xTool product data). */
+if ( ! function_exists( 'lasery_xtool_reviewed_english_features' ) ) {
+    require_once __DIR__ . '/../wp-content/plugins/lasery-xtool/reviewed-product-content.php';
+}
 return [
     // P3
     '9089650622677' => [
@@ -483,17 +486,18 @@ return [
         ],
     ],
     '8309744009429' => [
-        'fits' => [ '8169201631445', '9163846877397', '9187692970197', '8523126931669' ],
-        'titles' => [ 'pl' => 'Przystawka obrotowa xTool RA2 Pro do S1, F2, F2 Ultra UV i F1 Ultra', 'de' => 'xTool RA2 Pro Rotationsaufsatz für S1, F2, F2 Ultra UV und F1 Ultra', 'ru' => 'Ротационная насадка xTool RA2 Pro для S1, F2, F2 Ultra UV и F1 Ultra', 'uk' => 'Ротаційна насадка xTool RA2 Pro для S1, F2, F2 Ultra UV і F1 Ultra' ],
+        'fits' => [ '8169201631445', '9163846877397', '9009695293653', '9187692970197', '8523126931669' ],
+        'titles' => [ 'pl' => 'Przystawka obrotowa xTool RA2 Pro do S1, F2, F2 Ultra, F2 Ultra UV i F1 Ultra', 'de' => 'xTool RA2 Pro Rotationsaufsatz für S1, F2, F2 Ultra, F2 Ultra UV und F1 Ultra', 'ru' => 'Ротационная насадка xTool RA2 Pro для S1, F2, F2 Ultra, F2 Ultra UV и F1 Ultra', 'uk' => 'Ротаційна насадка xTool RA2 Pro для S1, F2, F2 Ultra, F2 Ultra UV і F1 Ultra' ],
         'features' => [
-            'pl' => [ 'Przystawka 4 w 1: tryb rolkowy, uchwyt szczękowy, kula i pierścionki.', 'Zgodna z xTool S1, F2, F2 Ultra UV i F1 Ultra.', 'Wariant RA2 Pro Plus zawiera RA2 Pro i zestaw akcesoriów, który rozszerza zastosowania, ułatwia ustawienie ostrości i pasuje do różnych blatów.' ],
-            'de' => [ '4-in-1-Rotationsaufsatz: Rollen-, Futter-, Kugel- und Ringmodus.', 'Kompatibel mit xTool S1, F2, F2 Ultra UV und F1 Ultra.', 'RA2 Pro Plus enthält RA2 Pro und das Zubehörset, das weitere Anwendungen, optimale Fokusausrichtung und verschiedene Tischplatten ermöglicht.' ],
-            'ru' => [ 'Насадка 4 в 1: роликовый режим, патрон, шар и кольца.', 'Совместима с xTool S1, F2, F2 Ultra UV и F1 Ultra.', 'Вариант RA2 Pro Plus включает RA2 Pro и комплект аксессуаров, который расширяет сценарии работы, помогает точно выставить фокус и подходит к разным столам.' ],
-            'uk' => [ 'Насадка 4 в 1: роликовий режим, патрон, куля та каблучки.', 'Сумісна з xTool S1, F2, F2 Ultra UV і F1 Ultra.', 'Варіант RA2 Pro Plus містить RA2 Pro і комплект аксесуарів, який розширює сценарії роботи, допомагає точно виставити фокус і підходить до різних столів.' ],
+            'en' => lasery_xtool_reviewed_english_features( '8309744009429' ),
+            'pl' => [ 'Przystawka 4 w 1: tryb rolkowy, uchwyt szczękowy, kula i pierścionki.', 'Zgodna z xTool S1, F2, F2 Ultra, F2 Ultra UV i F1 Ultra. Przy F2 Ultra sprawdź przewód; niektóre zestawy wymagają zgodnego przewodu dokupionego osobno.', 'Wariant RA2 Pro Plus zawiera RA2 Pro i zestaw akcesoriów, który rozszerza zastosowania, ułatwia ustawienie ostrości i pasuje do różnych blatów.' ],
+            'de' => [ '4-in-1-Rotationsaufsatz: Rollen-, Futter-, Kugel- und Ringmodus.', 'Kompatibel mit xTool S1, F2, F2 Ultra, F2 Ultra UV und F1 Ultra. Prüfen Sie das Kabel für den F2 Ultra; bei manchen Sets ist ein passendes Kabel separat nötig.', 'RA2 Pro Plus enthält RA2 Pro und das Zubehörset, das weitere Anwendungen, optimale Fokusausrichtung und verschiedene Tischplatten ermöglicht.' ],
+            'ru' => [ 'Насадка 4 в 1: роликовый режим, патрон, шар и кольца.', 'Совместима с xTool S1, F2, F2 Ultra, F2 Ultra UV и F1 Ultra. Для F2 Ultra проверьте кабель: к некоторым комплектам совместимый кабель нужно приобрести отдельно.', 'Вариант RA2 Pro Plus включает RA2 Pro и комплект аксессуаров, который расширяет сценарии работы, помогает точно выставить фокус и подходит к разным столам.' ],
+            'uk' => [ 'Насадка 4 в 1: роликовий режим, патрон, куля та каблучки.', 'Сумісна з xTool S1, F2, F2 Ultra, F2 Ultra UV і F1 Ultra. Для F2 Ultra перевірте кабель: до деяких комплектів сумісний кабель потрібно придбати окремо.', 'Варіант RA2 Pro Plus містить RA2 Pro і комплект аксесуарів, який розширює сценарії роботи, допомагає точно виставити фокус і підходить до різних столів.' ],
         ],
     ],
     '8233870033109' => [
-        'fits' => [ '8169201631445', '9163846877397', '9187692970197', '8523126931669' ],
+        'fits' => [ '8169201631445', '9163846877397', '9009695293653', '9187692970197', '8523126931669' ],
         'titles' => [ 'pl' => 'Zestaw akcesoriów do przystawki xTool RA2 Pro', 'de' => 'Zubehörset für den xTool RA2 Pro Rotationsaufsatz', 'ru' => 'Комплект аксессуаров для ротационной насадки xTool RA2 Pro', 'uk' => 'Комплект аксесуарів для ротаційної насадки xTool RA2 Pro' ],
         'features' => [
             'pl' => [ 'Pasuje do każdej przystawki obrotowej xTool RA2 Pro.', 'Rozszerza zastosowania przystawki, ułatwia ustawienie ostrości i pasuje do różnych blatów roboczych.' ],
@@ -506,10 +510,11 @@ return [
         'fits' => [ '15473430692053', '15452856942805', '8169201631445', '9009695293653', '9187692970197', '8523126931669' ],
         'titles' => [ 'pl' => 'Automatyczny zestaw gaśniczy xTool Fire Safety Set / Set 2', 'de' => 'xTool Fire Safety Set / Set 2 mit automatischer Feuerlöschung', 'ru' => 'Автоматическая система пожаротушения xTool Fire Safety Set / Set 2', 'uk' => 'Автоматична система пожежогасіння xTool Fire Safety Set / Set 2' ],
         'features' => [
-            'pl' => [ 'Komunikuje się z laserem i automatycznie gasi ogień.', 'W razie potrzeby uruchomisz gaszenie ręcznie jednym przyciskiem.', 'Wskaźniki poziomu gazu, zablokowania silnika i stanu pracy.', 'Umożliwia wielokrotne wyzwolenie i resetuje się automatycznie po każdym.', 'Fire Safety Set 2 pasuje do X1 i M2, a Fire Safety Set do M2, S1, F2 Ultra, F2 Ultra UV i F1 Ultra.' ],
-            'de' => [ 'Kommuniziert mit dem Laser und löscht Brände automatisch.', 'Bei Bedarf manuelle Auslösung per Knopfdruck.', 'Anzeigen für Gasstand, Motorblockade und Betriebsstatus.', 'Mehrfach auslösbar, setzt sich nach jeder Auslösung automatisch zurück.', 'Fire Safety Set 2 passt zu X1 und M2, Fire Safety Set zu M2, S1, F2 Ultra, F2 Ultra UV und F1 Ultra.' ],
-            'ru' => [ 'Связывается с лазером и автоматически тушит возгорание.', 'При необходимости тушение запускается вручную одной кнопкой.', 'Индикаторы уровня газа, заклинивания двигателя и состояния работы.', 'Допускает многократное срабатывание и автоматически сбрасывается после каждого.', 'Fire Safety Set 2 подходит для X1 и M2, а Fire Safety Set — для M2, S1, F2 Ultra, F2 Ultra UV и F1 Ultra.' ],
-            'uk' => [ 'Зв’язується з лазером і автоматично гасить займання.', 'За потреби гасіння запускається вручну однією кнопкою.', 'Індикатори рівня газу, заклинювання двигуна та стану роботи.', 'Допускає багаторазове спрацювання й автоматично скидається після кожного.', 'Fire Safety Set 2 підходить для X1 і M2, а Fire Safety Set — для M2, S1, F2 Ultra, F2 Ultra UV і F1 Ultra.' ],
+            'en' => lasery_xtool_reviewed_english_features( '7954661376213' ),
+            'pl' => [ 'Współpracuje z laserem i może automatycznie uruchomić gaszenie.', 'W razie potrzeby uruchomisz gaszenie ręcznie jednym przyciskiem.', 'Wskaźniki poziomu gazu, zablokowania silnika i stanu pracy.', 'Po uruchomieniu sprawdź butle CO₂ i wymień je zgodnie z instrukcją swojego wariantu. Zestaw działa w zamkniętej przestrzeni roboczej, nie ugasi każdego pożaru i nie zastępuje nadzoru ani gaśnicy. W przypadku Fire Safety Set pierwszej generacji z M2 i xTool Inline Duct Fan lub xTool Smoke Purifier potrzebny jest dodatkowy smart switch.', 'Fire Safety Set 2 pasuje do X1 i M2, a Fire Safety Set do M2, S1, F2 Ultra, F2 Ultra UV i F1 Ultra.' ],
+            'de' => [ 'Kommuniziert mit dem Laser und kann die Löschung automatisch auslösen.', 'Bei Bedarf manuelle Auslösung per Knopfdruck.', 'Anzeigen für Gasstand, Motorblockade und Betriebsstatus.', 'Prüfen und ersetzen Sie nach einer Auslösung die CO₂-Flaschen gemäß der Anleitung Ihrer Variante. Das Set funktioniert nur im geschlossenen Arbeitsraum, löscht nicht jeden Brand und ersetzt weder Aufsicht noch Feuerlöscher. Beim Fire Safety Set der ersten Generation mit M2 und xTool Inline Duct Fan oder xTool Smoke Purifier ist ein zusätzlicher Smart Switch erforderlich.', 'Fire Safety Set 2 passt zu X1 und M2, Fire Safety Set zu M2, S1, F2 Ultra, F2 Ultra UV und F1 Ultra.' ],
+            'ru' => [ 'Связывается с лазером и может автоматически запустить тушение.', 'При необходимости тушение запускается вручную одной кнопкой.', 'Индикаторы уровня газа, заклинивания двигателя и состояния работы.', 'После срабатывания проверьте и замените баллоны CO₂ согласно инструкции вашей версии. Комплект работает в закрытом рабочем пространстве, не тушит любой пожар и не заменяет наблюдение и огнетушитель. Для Fire Safety Set первого поколения с M2 и xTool Inline Duct Fan или xTool Smoke Purifier необходим отдельный smart switch.', 'Fire Safety Set 2 подходит для X1 и M2, а Fire Safety Set — для M2, S1, F2 Ultra, F2 Ultra UV и F1 Ultra.' ],
+            'uk' => [ 'Зв’язується з лазером і може автоматично запустити гасіння.', 'За потреби гасіння запускається вручну однією кнопкою.', 'Індикатори рівня газу, заклинювання двигуна та стану роботи.', 'Після спрацювання перевірте й замініть балони CO₂ згідно з інструкцією вашої версії. Комплект працює в закритому робочому просторі, не гасить будь-яку пожежу й не замінює нагляд і вогнегасник. Для Fire Safety Set першого покоління з M2 та xTool Inline Duct Fan або xTool Smoke Purifier потрібен окремий smart switch.', 'Fire Safety Set 2 підходить для X1 і M2, а Fire Safety Set — для M2, S1, F2 Ultra, F2 Ultra UV і F1 Ultra.' ],
         ],
     ],
     '8032675234005' => [

@@ -96,13 +96,26 @@ foreach ( $prepared as $id => $product ) {
         WP_CLI::warning( 'Product ' . $id . ' already exists; skipped.' );
         continue;
     }
-    $post_id = wp_insert_post( wp_slash( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'draft', 'post_title' => $product['title'], 'post_content' => $product['content'] ] ), true );
+    $english = null;
+    if ( isset( $accessories[ $id ]['features']['en'] ) ) {
+        $items = $accessories[ $id ]['features']['en'];
+        $english = wp_kses_post( '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>' );
+    }
+    $content = lasery_xtool_initial_product_content( $product );
+    $post_id = wp_insert_post( wp_slash( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'draft', 'post_title' => $product['title'], 'post_content' => $content ] ), true );
     if ( is_wp_error( $post_id ) || ! $post_id ) {
         WP_CLI::error( 'Could not create product ' . $id );
     }
     if ( ! add_post_meta( $post_id, LASERY_XTOOL_SOURCE_ID, (string) $id, true ) || ! lasery_xtool_save_source_data( $post_id, $product ) ) {
         wp_delete_post( $post_id, true );
         WP_CLI::error( 'Could not save source data for ' . $id );
+    }
+    // Save a reviewed English description while this product is new, before anyone can edit it.
+    if ( null !== $english ) {
+        if ( ! add_post_meta( $post_id, '_lasery_description_en', wp_slash( $english ), true ) ) {
+            wp_delete_post( $post_id, true );
+            WP_CLI::error( 'Could not save English description for ' . $id );
+        }
     }
     $published = wp_update_post( [ 'ID' => $post_id, 'post_status' => 'publish' ], true );
     if ( is_wp_error( $published ) || ! $published || get_post_status( $post_id ) !== 'publish' ) {
