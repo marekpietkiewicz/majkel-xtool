@@ -39,16 +39,20 @@ function lasery_xtool_product_description( $post_id, $language ) {
 
 /** HTML as one line of plain text, with entities decoded. */
 function lasery_xtool_plain_text( $html ) {
-	// Keep words from adjacent elements apart before removing the tags.
+	// Keep words from adjacent elements apart before removing the tags; no-break spaces count as spaces.
 	$text = wp_strip_all_tags( str_replace( '<', ' <', (string) $html ) );
-	return trim( preg_replace( '/\s+/u', ' ', html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+	return trim( preg_replace( '/[\s\x{00A0}\x{202F}]+/u', ' ', html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
 }
 
-/** Return the first point of the description as plain text for cards and previews. */
+/** Return the first point of the description with text, or the whole text, as plain text for cards and previews. */
 function lasery_xtool_product_summary( $post_id, $language ) {
 	$html = lasery_xtool_product_description( $post_id, $language );
-	if ( preg_match( '~<(li|p)\b[^>]*>(.*?)</\1>~is', $html, $match ) ) {
-		$html = $match[2];
+	preg_match_all( '~<(li|p)\b[^>]*>(.*?)</\1>~is', $html, $matches );
+	foreach ( $matches[2] as $item ) {
+		$text = lasery_xtool_plain_text( $item );
+		if ( '' !== $text ) {
+			return $text;
+		}
 	}
 	return lasery_xtool_plain_text( $html );
 }

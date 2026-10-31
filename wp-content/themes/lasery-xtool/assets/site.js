@@ -170,6 +170,18 @@
     input.value = Number.isFinite(value) ? String(Math.min(100, Math.max(1, value))) : input.dataset.saved || input.defaultValue;
   };
   document.addEventListener('submit', (event) => event.target.querySelectorAll('[data-quantity]').forEach(normaliseQuantity), true);
+  // Quantity fields take digits only: other typed characters are refused, and so is a pasted decimal ("1.5");
+  // other pasted characters ("12 szt.") are dropped before other handlers see the value.
+  document.addEventListener('beforeinput', (event) => {
+    if (!event.target.matches('[data-quantity]')) return;
+    const text = event.data || (event.dataTransfer ? event.dataTransfer.getData('text/plain') : '');
+    if ((event.inputType === 'insertText' && /\D/.test(text)) || /\d[.,]\d/.test(text)) event.preventDefault();
+  });
+  document.addEventListener('input', (event) => {
+    const input = event.target;
+    if (!input.matches('[data-quantity]') || !/\D/.test(input.value)) return;
+    input.value = input.value.replace(/\D/g, '');
+  }, true);
   // Cents in the page's language, written as the server writes prices: thousands always grouped ("1 541,75 €"
   // in Polish too), "€" where a locale writes the code.
   const formatPrice = (cents, currency, locale) => {
@@ -207,7 +219,7 @@
   if (toast) {
     const message = toast.textContent.trim();
     if (message) showToast(message);
-    if (/^(?:added|updated|removed)$/.test(new URL(window.location.href).searchParams.get('cart') || '')) forgetCartResult();
+    if (/^(?:added|limit|updated|removed)$/.test(new URL(window.location.href).searchParams.get('cart') || '')) forgetCartResult();
   }
   // Errors stay; focus goes to them instead of the top of the page.
   const cartError = document.querySelector('[data-cart-error]');

@@ -37,8 +37,13 @@ add_action('save_post', 'lasery_xtool_search_changed');
 add_action('deleted_post', 'lasery_xtool_search_changed');
 function lasery_xtool_search_changed($post_id) {
     if (in_array(get_post_type($post_id), ['lasery_product', 'post'], true)) {
-        update_option('lasery_xtool_search_generation', (int) get_option('lasery_xtool_search_generation', 0) + 1, false);
+        lasery_xtool_search_refresh();
     }
+}
+
+/** Build the search index again on its next request (products, articles or texts changed). */
+function lasery_xtool_search_refresh() {
+    update_option('lasery_xtool_search_generation', (int) get_option('lasery_xtool_search_generation', 0) + 1, false);
 }
 
 add_action('rest_api_init', function () {

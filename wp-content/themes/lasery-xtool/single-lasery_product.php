@@ -107,7 +107,8 @@
                 </div>
             </div>
 
-            <?php if (trim(wp_strip_all_tags($description)) !== '') : ?>
+            <?php // A description of empty paragraphs (e.g. "&nbsp;") gets no section. ?>
+            <?php if ((function_exists('lasery_xtool_plain_text') ? lasery_xtool_plain_text($description) : trim(wp_strip_all_tags($description))) !== '') : ?>
                 <section class="product-section" aria-labelledby="product-features-heading">
                     <h2 id="product-features-heading" class="section-title section-title--sm"><?php esc_html_e('Najważniejsze cechy', 'lasery-xtool'); ?></h2>
                     <div class="prose product-description"><?php echo lasery_xtool_keep_together_html(apply_filters('the_content', wp_kses_post($description))); ?></div>

@@ -63,7 +63,7 @@ $email = lasery_xtool_contact_email();
         <button type="button" class="search-close" data-search-close><span aria-hidden="true">Esc</span><span class="visually-hidden"><?php esc_html_e('Zamknij', 'lasery-xtool'); ?></span></button>
     </form>
     <p class="visually-hidden" role="status" data-search-status></p>
-    <div class="search-results" id="search-results" data-search-results></div>
+    <div class="search-dialog-results" id="search-results" data-search-results></div>
 </dialog>
 <?php wp_footer(); ?>
 </body>

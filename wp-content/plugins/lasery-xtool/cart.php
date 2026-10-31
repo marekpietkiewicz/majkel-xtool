@@ -127,8 +127,9 @@ function lasery_xtool_format_cents( $cents, $currency, $language ) {
 	return lasery_xtool_format_price( number_format( $cents / 100, 2, '.', '' ), $currency, $language );
 }
 
+/** A variant's name for visitors, or '' for xTool's "Default Title" (the only variant of a product without options). */
 function lasery_xtool_variant_label( $variant ) {
-	return $variant ? str_replace( ' / ', ' · ', sanitize_text_field( html_entity_decode( $variant['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) : '';
+	return $variant && 'Default Title' !== $variant['title'] ? str_replace( ' / ', ' · ', sanitize_text_field( html_entity_decode( $variant['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) : '';
 }
 
 /** The price of $quantity pieces of a line, or the "to be confirmed" text. */
@@ -172,8 +173,11 @@ function lasery_xtool_cart_add() {
 		exit;
 	}
 	$items = lasery_xtool_cart_items();
+	// A line holds at most 100 pieces; the customer is told when the addition reached that limit.
+	$limited = false;
 	foreach ( $items as $index => $item ) {
 		if ( $item[0] === $post_id && $item[1] === $variant ) {
+			$limited = $item[2] + $quantity > 100;
 			$items[ $index ][2] = min( 100, $item[2] + $quantity );
 			$quantity = 0;
 		}
@@ -185,7 +189,7 @@ function lasery_xtool_cart_add() {
 		$items[] = array( $post_id, $variant, $quantity );
 	}
 	lasery_xtool_cart_save( $items );
-	lasery_xtool_cart_redirect( $language, array( 'cart' => 'added' ) );
+	lasery_xtool_cart_redirect( $language, array( 'cart' => $limited ? 'limit' : 'added' ) );
 }
 
 /** A posted quantity from $min to 100 as a whole number (leading zeros allowed), or null. */
@@ -263,7 +267,7 @@ function lasery_xtool_render_cart() {
 	$orderable = $lines && ! array_filter( array_column( $lines, 'error' ) );
 	$result = isset( $_GET['cart'] ) && is_string( $_GET['cart'] ) ? sanitize_key( wp_unslash( $_GET['cart'] ) ) : '';
 	// Confirmations of cart changes pass by themselves (a toast); errors stay on the page.
-	$toast = in_array( $result, array( 'added', 'updated', 'removed' ), true ) ? $text[ 'cart_' . $result ] : '';
+	$toast = in_array( $result, array( 'added', 'limit', 'updated', 'removed' ), true ) ? $text[ 'cart_' . $result ] : '';
 	$error = in_array( $result, array( 'full', 'failed', 'invalid', 'busy', 'changed' ), true ) ? $text[ 'cart_' . $result ] ?? $text[ $result ] : '';
 	$sent = in_array( $result, array( 'sent', 'sent_no_receipt' ), true ) ? $text[ $result ] : '';
 	$archive = get_post_type_archive_link( LASERY_XTOOL_PRODUCT_TYPE );
@@ -314,7 +318,8 @@ function lasery_xtool_render_cart() {
 								<a class="cart-line-media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"><?php echo get_the_post_thumbnail( $line['product'], 'thumbnail', array( 'alt' => '', 'loading' => 'lazy' ) ); ?></a>
 								<div class="cart-line-body">
 									<p class="cart-line-title"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></p>
-									<?php if ( $line['variant'] ) : ?><p class="cart-line-variant"><?php echo esc_html( lasery_xtool_variant_label( $line['variant'] ) ); ?></p><?php endif; ?>
+									<?php $variant_label = lasery_xtool_variant_label( $line['variant'] ); ?>
+									<?php if ( '' !== $variant_label ) : ?><p class="cart-line-variant"><?php echo esc_html( $variant_label ); ?></p><?php endif; ?>
 									<?php if ( $line['error'] ) : ?>
 										<p class="cart-line-error" data-cart-update-part><?php echo esc_html( $text[ 'cart_' . $line['error'] ] ); ?></p>
 									<?php else : ?>
@@ -456,11 +461,15 @@ function lasery_xtool_cart_email_rows( $lines, $text, $language, $owner ) {
 		if ( $owner && $source !== lasery_xtool_order_product_title( $line['product'], $language ) ) {
 			$details[] = 'Nazwa w xTool: ' . $source;
 		}
-		if ( $line['variant'] ) {
-			$details[] = $text['variant'] . ': ' . lasery_xtool_variant_label( $line['variant'] ) . ( $owner ? ' (ID ' . $line['variant']['id'] . ')' : '' );
-			if ( $owner && ! empty( $line['variant']['sku'] ) ) {
+		$variant_label = lasery_xtool_variant_label( $line['variant'] );
+		// The shop owner always gets the variant ID and SKU to order it; the customer only a named variant.
+		if ( $line['variant'] && $owner ) {
+			$details[] = $text['variant'] . ': ' . ltrim( $variant_label . ' (ID ' . $line['variant']['id'] . ')' );
+			if ( ! empty( $line['variant']['sku'] ) ) {
 				$details[] = 'SKU: ' . $line['variant']['sku'];
 			}
+		} elseif ( '' !== $variant_label ) {
+			$details[] = $text['variant'] . ': ' . $variant_label;
 		}
 		$details[] = $text['quantity'] . ': ' . $line['quantity'];
 		$details[] = $text['unit_price'] . ': ' . lasery_xtool_cart_line_value( $line, 1, $text, $language );
