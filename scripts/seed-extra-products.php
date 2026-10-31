@@ -32,6 +32,19 @@ $ids = [
     '9573828133077', // Apparel Printer Plus
     '9420620202197', // WonderPress 3D
     '8941086245077', // OS1
+    '9341134569685', // F2 Ultra MOPA + UV Business Duo
+    '8259513778389', // S1 + 1064nm IR Laser Kit
+    '8863750488277', // S1 for Education
+    '9078363816149', // MetalFab Laser Welder and CNC Cutter for Education
+    '8919099048149', // F1 Ultra for Education
+];
+// Sets and education versions of a machine take the accessories of the machines they contain.
+$families = [
+    '9341134569685' => [ '9009695293653', '9187692970197' ],
+    '8259513778389' => [ '8169201631445' ],
+    '8863750488277' => [ '8169201631445' ],
+    '9078363816149' => [ '8974447804629' ],
+    '8919099048149' => [ '8523126931669' ],
 ];
 $accessories = require __DIR__ . '/accessories.php';
 $ids = array_merge( $ids, array_map( 'strval', array_keys( $accessories ) ) );
@@ -108,5 +121,21 @@ foreach ( $accessories as $id => $accessory ) {
             }
         }
     }
+}
+// Each set or education version joins the fits of its base machines' accessories once (marked on
+// the machine), so fits edited in the panel later stay as they are, and a rerun completes a stopped one.
+foreach ( $families as $machine => $bases ) {
+    $machine_posts = get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private' ], 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => (string) $machine, 'fields' => 'ids', 'posts_per_page' => 1 ] );
+    if ( ! $machine_posts || get_post_meta( $machine_posts[0], '_lasery_family_fits', true ) ) {
+        continue;
+    }
+    $fitting = get_posts( [ 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => [ 'publish', 'future', 'draft', 'pending', 'private' ], 'meta_query' => [ [ 'key' => LASERY_XTOOL_FITS, 'value' => array_map( 'strval', $bases ), 'compare' => 'IN' ] ], 'fields' => 'ids', 'posts_per_page' => -1 ] );
+    foreach ( $fitting as $post_id ) {
+        if ( ! in_array( (string) $machine, get_post_meta( $post_id, LASERY_XTOOL_FITS ), true ) ) {
+            add_post_meta( $post_id, LASERY_XTOOL_FITS, (string) $machine );
+        }
+    }
+    update_post_meta( $machine_posts[0], '_lasery_family_fits', '1' );
+    WP_CLI::log( 'Machine ' . $machine . ' fits ' . count( $fitting ) . ' accessories.' );
 }
 WP_CLI::success( 'Accessory types and fits set for ' . count( $accessories ) . ' accessories.' );

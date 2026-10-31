@@ -46,11 +46,11 @@ $blog = lasery_xtool_blog_url();
             <details class="lang-menu" data-lang-menu>
                 <?php // The name includes the visible code, so voice control finds the menu by what it shows. ?>
                 <summary>
-                    <?php echo lasery_xtool_icon('globe'); ?><span class="visually-hidden"><?php echo esc_html(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>, </span><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>
+                    <?php echo lasery_xtool_flag($current_language); ?><span class="visually-hidden"><?php echo esc_html(sprintf(__('Język strony: %s', 'lasery-xtool'), $languages[$current_language])); ?>, </span><span><?php echo esc_html(strtoupper($current_language)); ?></span><?php echo lasery_xtool_icon('chevron-down'); ?>
                 </summary>
                 <ul class="lang-menu-list">
                     <?php foreach ($languages as $language => $name) : ?>
-                        <li><a href="<?php echo esc_url(lasery_xtool_language_switch_url($language)); ?>" lang="<?php echo esc_attr($language); ?>" hreflang="<?php echo esc_attr($language); ?>"<?php if ($current_language === $language) : ?> aria-current="true"<?php endif; ?>><?php echo esc_html($name); ?><?php if ($current_language === $language) : ?><?php echo lasery_xtool_icon('check'); ?><?php endif; ?></a></li>
+                        <li><a href="<?php echo esc_url(lasery_xtool_language_switch_url($language)); ?>" lang="<?php echo esc_attr($language); ?>" hreflang="<?php echo esc_attr($language); ?>"<?php if ($current_language === $language) : ?> aria-current="true"<?php endif; ?>><?php echo lasery_xtool_flag($language); ?><span class="lang-menu-name"><?php echo esc_html($name); ?></span><?php if ($current_language === $language) : ?><?php echo lasery_xtool_icon('check'); ?><?php endif; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </details>

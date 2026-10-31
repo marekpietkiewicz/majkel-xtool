@@ -9,6 +9,21 @@ function lasery_xtool_languages() {
     return function_exists('lasery_xtool_description_languages') ? lasery_xtool_description_languages() : ['pl' => 'Polski'];
 }
 
+/** The flag shown next to a language (English: United Kingdom), or '' for other languages. */
+function lasery_xtool_flag($language) {
+    $flags = [
+        'pl' => ['16 10', '<path fill="#fff" d="M0 0h16v5H0z"/><path fill="#dc143c" d="M0 5h16v5H0z"/>'],
+        'en' => ['60 30', '<path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#fff" stroke-width="6" d="m0 0 60 30M60 0 0 30"/><path stroke="#c8102e" stroke-width="2" d="m0 0 60 30M60 0 0 30"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/>'],
+        'de' => ['5 3', '<path d="M0 0h5v1H0z"/><path fill="#d00" d="M0 1h5v1H0z"/><path fill="#ffce00" d="M0 2h5v1H0z"/>'],
+        'ru' => ['9 6', '<path fill="#fff" d="M0 0h9v2H0z"/><path fill="#0039a6" d="M0 2h9v2H0z"/><path fill="#d52b1e" d="M0 4h9v2H0z"/>'],
+        'uk' => ['3 2', '<path fill="#0057b7" d="M0 0h3v1H0z"/><path fill="#ffd700" d="M0 1h3v1H0z"/>'],
+    ];
+    if (!isset($flags[$language])) {
+        return '';
+    }
+    return '<svg class="flag" viewBox="0 0 ' . $flags[$language][0] . '" width="20" height="15" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">' . $flags[$language][1] . '</svg>';
+}
+
 /** Inline stroke icons; names are fixed in templates. */
 function lasery_xtool_icon($name) {
     $paths = [
@@ -17,7 +32,6 @@ function lasery_xtool_icon($name) {
         'chevron-left' => '<path d="m15 18-6-6 6-6"/>',
         'chevron-right' => '<path d="m9 18 6-6-6-6"/>',
         'chevron-down' => '<path d="m6 9 6 6 6-6"/>',
-        'globe' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
         'menu' => '<path d="M4 7h16M4 12h16M4 17h16"/>',
         'close' => '<path d="M6 6l12 12M18 6 6 18"/>',
         'pause' => '<path d="M9 6v12M15 6v12"/>',
@@ -31,6 +45,9 @@ function lasery_xtool_icon($name) {
         'mail' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         'calendar' => '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
         'search' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+        'minus' => '<path d="M5 12h14"/>',
+        'plus' => '<path d="M12 5v14M5 12h14"/>',
+        'trash' => '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     ];
     if (!isset($paths[$name])) {
         return '';

@@ -527,6 +527,16 @@ return [
             'uk' => [ 'Ультрапортативна електростанція DJI ємністю 1 кВт·год.', 'Заряджається від 0 до 80% за 58 хвилин.', 'Вбудований автомобільний зарядний пристрій 400 Вт і модуль MPPT.', 'Висувний кабель 100 Вт спрощує заряджання та зберігання.', 'xTool пропонує її в комплектах із M2 і F2 для роботи на виїзді.' ],
         ],
     ],
+    '9514708762837' => [
+        'fits' => [ '9163846877397' ],
+        'titles' => [ 'pl' => 'Kabel zasilający 24 V do DJI Power 1000 Mini (F2)', 'de' => '24-V-Ladekabel für DJI Power 1000 Mini (F2)', 'ru' => 'Кабель питания 24 В для DJI Power 1000 Mini (F2)', 'uk' => 'Кабель живлення 24 В для DJI Power 1000 Mini (F2)' ],
+        'features' => [
+            'pl' => [ 'Kabel DC łączy xTool F2 bezpośrednio ze stacją zasilania DJI Power 1000 Mini.', 'Zasilanie DC–DC bez strat na przetwarzanie, czyli dłuższa praca w terenie.' ],
+            'de' => [ 'Das DC-Kabel verbindet den xTool F2 direkt mit der Powerstation DJI Power 1000 Mini.', 'DC-zu-DC-Versorgung ohne Umwandlungsverluste für längeres Arbeiten unterwegs.' ],
+            'ru' => [ 'DC-кабель напрямую подключает xTool F2 к электростанции DJI Power 1000 Mini.', 'Питание DC–DC без потерь на преобразование — дольше работа на выезде.' ],
+            'uk' => [ 'DC-кабель напряму підключає xTool F2 до електростанції DJI Power 1000 Mini.', 'Живлення DC–DC без втрат на перетворення — довша робота на виїзді.' ],
+        ],
+    ],
     '8762129842389' => [
         'fits' => [ '9089720189141', '15473430692053', '15452856942805', '8169201631445', '9163846877397', '9009695293653', '9187692970197', '8523126931669', '8974447804629', '9573828133077', '8941086245077' ],
         'titles' => [ 'pl' => 'Oczyszczacz powietrza xTool SafetyPro™ AP2 / AP2 Max', 'de' => 'xTool SafetyPro™ AP2 / AP2 Max Luftreiniger', 'ru' => 'Очиститель воздуха xTool SafetyPro™ AP2 / AP2 Max', 'uk' => 'Очищувач повітря xTool SafetyPro™ AP2 / AP2 Max' ],
