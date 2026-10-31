@@ -170,9 +170,12 @@
     input.value = Number.isFinite(value) ? String(Math.min(100, Math.max(1, value))) : input.dataset.saved || input.defaultValue;
   };
   document.addEventListener('submit', (event) => event.target.querySelectorAll('[data-quantity]').forEach(normaliseQuantity), true);
-  // Quantity fields take digits only: other typed characters are refused, pasted ones dropped (before other handlers see them).
+  // Quantity fields take digits only: other typed characters are refused, and so is a pasted decimal ("1.5");
+  // other pasted characters ("12 szt.") are dropped before other handlers see the value.
   document.addEventListener('beforeinput', (event) => {
-    if (event.target.matches('[data-quantity]') && event.data && /\D/.test(event.data)) event.preventDefault();
+    if (!event.target.matches('[data-quantity]')) return;
+    const text = event.data || (event.dataTransfer ? event.dataTransfer.getData('text/plain') : '');
+    if ((event.inputType === 'insertText' && /\D/.test(text)) || /\d[.,]\d/.test(text)) event.preventDefault();
   });
   document.addEventListener('input', (event) => {
     const input = event.target;

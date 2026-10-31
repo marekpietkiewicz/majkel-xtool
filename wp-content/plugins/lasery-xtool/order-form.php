@@ -504,8 +504,8 @@ function lasery_xtool_render_order_form( $post_id ) {
 	$fresh = lasery_xtool_source_is_fresh( $post_id );
 	$available_variants = $fresh ? lasery_xtool_available_variants( $post_id ) : array();
 	$selected = 1 === count( $available_variants ) ? $available_variants[0] : null;
-	// The only variant of a product without options has no name to choose by.
-	$single = $selected && '' === lasery_xtool_variant_label( $selected );
+	// The only variant of a product without options has no name to choose by (a set still shows its contents there).
+	$single = $selected && '' === lasery_xtool_variant_label( $selected ) && ! lasery_xtool_set_contents( $post_id, $selected );
 	$selected_amount = $selected ? lasery_xtool_variant_amount( $post_id, $selected ) : ( $uses_source_variants ? null : lasery_xtool_order_price_amount( $post_id ) );
 	$cart = lasery_xtool_cart_url( $language );
 	$previews = false;
@@ -593,7 +593,7 @@ function lasery_xtool_render_order_form( $post_id ) {
 					<?php endif; ?>
 					<dt><?php echo esc_html( $text['price'] ); ?></dt>
 					<?php // The price of the chosen quantity; with several pieces the script adds the price of one. ?>
-					<dd class="order-summary-price" data-order-summary-price<?php echo lasery_xtool_amount_attributes( $selected_amount ); ?>><?php echo esc_html( $selected_amount ? lasery_xtool_format_price( $selected_amount[0], $selected_amount[1], $language ) : ( $available_variants ? '—' : $text['no_price'] ) ); ?></dd>
+					<dd class="order-summary-price" data-order-summary-price<?php echo lasery_xtool_amount_attributes( $selected_amount ); ?>><?php echo esc_html( $selected_amount ? lasery_xtool_format_price( $selected_amount[0], $selected_amount[1], $language ) : ( $available_variants && ! $single ? '—' : $text['no_price'] ) ); ?></dd>
 				</dl>
 				<p class="order-summary-note"><?php echo esc_html( $text['price_note'] ); ?></p>
 				<button type="submit" class="btn btn-primary btn-block" <?php disabled( $uses_source_variants && ! $available_variants ); ?>><?php echo esc_html( $text['add'] ); ?></button>
