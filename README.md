@@ -30,6 +30,12 @@ Ikona lupy w nagłówku (oraz skróty `/` i Ctrl/⌘+K) otwiera wyszukiwanie urz
 
 Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie siedem, żeby siatka była pełna): najpierw maszyny z oznaczeniem demo, potem pozostałe, w obu grupach według pola **Kolejność**. Pozostałe są w katalogu `/produkty/`.
 
+## Mapa witryny i IndexNow
+
+Mapa: `https://laseryxtool.pl/wp-sitemap.xml` (`/sitemap.xml` przekierowuje na nią, a `robots.txt` ją wskazuje). Zawiera artykuły (każdy w swoim języku), strony, produkty i sekcję `languages` z pozostałymi wersjami językowymi stron i produktów oraz katalogiem w każdym języku. Generuje się z bazy przy każdym żądaniu, więc nowy lub zmieniony wpis pojawia się w niej od razu (po wyczyszczeniu pamięci podręcznej LiteSpeed). Produkt ukryty przez synchronizację znika z mapy, a po powrocie do oferty wraca. `lastmod` to data zmiany wpisu; katalog, strona główna i blog dostają datę najnowszego produktu lub artykułu.
+
+IndexNow (Bing, Yandex, Naver, Seznam, Yep) dostaje adresy wszystkich wersji językowych wpisu, który został opublikowany, zmienił tytuł, treść, zajawkę lub adres, albo przestał być publiczny, razem z listą, na której widać wpis (blog lub katalog). Wysyłka jest zbiorcza, minutę po zmianie, a przy błędzie sieci lub kodach 429 i 5xx ponawiana po godzinie. Wynik ostatniej wysyłki: opcja `lasery_xtool_indexnow_last`. Google nie obsługuje IndexNow: poznaje zmiany z mapy po dodaniu strony w Search Console.
+
 ## Stan środowiska
 
 - Domena `https://laseryxtool.pl` działa przez HTTPS na WordPressie. Katalog obejmuje urządzenia xTool oraz akcesoria.
