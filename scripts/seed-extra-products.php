@@ -37,6 +37,7 @@ $ids = [
     '8863750488277', // S1 for Education
     '9078363816149', // MetalFab Laser Welder and CNC Cutter for Education
     '8919099048149', // F1 Ultra for Education
+    '15445001339093', // C1 Color Cutter
 ];
 // Sets and education versions of a machine take the accessories of the machines they contain.
 $families = [

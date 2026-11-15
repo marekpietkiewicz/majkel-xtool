@@ -175,6 +175,12 @@ $translations += [
         'ru' => [ 'Глубокая гравировка, тиснение и резка тонкого металла.', 'Двойной лазер гравирует дерево, акрил, кожу и металл.', 'Встроенная камера, автофокусировка и скорость 10 000 мм/с для серийной гравировки.', 'Безопасность: защитная крышка, очиститель дыма, защита глаз и остановка при возгорании.' ],
         'uk' => [ 'Глибоке гравіювання, тиснення та різання тонкого металу.', 'Подвійний лазер гравіює дерево, акрил, шкіру й метал.', 'Вбудована камера, автофокусування і швидкість 10 000 мм/с для серійного гравіювання.', 'Безпека: захисна кришка, очищувач диму, захист очей і зупинка в разі займання.' ],
     ],
+    '15445001339093' => [
+        'pl' => [ 'Drukowanie i cięcie pełnokolorowych projektów bez znaczników pozycjonujących.', 'Pakiet Atomm Creative Suite oferuje konfigurowalne generatory i szablony.', 'Wbudowany skaner pozwala wyświetlić podgląd i ustawić projekt, ograniczając ilość odpadów.', 'Dodatek ultradźwiękowy umożliwia cięcie grubszych materiałów; można go zamontować w maszynie lub używać ręcznie.', 'Różne narzędzia, łatwa wymiana ostrzy i cicha praca.' ],
+        'de' => [ 'Vollfarbige Designs ohne Registermarken drucken und schneiden.', 'Atomm Creative Suite bietet anpassbare Generatoren und Vorlagen.', 'Der integrierte Scanner ermöglicht Vorschau und Positionierung des Designs für einen sparsamen Zuschnitt.', 'Das Ultraschall-Zubehör schneidet dickere Materialien; es lässt sich an der Maschine montieren oder von Hand verwenden.', 'Verschiedene Werkzeuge, einfacher Klingenwechsel und leiser Betrieb.' ],
+        'ru' => [ 'Печать и резка полноцветных проектов без регистрационных меток.', 'Atomm Creative Suite предлагает настраиваемые генераторы и шаблоны.', 'Встроенный сканер позволяет просмотреть и разместить проект, сокращая количество отходов.', 'Ультразвуковая насадка позволяет резать более толстые материалы; её можно установить на машину или использовать вручную.', 'Разные инструменты, простая замена лезвий и тихая работа.' ],
+        'uk' => [ 'Друк і різання повнокольорових проєктів без реєстраційних міток.', 'Atomm Creative Suite пропонує настроювані генератори та шаблони.', 'Вбудований сканер дає змогу переглянути й розмістити проєкт, зменшуючи кількість відходів.', 'Ультразвукова насадка дає змогу різати товстіші матеріали; її можна встановити на машину або використовувати вручну.', 'Різні інструменти, проста заміна лез і тиха робота.' ],
+    ],
 ];
 $titles = [
     '15473430692053' => [ 'pl' => 'Ploter laserowy xTool X1', 'de' => 'xTool X1 Laserschneider', 'ru' => 'Лазерный станок xTool X1', 'uk' => 'Лазерний верстат xTool X1' ],
@@ -203,6 +209,7 @@ $titles = [
     '8863750488277' => [ 'pl' => 'Laser xTool S1 dla edukacji', 'de' => 'xTool S1 für Bildungseinrichtungen', 'ru' => 'Лазер xTool S1 для образования', 'uk' => 'Лазер xTool S1 для освіти' ],
     '9078363816149' => [ 'pl' => 'Spawarka laserowa i wycinarka CNC xTool MetalFab dla edukacji', 'de' => 'xTool MetalFab Laserschweißgerät und CNC-Schneider für Bildungseinrichtungen', 'ru' => 'Лазерный сварочный аппарат и ЧПУ-резак xTool MetalFab для образования', 'uk' => 'Лазерний зварювальний апарат і ЧПК-різак xTool MetalFab для освіти' ],
     '8919099048149' => [ 'pl' => 'Podwójny laser xTool F1 Ultra dla edukacji', 'de' => 'xTool F1 Ultra Duallaser für Bildungseinrichtungen', 'ru' => 'Двойной лазер xTool F1 Ultra для образования', 'uk' => 'Подвійний лазер xTool F1 Ultra для освіти' ],
+    '15445001339093' => [ 'pl' => 'Kolorowy ploter tnący xTool C1', 'de' => 'xTool C1 Farb-Schneideplotter', 'ru' => 'Цветной режущий плоттер xTool C1', 'uk' => 'Кольоровий ріжучий плотер xTool C1' ],
 ];
 $to_html = static function ( $items ) {
     return wp_kses_post( '<ul>' . implode( '', array_map( static function ( $item ) { return '<li>' . esc_html( $item ) . '</li>'; }, $items ) ) . '</ul>' );

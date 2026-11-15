@@ -505,6 +505,11 @@ function lasery_xtool_track_offer_expiry( $expires_at ) {
 	$earliest = $earliest ? min( $earliest, $expires_at ) : $expires_at;
 }
 
+/** Whether a stored fetch time is within the 24-hour validity of an offer. */
+function lasery_xtool_timestamp_is_fresh( $fetched_at ) {
+	return is_string( $fetched_at ) && ctype_digit( $fetched_at ) && (int) $fetched_at <= time() && (int) $fetched_at + DAY_IN_SECONDS + 1 > time();
+}
+
 function lasery_xtool_source_is_fresh( $post_id ) {
 	$expires_at = lasery_xtool_offer_expires_at( $post_id );
 	$fresh = $expires_at > time();

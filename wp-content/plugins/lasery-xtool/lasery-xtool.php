@@ -126,6 +126,7 @@ function lasery_xtool_deactivate() {
 		unregister_post_type( LASERY_XTOOL_PRODUCT_TYPE );
 	}
 	wp_clear_scheduled_hook( 'lasery_xtool_sync_existing' );
+	wp_clear_scheduled_hook( 'lasery_xtool_sync_images' );
 	flush_rewrite_rules();
 }
 
@@ -168,6 +169,7 @@ function lasery_xtool_import_page() {
 		'complete' => 'Import zakończony.',
 		'limit'    => 'Import zakończony. Osiągnięto limit pobierania — w źródle mogą być dalsze produkty.',
 		'incomplete' => 'Nie udało się zsynchronizować części produktów. Sprawdź ich dane źródłowe i ponów próbę.',
+		'anomaly'  => 'Z katalogu xTool zniknęła naraz duża część produktów, więc nic nie zostało ukryte. Sprawdź źródło.',
 	);
 	$result = isset( $_GET['result'] ) && is_string( $_GET['result'] ) ? sanitize_key( wp_unslash( $_GET['result'] ) ) : '';
 	?>
@@ -219,8 +221,8 @@ function lasery_xtool_import_page() {
 	<?php
 }
 
-/** One validated product from Shopify's products.json, or false. */
-function lasery_xtool_parse_product( $product ) {
+/** One validated product from Shopify's products.json, or false. The sync has no use for the description, so it skips sanitising it. */
+function lasery_xtool_parse_product( $product, $with_content = true ) {
 	if ( ! is_object( $product ) || ! isset( $product->id, $product->title ) || ( ! is_int( $product->id ) && ! is_string( $product->id ) ) || ! preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $product->id ) || ! is_string( $product->title ) || ( isset( $product->body_html ) && ! is_string( $product->body_html ) ) ) {
 		return false;
 	}
@@ -231,7 +233,7 @@ function lasery_xtool_parse_product( $product ) {
 	$item = array(
 		'id'      => (string) $product->id,
 		'title'   => $title,
-		'content' => isset( $product->body_html ) ? wp_kses_post( $product->body_html ) : '',
+		'content' => $with_content && isset( $product->body_html ) ? wp_kses_post( $product->body_html ) : '',
 	);
 	if ( property_exists( $product, 'variants' ) ) {
 		if ( ! is_array( $product->variants ) ) {
@@ -395,16 +397,18 @@ function lasery_xtool_public_product_state( $post_id ) {
 
 /** Coalesce all changes in this request, including partial failures, into one purge. */
 function lasery_xtool_product_state_changed( $post_id, $before ) {
-	if ( $before === lasery_xtool_public_product_state( $post_id ) ) {
-		return;
+	if ( $before !== lasery_xtool_public_product_state( $post_id ) ) {
+		lasery_xtool_schedule_cache_purge();
 	}
+}
+
+function lasery_xtool_schedule_cache_purge() {
 	static $scheduled = false;
-	if ( $scheduled ) {
-		return;
+	if ( ! $scheduled ) {
+		$scheduled = true;
+		// LiteSpeed emits headers and kicks its CLI queue on shutdown at priority 0.
+		add_action( 'shutdown', 'lasery_xtool_purge_catalog_cache', -1 );
 	}
-	$scheduled = true;
-	// LiteSpeed emits headers and kicks its CLI queue on shutdown at priority 0.
-	add_action( 'shutdown', 'lasery_xtool_purge_catalog_cache', -1 );
 }
 
 function lasery_xtool_purge_catalog_cache() {
@@ -479,6 +483,11 @@ function lasery_xtool_handle_fetch() {
 
 const LASERY_XTOOL_OFFERS_PAUSE = 'lasery_xtool_fetch_paused';
 const LASERY_XTOOL_IMAGES_PAUSE = 'lasery_xtool_images_paused';
+const LASERY_XTOOL_SOURCE_URL   = 'https://www.xtool.eu';
+// Page ETags and product IDs of the last complete walk of products.json; they make an unchanged page a 304.
+const LASERY_XTOOL_STATE        = 'lasery_xtool_catalog_state';
+// An offer the source stopped listing is hidden after this many consecutive complete walks without it.
+const LASERY_XTOOL_MISSING_RUNS = 3;
 
 /**
  * After HTTP 429 the source is left alone for as long as Retry-After asks (at least five minutes,
@@ -495,14 +504,28 @@ function lasery_xtool_fetching_paused( $option = LASERY_XTOOL_OFFERS_PAUSE ) {
 }
 
 /**
- * One GET from the source, shaped like a wp_remote_get() response. The system curl is preferred:
- * the source answers PHP's HTTP client on this shared host with 429 "local_rate_limited" whatever
- * the pause, while the same request from curl succeeds. It is still one polite request with the
+ * One GET from the source, shaped like a wp_remote_get() response, compressed on the wire and
+ * conditional when $etag is given (an unchanged document answers 304 without a body). The system curl
+ * is preferred: the source answers PHP's HTTP client on this shared host with 429 "local_rate_limited"
+ * whatever the pause, while the same request from curl succeeds. It is still one polite request with the
  * same caps; 429 is honoured by the caller. Without a usable curl the WordPress HTTP API is used.
+ * The 'lasery_xtool_pre_request' filter can answer instead (tests).
  */
-function lasery_xtool_request( $url, $max_bytes ) {
-	$fallback = static function () use ( $url, $max_bytes ) {
-		return wp_safe_remote_get( $url, array( 'timeout' => 30, 'redirection' => 0, 'limit_response_size' => $max_bytes + 1, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) ) );
+function lasery_xtool_request( $url, $max_bytes, $etag = '' ) {
+	$pre = apply_filters( 'lasery_xtool_pre_request', null, $url, $etag );
+	if ( null !== $pre ) {
+		return $pre;
+	}
+	$etag     = lasery_xtool_valid_etag( $etag );
+	$fallback = static function () use ( $url, $max_bytes, $etag ) {
+		$headers = array( 'Accept-Encoding' => 'identity' );
+		if ( '' !== $etag ) {
+			$headers['If-None-Match'] = $etag;
+		}
+		$response = wp_safe_remote_get( $url, array( 'timeout' => 30, 'redirection' => 0, 'limit_response_size' => $max_bytes + 1, 'decompress' => false, 'headers' => $headers ) );
+		// The cap above is only safe for an uncompressed body.
+		$encoding = is_wp_error( $response ) ? '' : wp_remote_retrieve_header( $response, 'content-encoding' );
+		return is_string( $encoding ) && ( '' === $encoding || 'identity' === strtolower( trim( $encoding ) ) ) ? $response : new WP_Error( 'lasery_xtool_request', 'compressed response' );
 	};
 	if ( ! function_exists( 'proc_open' ) ) {
 		return $fallback();
@@ -512,14 +535,17 @@ function lasery_xtool_request( $url, $max_bytes ) {
 	if ( false === $headers_file || false === $body_file ) {
 		return $fallback();
 	}
-	$process = proc_open(
-		array( 'curl', '--silent', '--proto', '=https', '--max-time', '30', '--max-filesize', (string) ( $max_bytes + 1 ), '--header', 'Accept-Encoding: identity', '--dump-header', $headers_file, '--output', $body_file, $url ),
-		array( 1 => array( 'file', '/dev/null', 'w' ), 2 => array( 'file', '/dev/null', 'w' ) ),
-		$pipes
-	);
-	$exit = is_resource( $process ) ? proc_close( $process ) : 127;
+	$command = array( 'curl', '--silent', '--compressed', '--proto', '=https', '--max-time', '30', '--max-filesize', (string) ( $max_bytes + 1 ), '--dump-header', $headers_file, '--output', $body_file );
+	if ( '' !== $etag ) {
+		array_push( $command, '--header', 'If-None-Match: ' . $etag );
+	}
+	$command[] = $url;
+	$process   = proc_open( $command, array( 1 => array( 'file', '/dev/null', 'w' ), 2 => array( 'file', '/dev/null', 'w' ) ), $pipes );
+	$exit      = is_resource( $process ) ? proc_close( $process ) : 127;
+	// The cap above counts bytes on the wire; the decoded body must fit too.
+	$size = (int) filesize( $body_file );
 	$head = (string) file_get_contents( $headers_file );
-	$body = (string) file_get_contents( $body_file, false, null, 0, $max_bytes + 1 );
+	$body = $size <= $max_bytes ? (string) file_get_contents( $body_file ) : '';
 	unlink( $headers_file );
 	unlink( $body_file );
 	if ( 127 === $exit ) {
@@ -528,7 +554,7 @@ function lasery_xtool_request( $url, $max_bytes ) {
 	// The last header block belongs to the final response.
 	$blocks = preg_split( '/\r?\n\r?\n/', trim( $head ) );
 	$lines  = preg_split( '/\r?\n/', (string) end( $blocks ) );
-	if ( 0 !== $exit || ! preg_match( '~^HTTP/\S+ (\d{3})~', (string) $lines[0], $status ) ) {
+	if ( 0 !== $exit || $size > $max_bytes || ! preg_match( '~^HTTP/\S+ (\d{3})~', (string) $lines[0], $status ) ) {
 		return new WP_Error( 'lasery_xtool_request', 'curl exit ' . $exit );
 	}
 	$headers = array();
@@ -541,13 +567,18 @@ function lasery_xtool_request( $url, $max_bytes ) {
 	return array( 'headers' => $headers, 'body' => $body, 'response' => array( 'code' => (int) $status[1], 'message' => '' ) );
 }
 
+/** The ETag if it is a plain quoted token (it goes into a request header), otherwise ''. */
+function lasery_xtool_valid_etag( $etag ) {
+	return is_string( $etag ) && preg_match( '~^(?:W/)?"[A-Za-z0-9:_.-]{1,200}"$~D', $etag ) ? $etag : '';
+}
+
 /**
  * GET from the source. A short HTTP 429 (Retry-After within two minutes) is waited out and retried
  * while $deadline allows; a longer one pauses fetching and returns WP_Error( 'paused' ).
  */
-function lasery_xtool_source_get( $url, $max_bytes, $deadline ) {
+function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
 	for ( $attempt = 1; ; ++$attempt ) {
-		$response = lasery_xtool_request( $url, $max_bytes );
+		$response = lasery_xtool_request( $url, $max_bytes, $etag );
 		if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
 			return $response;
 		}
@@ -560,104 +591,115 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline ) {
 	}
 }
 
-/** Refuse compressed bodies, which could exceed the limit when decompressed. */
-function lasery_xtool_identity_response( $response ) {
-	$encoding = wp_remote_retrieve_header( $response, 'content-encoding' );
-	return is_string( $encoding ) && ( '' === $encoding || 'identity' === strtolower( trim( $encoding ) ) );
+/**
+ * The currency of the source's storefront (meta.json). It practically never changes, so it is
+ * fetched once a day; a failed refresh keeps the last known value. Returns WP_Error( 'paused' ) when
+ * the source asked to be left alone.
+ */
+function lasery_xtool_currency( $deadline ) {
+	$known = get_option( 'lasery_xtool_currency' );
+	$known = is_array( $known ) && isset( $known['code'], $known['at'] ) && is_string( $known['code'] ) ? $known : array( 'code' => '', 'at' => 0 );
+	if ( '' !== $known['code'] && (int) $known['at'] > time() - DAY_IN_SECONDS ) {
+		return $known['code'];
+	}
+	$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/meta.json', 32768, $deadline );
+	if ( is_wp_error( $response ) && 'paused' === $response->get_error_code() ) {
+		return $response;
+	}
+	if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+		$meta = json_decode( wp_remote_retrieve_body( $response ) );
+		if ( is_object( $meta ) && isset( $meta->currency ) && is_string( $meta->currency ) && preg_match( '/^[A-Z]{3}$/D', $meta->currency ) ) {
+			$known = array( 'code' => $meta->currency, 'at' => time() );
+			update_option( 'lasery_xtool_currency', $known, false );
+		}
+	}
+	return $known['code'];
 }
 
-/** Return a complete bounded snapshot, without writes to product records. */
-function lasery_xtool_fetch_source( $target_ids = null ) {
+/**
+ * Walk products.json page by page. $handle( $raw ) receives the products of every page that has
+ * changed since $known (page => array( 'etag', 'ids', 'count' ) of the previous walk) and returns false
+ * to reject the page; an unchanged page answers 304 and is carried over. Returns array( 'pages' => the
+ * same structure for this walk, 'complete' => whether the last page was reached ) or a WP_Error
+ * ('paused', 'network' or 'format').
+ */
+function lasery_xtool_walk_catalog( $known, $deadline, $handle ) {
+	$pages = array();
+	for ( $page = 1; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
+		if ( $page > 1 ) {
+			// A short pause between pages keeps the requests within the storefront's rate limit.
+			sleep( 1 );
+		}
+		$url      = add_query_arg( array( 'limit' => LASERY_XTOOL_PAGE_SIZE, 'page' => $page ), LASERY_XTOOL_SOURCE_URL . '/products.json' );
+		$etag     = isset( $known[ $page ]['etag'] ) ? $known[ $page ]['etag'] : '';
+		$response = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, $deadline, $etag );
+		if ( is_wp_error( $response ) ) {
+			return 'paused' === $response->get_error_code() ? $response : new WP_Error( 'network' );
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( 304 === $code && '' !== $etag ) {
+			$pages[ $page ] = $known[ $page ];
+		} elseif ( 200 === $code ) {
+			$raw = lasery_xtool_decode_products( wp_remote_retrieve_body( $response ), LASERY_XTOOL_PAGE_SIZE );
+			if ( false === $raw || ! $handle( $raw ) ) {
+				return new WP_Error( 'format' );
+			}
+			$pages[ $page ] = array(
+				'etag'  => lasery_xtool_valid_etag( wp_remote_retrieve_header( $response, 'etag' ) ),
+				'ids'   => array_values( array_filter( array_map( 'lasery_xtool_raw_product_id', $raw ), 'strlen' ) ),
+				'count' => count( $raw ),
+			);
+		} else {
+			return new WP_Error( 'network' );
+		}
+		if ( $pages[ $page ]['count'] < LASERY_XTOOL_PAGE_SIZE ) {
+			return array( 'pages' => $pages, 'complete' => true );
+		}
+	}
+	return array( 'pages' => $pages, 'complete' => false );
+}
+
+/** Every product of the source for the draft import: all pages, each product valid and unique. */
+function lasery_xtool_fetch_source() {
 	if ( lasery_xtool_fetching_paused() ) {
 		return new WP_Error( 'paused' );
 	}
-	if ( is_array( $target_ids ) && ! $target_ids ) {
-		return array( 'products' => array(), 'result' => 'complete' );
-	}
-	$remaining = is_array( $target_ids ) ? array_fill_keys( $target_ids, true ) : null;
-	// Shopify's shop metadata describes the currency of the same storefront.
-	// A missing or invalid response leaves prices without a currency.
-	$currency = '';
 	// Short rate limits are waited out, but a run stays well inside the 15-minute import lock.
 	$deadline = time() + 420;
-	$meta_response = lasery_xtool_source_get( 'https://www.xtool.eu/meta.json', 32768, $deadline );
-	if ( is_wp_error( $meta_response ) && 'paused' === $meta_response->get_error_code() ) {
-		return $meta_response;
+	$currency = lasery_xtool_currency( $deadline );
+	if ( is_wp_error( $currency ) ) {
+		return $currency;
 	}
-	if ( ! is_wp_error( $meta_response ) && 200 === wp_remote_retrieve_response_code( $meta_response ) && lasery_xtool_identity_response( $meta_response ) ) {
-		$meta_body = wp_remote_retrieve_body( $meta_response );
-		$meta = strlen( $meta_body ) <= 32768 ? json_decode( $meta_body ) : null;
-		if ( is_object( $meta ) && isset( $meta->currency ) && is_string( $meta->currency ) && preg_match( '/^[A-Z]{3}$/D', $meta->currency ) ) {
-			$currency = $meta->currency;
-		}
-	}
-	$products = array();
-	$result   = 'complete';
 	$source   = array( 'currency' => $currency, 'fetched_at' => time() );
-	for ( $page = 1; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
-		// A short pause between pages keeps the requests within the storefront's rate limit.
-		sleep( 2 );
-		$url = add_query_arg( array( 'limit' => LASERY_XTOOL_PAGE_SIZE, 'page' => $page ), 'https://www.xtool.eu/products.json' );
-		$response = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, $deadline );
-		if ( is_wp_error( $response ) && 'paused' === $response->get_error_code() ) {
-			return $response;
-		}
-		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! lasery_xtool_identity_response( $response ) ) {
-			return new WP_Error( 'network' );
-		}
-		$body = wp_remote_retrieve_body( $response );
-		if ( strlen( $body ) > LASERY_XTOOL_MAX_BYTES ) {
-			return new WP_Error( 'network' );
-		}
-		$raw = lasery_xtool_decode_products( $body, LASERY_XTOOL_PAGE_SIZE );
-		if ( false === $raw ) {
-			return new WP_Error( 'format' );
-		}
-		if ( null === $remaining ) {
-			// Drafts: every product of the page must be valid and new.
+	$products = array();
+	$walk     = lasery_xtool_walk_catalog(
+		array(),
+		$deadline,
+		static function ( $raw ) use ( &$products, $source ) {
 			foreach ( $raw as $entry ) {
 				$product = lasery_xtool_parse_product( $entry );
 				if ( false === $product || isset( $products[ $product['id'] ] ) ) {
-					return new WP_Error( 'format' );
+					return false;
 				}
 				$products[ $product['id'] ] = $product + $source;
 			}
-		} else {
-			// Sync: only the site's products are validated, so an unrelated malformed product
-			// or one shifted between pages while xTool edits the catalogue cannot stop it.
-			// A product that is invalid or missing stays in $remaining and loses its offer.
-			foreach ( $raw as $entry ) {
-				$id = lasery_xtool_raw_product_id( $entry );
-				$product = isset( $remaining[ $id ] ) ? lasery_xtool_parse_product( $entry ) : false;
-				// A source snapshot without variants cannot confirm an offer. Keep it
-				// in the remaining set so the existing offer becomes stale.
-				if ( $product && array_key_exists( 'variants', $product ) ) {
-					$products[ $id ] = $product + $source;
-					unset( $remaining[ $id ] );
-				}
-			}
-			if ( ! $remaining ) {
-				break;
-			}
+			return true;
 		}
-		if ( count( $raw ) < LASERY_XTOOL_PAGE_SIZE ) {
-			$result = null !== $remaining ? 'incomplete' : 'complete';
-			break;
-		}
-		if ( LASERY_XTOOL_MAX_PAGES === $page ) {
-			$result = null !== $remaining ? 'incomplete' : 'limit';
-		}
+	);
+	if ( is_wp_error( $walk ) ) {
+		return $walk;
 	}
-	return array( 'products' => array_values( $products ), 'result' => $result );
+	return array( 'products' => array_values( $products ), 'result' => $walk['complete'] ? 'complete' : 'limit' );
 }
-
 
 // The system cron is the main trigger. WP-Cron backs it up, so a stopped or misconfigured system
 // cron cannot leave every offer to expire after a day.
 add_action( 'init', 'lasery_xtool_schedule_sync' );
 function lasery_xtool_schedule_sync() {
-	if ( ! wp_next_scheduled( 'lasery_xtool_sync_existing' ) ) {
-		wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', 'lasery_xtool_sync_existing' );
+	foreach ( array( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_images' ) as $hook ) {
+		if ( ! wp_next_scheduled( $hook ) ) {
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', $hook );
+		}
 	}
 }
 
@@ -666,16 +708,122 @@ function lasery_xtool_schedule_sync_retry() {
 	wp_schedule_single_event( max( time() + 10 * MINUTE_IN_SECONDS, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) ), 'lasery_xtool_sync_existing' );
 }
 
+/** Tell the administrator when offers have not been refreshed for six hours, at most once a day. */
+function lasery_xtool_alert_when_stale() {
+	$ok = (int) get_option( 'lasery_xtool_last_ok' );
+	if ( ! $ok ) {
+		update_option( 'lasery_xtool_last_ok', time(), false );
+		return;
+	}
+	if ( time() - $ok < 6 * HOUR_IN_SECONDS || time() - (int) get_option( 'lasery_xtool_last_alert' ) < DAY_IN_SECONDS ) {
+		return;
+	}
+	update_option( 'lasery_xtool_last_alert', time(), false );
+	$last = get_option( 'lasery_xtool_last_sync' );
+	wp_mail(
+		get_option( 'admin_email' ),
+		'laseryxtool.pl: oferty nie są aktualizowane',
+		sprintf(
+			"Od %s synchronizacja nie pobrała katalogu xTool (ostatni wynik: %s). Po 24 godzinach od ostatniej udanej synchronizacji oferty znikną ze stron produktów.\n\nSprawdź Produkty xTool → Import (ostatnia synchronizacja i ewentualne wstrzymanie po odpowiedzi 429) oraz zadania cron na hostingu.",
+			wp_date( 'Y-m-d H:i', $ok ),
+			is_array( $last ) && isset( $last['result'] ) && is_string( $last['result'] ) ? $last['result'] : 'brak'
+		)
+	);
+}
+
+/** The products with a source ID, grouped by it, with everything the sync needs in one query. */
+function lasery_xtool_sync_targets() {
+	global $wpdb;
+	$rows    = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT p.ID AS id, p.post_status AS status, s.meta_value AS source, h.meta_value AS hash, u.meta_value AS updated, m.meta_value AS missing, a.meta_value AS hidden
+			FROM {$wpdb->posts} p
+			JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = %s
+			LEFT JOIN {$wpdb->postmeta} h ON h.post_id = p.ID AND h.meta_key = '_lasery_source_hash'
+			LEFT JOIN {$wpdb->postmeta} u ON u.post_id = p.ID AND u.meta_key = '_lasery_source_updated_at'
+			LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_lasery_missing_runs'
+			LEFT JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = '_lasery_auto_hidden'
+			WHERE p.post_type = %s AND p.post_status IN ('publish', 'future', 'draft', 'pending', 'private')",
+			LASERY_XTOOL_SOURCE_ID,
+			LASERY_XTOOL_PRODUCT_TYPE
+		)
+	);
+	$targets = array();
+	foreach ( $rows as $row ) {
+		if ( preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $row->source ) ) {
+			$targets[ $row->source ][] = $row;
+		}
+	}
+	return $targets;
+}
+
+/** Content hash of an offer: what a visitor can see of the source data except the time it was read. */
+function lasery_xtool_source_hash( $product ) {
+	return md5( (string) wp_json_encode( array( isset( $product['currency'] ) ? $product['currency'] : '', $product['variants'], isset( $product['image_urls'] ) ? $product['image_urls'] : null ) ) );
+}
+
+/** Confirm many unchanged offers with one query. Direct SQL, so the meta cache is cleared by hand. */
+function lasery_xtool_confirm_offers( $post_ids, $time ) {
+	global $wpdb;
+	foreach ( array_chunk( $post_ids, 200 ) as $chunk ) {
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = '_lasery_source_updated_at' AND post_id IN (" . implode( ',', array_fill( 0, count( $chunk ), '%d' ) ) . ')',
+				array_merge( array( (string) $time ), $chunk )
+			)
+		);
+	}
+	foreach ( $post_ids as $post_id ) {
+		wp_cache_delete( $post_id, 'post_meta' );
+	}
+}
+
+/** The source lists the product again: forget its absence and show it if only the sync hid it. */
+function lasery_xtool_mark_present( $row ) {
+	if ( null !== $row->missing ) {
+		delete_post_meta( $row->id, '_lasery_missing_runs' );
+	}
+	if ( null !== $row->hidden ) {
+		delete_post_meta( $row->id, '_lasery_auto_hidden' );
+		if ( 'draft' === $row->status ) {
+			wp_update_post( array( 'ID' => $row->id, 'post_status' => 'publish' ) );
+		}
+		lasery_xtool_schedule_cache_purge();
+	}
+}
+
+/**
+ * A complete walk did not list the product. Its offer stops being fresh at once; after
+ * LASERY_XTOOL_MISSING_RUNS such walks in a row the product is hidden (not deleted), and shown again
+ * by lasery_xtool_mark_present() if the source lists it again.
+ */
+function lasery_xtool_mark_absent( $row ) {
+	$runs = (int) $row->missing + 1;
+	if ( '' !== (string) $row->updated ) {
+		update_post_meta( $row->id, '_lasery_source_updated_at', '' );
+		lasery_xtool_schedule_cache_purge();
+	}
+	if ( $runs <= LASERY_XTOOL_MISSING_RUNS ) {
+		update_post_meta( $row->id, '_lasery_missing_runs', $runs );
+	}
+	if ( $runs >= LASERY_XTOOL_MISSING_RUNS && 'publish' === $row->status ) {
+		update_post_meta( $row->id, '_lasery_auto_hidden', '1' );
+		wp_update_post( array( 'ID' => $row->id, 'post_status' => 'draft' ) );
+		lasery_xtool_schedule_cache_purge();
+	}
+}
+
 /**
  * Called hourly by the system cron and WP-Cron; refreshes every existing product and never creates
- * drafts. A run shortly after one that reached the source is skipped unless $force is set, so the two
- * triggers do not fetch the catalogue twice an hour (products xTool no longer lists make a run
- * 'incomplete', which still counts).
+ * drafts. The walk is conditional: pages that did not change since the last complete walk answer 304,
+ * so a quiet hour costs a few empty responses and two writes; only products whose offer changed are
+ * saved. A run shortly after one that reached the source is skipped unless $force is set, so the two
+ * triggers do not walk the catalogue twice an hour.
  */
 add_action( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_existing' );
 function lasery_xtool_sync_existing( $force = false ) {
 	$last = get_option( 'lasery_xtool_last_sync' );
-	if ( true !== $force && is_array( $last ) && isset( $last['time'], $last['result'], $last['updated'] ) && 'locklost' !== $last['result'] && (int) $last['time'] > time() - 30 * MINUTE_IN_SECONDS ) {
+	if ( true !== $force && is_array( $last ) && isset( $last['time'], $last['result'], $last['confirmed'] ) && 'locklost' !== $last['result'] && (int) $last['time'] > time() - 30 * MINUTE_IN_SECONDS ) {
 		return;
 	}
 	// A run from WP-Cron is a web request with the default time limit.
@@ -683,61 +831,143 @@ function lasery_xtool_sync_existing( $force = false ) {
 		set_time_limit( 600 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
+		// Another import, or the image sync, holds the lock; this one is needed within minutes.
+		wp_schedule_single_event( time() + 2 * MINUTE_IN_SECONDS, 'lasery_xtool_sync_existing' );
 		return;
 	}
-	$targets = array();
-	$existing = get_posts( array(
-		'post_type' => LASERY_XTOOL_PRODUCT_TYPE,
-		'post_status' => array( 'publish', 'future', 'draft', 'pending', 'private' ),
-		'meta_key' => LASERY_XTOOL_SOURCE_ID,
-		'fields' => 'ids',
-		'posts_per_page' => -1,
-		'no_found_rows' => true,
-	) );
-	foreach ( $existing as $post_id ) {
-		$id = get_post_meta( $post_id, LASERY_XTOOL_SOURCE_ID, true );
-		if ( is_string( $id ) && preg_match( '/^[1-9][0-9]{0,19}$/D', $id ) ) {
-			$targets[ $id ][] = $post_id;
-		}
-	}
-	$fetched = lasery_xtool_fetch_source( array_keys( $targets ) );
-	if ( is_wp_error( $fetched ) ) {
-		// A failed batch does not invalidate unrelated observed offers. Their
-		// existing freshness limit still applies.
-		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $fetched->get_error_code() ), false );
+	$targets = lasery_xtool_sync_targets();
+	$failure = static function ( $code ) {
+		// A failed run does not invalidate observed offers; their 24-hour freshness limit still applies.
+		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $code ), false );
 		lasery_xtool_schedule_sync_retry();
+		lasery_xtool_alert_when_stale();
+		lasery_xtool_release_import_lock();
+	};
+	if ( ! $targets ) {
 		lasery_xtool_release_import_lock();
 		return;
 	}
-	$updated = 0;
-	$failed = 0;
-	foreach ( $fetched['products'] as $product ) {
-		if ( ! lasery_xtool_refresh_import_lock() ) {
-			update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'locklost', 'updated' => $updated, 'failed' => $failed ), false );
-			lasery_xtool_release_import_lock();
-			return;
+	if ( lasery_xtool_fetching_paused() ) {
+		$failure( 'paused' );
+		return;
+	}
+	$deadline = time() + 420;
+	$currency = lasery_xtool_currency( $deadline );
+	if ( is_wp_error( $currency ) ) {
+		$failure( $currency->get_error_code() );
+		return;
+	}
+	// A 304 page confirms the stored offers, so pages are requested conditionally only if every product
+	// that the last walk listed already holds its data (a product added since then needs a full walk).
+	$state         = get_option( LASERY_XTOOL_STATE );
+	$known         = is_array( $state ) && isset( $state['pages'] ) && is_array( $state['pages'] ) ? $state['pages'] : array();
+	$conditional   = (bool) $known;
+	$listed_before = array();
+	foreach ( $known as $page ) {
+		$listed_before += array_fill_keys( $page['ids'], true );
+	}
+	foreach ( $targets as $id => $rows ) {
+		foreach ( $rows as $row ) {
+			$conditional = $conditional && ( ! isset( $listed_before[ $id ] ) || ! empty( $row->hash ) );
 		}
-		foreach ( $targets[ $product['id'] ] as $post_id ) {
-			if ( lasery_xtool_save_source_data( $post_id, $product ) ) {
-				++$updated;
-			} else {
+	}
+	$source   = array( 'currency' => $currency, 'fetched_at' => time() );
+	$data     = array(); // Offers of the products on pages that changed.
+	$listed   = array(); // Products on pages that changed, valid or not.
+	$walk     = lasery_xtool_walk_catalog(
+		$conditional ? $known : array(),
+		$deadline,
+		static function ( $raw ) use ( $targets, &$data, &$listed ) {
+			// Only the site's products are validated, so an unrelated malformed product
+			// or one shifted between pages while xTool edits the catalogue cannot stop the sync.
+			foreach ( $raw as $entry ) {
+				$id = lasery_xtool_raw_product_id( $entry );
+				if ( isset( $targets[ $id ] ) ) {
+					$listed[ $id ] = true;
+					$product       = lasery_xtool_parse_product( $entry, false );
+					// A snapshot without variants cannot confirm an offer.
+					if ( $product && array_key_exists( 'variants', $product ) ) {
+						$data[ $id ] = $product;
+					}
+				}
+			}
+			return true;
+		}
+	);
+	if ( is_wp_error( $walk ) ) {
+		$failure( $walk->get_error_code() );
+		return;
+	}
+	$present = array();
+	foreach ( $walk['pages'] as $page ) {
+		$present += array_fill_keys( $page['ids'], true );
+	}
+	$now       = time();
+	$confirmed = array();
+	$updated   = 0;
+	$failed    = 0;
+	$absent    = array();
+	$stale     = array();
+	foreach ( $targets as $id => $rows ) {
+		foreach ( $rows as $row ) {
+			if ( ! isset( $present[ $id ] ) ) {
+				$absent[] = $row;
+			} elseif ( isset( $data[ $id ] ) ) {
+				$product = array_merge( $data[ $id ], $source );
+				if ( lasery_xtool_source_hash( $product ) === $row->hash ) {
+					$confirmed[] = $row;
+				} elseif ( ! lasery_xtool_refresh_import_lock() ) {
+					update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'locklost', 'updated' => $updated, 'failed' => $failed ), false );
+					lasery_xtool_release_import_lock();
+					return;
+				} elseif ( lasery_xtool_save_source_data( $row->id, $product ) ) {
+					++$updated;
+					lasery_xtool_mark_present( $row );
+				} else {
+					++$failed;
+				}
+			} elseif ( isset( $listed[ $id ] ) ) {
+				// Listed with unusable data: the offer cannot stay fresh.
 				++$failed;
+				$stale[] = $row->id;
+				if ( '' !== (string) $row->updated ) {
+					update_post_meta( $row->id, '_lasery_source_updated_at', '' );
+					lasery_xtool_schedule_cache_purge();
+				}
+			} else {
+				// On a page that answered 304: the stored offer is still the current one.
+				$confirmed[] = $row;
 			}
 		}
-		unset( $targets[ $product['id'] ] );
 	}
-	// An absent product must not retain a fresh availability or price.
-	$stale = array();
-	foreach ( $targets as $post_ids ) {
-		foreach ( $post_ids as $post_id ) {
-			$before = lasery_xtool_public_product_state( $post_id );
-			update_post_meta( $post_id, '_lasery_source_updated_at', '' );
-			lasery_xtool_product_state_changed( $post_id, $before );
-			$stale[] = $post_id;
-			++$failed;
+	foreach ( $confirmed as $row ) {
+		// An offer that was not fresh becomes visible again.
+		if ( ! lasery_xtool_timestamp_is_fresh( $row->updated ) ) {
+			lasery_xtool_schedule_cache_purge();
+		}
+		lasery_xtool_mark_present( $row );
+	}
+	lasery_xtool_confirm_offers( wp_list_pluck( $confirmed, 'id' ), $now );
+	// A walk that stopped before the last page, or one that lost a large part of the catalogue at once,
+	// says nothing reliable about absence.
+	$result = 'complete';
+	if ( ! $walk['complete'] ) {
+		$result = 'limit';
+	} elseif ( count( $absent ) > max( 5, count( $targets ) / 4 ) ) {
+		$result = 'anomaly';
+	} else {
+		foreach ( $absent as $row ) {
+			lasery_xtool_mark_absent( $row );
 		}
 	}
-	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $fetched['result'], 'updated' => $updated, 'failed' => $failed, 'stale' => $stale ), false );
+	foreach ( $absent as $row ) {
+		$stale[] = $row->id;
+	}
+	if ( $walk['complete'] ) {
+		update_option( LASERY_XTOOL_STATE, array( 'pages' => $walk['pages'] ), false );
+	}
+	update_option( 'lasery_xtool_last_ok', time(), false );
+	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed, 'stale' => $stale ), false );
 	lasery_xtool_release_import_lock();
 }
 
@@ -817,6 +1047,7 @@ function lasery_xtool_save_source_data( $post_id, $product ) {
 			$fields['currency'] = '_lasery_source_currency';
 			$fields['fetched_at'] = '_lasery_source_updated_at';
 		}
+		$new_images = array_key_exists( 'image_urls', $product ) && get_post_meta( $post_id, '_lasery_source_image_urls', true ) !== $product['image_urls'];
 		foreach ( $fields as $field => $key ) {
 			if ( ! array_key_exists( $field, $product ) ) {
 				continue;
@@ -825,6 +1056,13 @@ function lasery_xtool_save_source_data( $post_id, $product ) {
 			if ( get_post_meta( $post_id, $key, true ) !== $product[ $field ] ) {
 				return false;
 			}
+		}
+		if ( $new_images ) {
+			lasery_xtool_queue_images( $post_id );
+		}
+		// Last, so that a half-saved offer never matches its hash and is saved again by the next sync.
+		if ( array_key_exists( 'variants', $product ) ) {
+			update_post_meta( $post_id, '_lasery_source_hash', lasery_xtool_source_hash( $product ) );
 		}
 		return true;
 	} finally {

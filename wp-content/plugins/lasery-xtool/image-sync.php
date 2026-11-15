@@ -43,6 +43,8 @@ function lasery_xtool_product_gallery_items( $post_id ) {
 		$images[ $old_source ] = $old_id;
 	}
 	$gallery = array();
+	// The images' own records and meta, in two queries instead of two per image.
+	_prime_post_caches( array_filter( array_map( 'absint', $images ) ), false, true );
 	foreach ( $urls as $url ) {
 		$id = isset( $images[ $url ] ) ? absint( $images[ $url ] ) : 0;
 		if ( ! $id || 'attachment' !== get_post_type( $id ) || 'image/webp' !== get_post_mime_type( $id ) || ! get_attached_file( $id ) || ! file_exists( get_attached_file( $id ) ) ) {
@@ -75,31 +77,61 @@ function lasery_xtool_set_source_thumbnail( $post_id, $url, $attachment ) {
 	update_post_meta( $post_id, '_lasery_local_image_attachment_id', $attachment );
 }
 
-/** Called by a scheduler or manually via WP-CLI; never schedules itself. */
+const LASERY_XTOOL_IMAGE_QUEUE = 'lasery_xtool_image_queue';
+
+/** Products whose images need work: new products and products whose source images changed. */
+function lasery_xtool_queue_images( $post_id ) {
+	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
+	$queue = is_array( $queue ) ? $queue : array();
+	if ( ! in_array( (int) $post_id, $queue, true ) ) {
+		$queue[] = (int) $post_id;
+		update_option( LASERY_XTOOL_IMAGE_QUEUE, $queue );
+	}
+}
+
+/**
+ * Called by the system cron every twenty minutes and by WP-Cron; downloads at most three images per
+ * run and, while more are waiting, asks WP-Cron for the next run in a minute. A run with an empty queue
+ * does nothing, so only the daily audit (which rebuilds the queue from all products and repairs
+ * drift, such as a deleted media file) walks every image.
+ */
 add_action( 'lasery_xtool_sync_images', 'lasery_xtool_sync_images' );
 function lasery_xtool_sync_images() {
 	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) ) {
-		update_option( 'lasery_xtool_last_image_sync', array( 'time' => time(), 'result' => 'paused' ), false );
 		return;
+	}
+	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
+	$queue = is_array( $queue ) ? array_map( 'intval', $queue ) : array();
+	$audit = (int) get_option( 'lasery_xtool_image_audit' ) < time() - DAY_IN_SECONDS;
+	if ( ! $queue && ! $audit ) {
+		return;
+	}
+	// A run from WP-Cron is a web request with the default time limit.
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( 600 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
-		update_option( 'lasery_xtool_last_image_sync', array( 'time' => time(), 'result' => 'locked' ), false );
 		return;
 	}
-	$posts = get_posts( array(
-		'post_type' => LASERY_XTOOL_PRODUCT_TYPE,
-		'post_status' => array( 'publish', 'future', 'draft', 'pending', 'private' ),
-		'meta_key' => '_lasery_source_image_url',
-		'fields' => 'ids',
-		'posts_per_page' => -1,
-		'no_found_rows' => true,
-	) );
+	$posts = $queue;
+	if ( $audit ) {
+		$posts = get_posts( array(
+			'post_type' => LASERY_XTOOL_PRODUCT_TYPE,
+			'post_status' => array( 'publish', 'future', 'draft', 'pending', 'private' ),
+			'meta_key' => '_lasery_source_image_url',
+			'fields' => 'ids',
+			'posts_per_page' => -1,
+			'no_found_rows' => true,
+		) );
+		update_option( 'lasery_xtool_image_audit', time() );
+	}
 	$attempted = 0;
 	$imported = 0;
 	$failed = 0;
 	$result = 'complete';
 	$primary = array();
 	$other = array();
+	$missing = array(); // Images still to be stored, per product.
 	foreach ( $posts as $post_id ) {
 		$urls = lasery_xtool_source_image_urls( $post_id );
 		$images = get_post_meta( $post_id, '_lasery_local_gallery', true );
@@ -121,6 +153,7 @@ function lasery_xtool_sync_images() {
 				}
 				continue;
 			}
+			$missing[ $post_id ] = isset( $missing[ $post_id ] ) ? $missing[ $post_id ] + 1 : 1;
 			if ( isset( $retries[ $url ] ) && (int) $retries[ $url ] > time() ) {
 				continue;
 			}
@@ -133,7 +166,8 @@ function lasery_xtool_sync_images() {
 		}
 	}
 	// Fill each product's main image before spending the batch on galleries.
-	foreach ( array_slice( array_merge( $primary, $other ), 0, 3 ) as $job ) {
+	$jobs = array_merge( $primary, $other );
+	foreach ( array_slice( $jobs, 0, 3 ) as $job ) {
 		if ( ! lasery_xtool_refresh_import_lock() ) {
 			$result = 'locklost';
 			break;
@@ -156,13 +190,16 @@ function lasery_xtool_sync_images() {
 			}
 		} else {
 			++$imported;
+			--$missing[ $post_id ];
 			unset( $retries[ $url ] );
 			update_post_meta( $post_id, '_lasery_image_retries', wp_slash( $retries ) );
 		}
 	}
-	if ( 'complete' === $result && count( $primary ) + count( $other ) > $attempted ) {
+	if ( 'complete' === $result && count( $jobs ) > $attempted ) {
 		$result = 'batch';
+		wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'lasery_xtool_sync_images' );
 	}
+	update_option( LASERY_XTOOL_IMAGE_QUEUE, array_keys( array_filter( $missing ) ) );
 	update_option( 'lasery_xtool_last_image_sync', compact( 'result', 'attempted', 'imported', 'failed' ) + array( 'time' => time() ), false );
 	lasery_xtool_release_import_lock();
 }
