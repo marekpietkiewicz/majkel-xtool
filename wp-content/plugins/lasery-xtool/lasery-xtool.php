@@ -831,6 +831,8 @@ function lasery_xtool_sync_existing( $force = false ) {
 		set_time_limit( 600 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
+		// Another import, or the image sync, holds the lock; this one is needed within minutes.
+		wp_schedule_single_event( time() + 2 * MINUTE_IN_SECONDS, 'lasery_xtool_sync_existing' );
 		return;
 	}
 	$targets = lasery_xtool_sync_targets();

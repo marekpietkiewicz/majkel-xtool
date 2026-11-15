@@ -912,4 +912,465 @@ return [
             'uk' => [ 'Змінний кабель для під’єднання ротаційної насадки RA2 Pro до лазерів xTool S1, F1, F1 Ultra і M1 Ultra.', 'Відрізняється від кабелю RA2 Pro для M1, D1 Pro і P2.' ],
         ],
     ],
+    // Original xTool consumables and spare parts of the machines added in November 2026.
+    // C1
+    '15509809135829' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Wymienne ostrza tnące do C1', 'de' => 'Ersatz-Schneidklingen für C1', 'ru' => 'Сменные режущие лезвия для C1', 'uk' => 'Змінні ріжучі леза для C1' ],
+        'features' => [
+            'pl' => [ 'Wymienne ostrza tnące do plotera tnącego xTool C1.' ],
+            'en' => [ 'Cutting replacement blades for the xTool C1 colour cutter.' ],
+            'de' => [ 'Ersatz-Schneidklingen für den Schneidplotter xTool C1.' ],
+            'ru' => [ 'Сменные режущие лезвия для режущего плоттера xTool C1.' ],
+            'uk' => [ 'Змінні ріжучі леза для ріжучого плотера xTool C1.' ],
+        ],
+    ],
+    '15509808939221' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Wymienne ostrza obrotowe do C1', 'de' => 'Ersatz-Rotationsklingen für C1', 'ru' => 'Сменные роторные лезвия для C1', 'uk' => 'Змінні роторні леза для C1' ],
+        'features' => [
+            'pl' => [ 'Wymienne ostrza obrotowe do plotera tnącego xTool C1.' ],
+            'en' => [ 'Rotary replacement blades for the xTool C1 colour cutter.' ],
+            'de' => [ 'Ersatz-Rotationsklingen für den Schneidplotter xTool C1.' ],
+            'ru' => [ 'Сменные роторные лезвия для режущего плоттера xTool C1.' ],
+            'uk' => [ 'Змінні роторні леза для ріжучого плотера xTool C1.' ],
+        ],
+    ],
+    '15509808775381' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Wymienne ostrza Deep-Point do C1', 'de' => 'Deep-Point-Ersatzklingen für C1', 'ru' => 'Сменные лезвия Deep-Point для C1', 'uk' => 'Змінні леза Deep-Point для C1' ],
+        'features' => [
+            'pl' => [ 'Wymienne ostrza Deep-Point do plotera tnącego xTool C1.' ],
+            'en' => [ 'Deep-Point replacement blades for the xTool C1 colour cutter.' ],
+            'de' => [ 'Deep-Point-Ersatzklingen für den Schneidplotter xTool C1.' ],
+            'ru' => [ 'Сменные лезвия Deep-Point для режущего плоттера xTool C1.' ],
+            'uk' => [ 'Змінні леза Deep-Point для ріжучого плотера xTool C1.' ],
+        ],
+    ],
+    '15509808283861' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Wymienne ostrza Fine-Point do C1', 'de' => 'Fine-Point-Ersatzklingen für C1', 'ru' => 'Сменные лезвия Fine-Point для C1', 'uk' => 'Змінні леза Fine-Point для C1' ],
+        'features' => [
+            'pl' => [ 'Wymienne ostrza Fine-Point do plotera tnącego xTool C1.' ],
+            'en' => [ 'Fine-Point replacement blades for the xTool C1 colour cutter.' ],
+            'de' => [ 'Fine-Point-Ersatzklingen für den Schneidplotter xTool C1.' ],
+            'ru' => [ 'Сменные лезвия Fine-Point для режущего плоттера xTool C1.' ],
+            'uk' => [ 'Змінні леза Fine-Point для ріжучого плотера xTool C1.' ],
+        ],
+    ],
+    '15512116035797' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Narzędzia z ostrzami do C1', 'de' => 'Klingenwerkzeuge für C1', 'ru' => 'Инструменты с лезвиями для C1', 'uk' => 'Інструменти з лезами для C1' ],
+        'features' => [
+            'pl' => [ 'Narzędzia z ostrzami do plotera tnącego xTool C1.', 'Dostępne warianty: ostrze Fine-Point, ostrze Deep-Point, końcówka do transferu folii i bigowania, ostrze obrotowe oraz ostrze tnące.' ],
+            'en' => [ 'Blade tools for the xTool C1 colour cutter.', 'Available options: Fine-Point blade, Deep-Point blade, foil transfer and scoring tip, rotary blade and cutting blade.' ],
+            'de' => [ 'Klingenwerkzeuge für den Schneidplotter xTool C1.', 'Verfügbare Varianten: Fine-Point-Klinge, Deep-Point-Klinge, Spitze für Folientransfer und Rillen, Rotationsklinge und Schneidklinge.' ],
+            'ru' => [ 'Инструменты с лезвиями для режущего плоттера xTool C1.', 'Доступные варианты: лезвие Fine-Point, лезвие Deep-Point, наконечник для переноса фольги и биговки, роторное лезвие и режущее лезвие.' ],
+            'uk' => [ 'Інструменти з лезами для ріжучого плотера xTool C1.', 'Доступні варіанти: лезо Fine-Point, лезо Deep-Point, наконечник для перенесення фольги та бигування, роторне лезо й ріжуче лезо.' ],
+        ],
+    ],
+    '15509808120021' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Pisaki Fine-Point do C1', 'de' => 'Fine-Point-Stifte für C1', 'ru' => 'Ручки Fine-Point для C1', 'uk' => 'Ручки Fine-Point для C1' ],
+        'features' => [
+            'pl' => [ 'Pisaki Fine-Point do plotera tnącego xTool C1.' ],
+            'en' => [ 'Fine-Point pens for the xTool C1 colour cutter.' ],
+            'de' => [ 'Fine-Point-Stifte für den Schneidplotter xTool C1.' ],
+            'ru' => [ 'Ручки Fine-Point для режущего плоттера xTool C1.' ],
+            'uk' => [ 'Ручки Fine-Point для ріжучого плотера xTool C1.' ],
+        ],
+    ],
+    '15509807497429' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Zestaw pisaków Hot Foil do C1', 'de' => 'Hot-Foil-Stiftset für C1', 'ru' => 'Набор ручек Hot Foil для C1', 'uk' => 'Набір ручок Hot Foil для C1' ],
+        'features' => [
+            'pl' => [ 'Zestaw pisaków Hot Foil do transferu folii w ploterze tnącym xTool C1.', 'Trzy wymienne końcówki: 0,5 mm, 1,5 mm i 2,5 mm; transfer folii metalicznej na karton, skórę, akryl i inne materiały.' ],
+            'en' => [ 'Hot foil pen set for foil transfer on the xTool C1 colour cutter.', 'Three interchangeable tips: 0.5 mm, 1.5 mm and 2.5 mm; transfers metallic foil onto cardstock, leather, acrylic and other materials.' ],
+            'de' => [ 'Hot-Foil-Stiftset für den Folientransfer mit dem Schneidplotter xTool C1.', 'Drei austauschbare Spitzen: 0,5 mm, 1,5 mm und 2,5 mm; überträgt Metallfolie auf Karton, Leder, Acryl und andere Materialien.' ],
+            'ru' => [ 'Набор ручек Hot Foil для переноса фольги на режущем плоттере xTool C1.', 'Три сменных наконечника: 0,5 мм, 1,5 мм и 2,5 мм; перенос металлизированной фольги на картон, кожу, акрил и другие материалы.' ],
+            'uk' => [ 'Набір ручок Hot Foil для перенесення фольги на ріжучому плотері xTool C1.', 'Три змінні наконечники: 0,5 мм, 1,5 мм і 2,5 мм; перенесення металізованої фольги на картон, шкіру, акрил та інші матеріали.' ],
+        ],
+    ],
+    '15512445812949' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Kaseta z tuszem DURA CMYK do C1', 'de' => 'DURA CMYK-Tintenpatrone für C1', 'ru' => 'Картридж с чернилами DURA CMYK для C1', 'uk' => 'Картридж із чорнилом DURA CMYK для C1' ],
+        'features' => [
+            'pl' => [ 'Kaseta z tuszem DURA CMYK przeznaczona do xTool C1.', 'Wodny tusz pigmentowy do pełnokolorowego druku.' ],
+            'en' => [ 'DURA CMYK ink cartridge made for the xTool C1.', 'Water-based pigment ink for full-colour printing.' ],
+            'de' => [ 'DURA CMYK-Tintenpatrone für den xTool C1.', 'Wasserbasierte Pigmenttinte für den Vollfarbdruck.' ],
+            'ru' => [ 'Картридж с чернилами DURA CMYK для xTool C1.', 'Водные пигментные чернила для полноцветной печати.' ],
+            'uk' => [ 'Картридж із чорнилом DURA CMYK для xTool C1.', 'Водні пігментні чорнила для повнокольорового друку.' ],
+        ],
+    ],
+    '15512445386965' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Papier transferowy do druku, świecący w ciemności, z automatycznymi ustawieniami C1 (10 szt.)', 'de' => 'Bedruckbares Transferpapier, nachleuchtend, mit C1-Auto-Einstellung (10 Stk.)', 'ru' => 'Печатная термотрансферная бумага, светящаяся в темноте, с автонастройкой C1 (10 шт.)', 'uk' => 'Друкований термотрансферний папір, що світиться в темряві, з автоналаштуванням C1 (10 шт.)' ],
+        'features' => [
+            'pl' => [ 'Papier do druku i termotransferu, świecący w ciemności, do xTool C1 (10 szt.); dostępny w wariantach kolorystycznych niebieskim i zielonym.', 'Każdy arkusz ma kod QR, który C1 skanuje, by automatycznie wczytać ustawienia druku; projektu nie trzeba odbijać lustrzanie.' ],
+            'en' => [ 'Printable glow-in-the-dark heat transfer paper for the xTool C1 (10 pcs); available in Blue and Green.', 'Each sheet carries a QR code that the C1 scans to load the print settings automatically; the design does not need to be mirrored.' ],
+            'de' => [ 'Bedruckbares, im Dunkeln nachleuchtendes Transferpapier für den xTool C1 (10 Stk.); in den Varianten Blau und Grün erhältlich.', 'Jedes Blatt trägt einen QR-Code, den der C1 scannt, um die Druckeinstellungen automatisch zu laden; das Motiv muss nicht gespiegelt werden.' ],
+            'ru' => [ 'Печатная термотрансферная бумага, светящаяся в темноте, для xTool C1 (10 шт.); доступна в вариантах синий и зелёный.', 'На каждом листе есть QR-код, который C1 сканирует, чтобы автоматически загрузить настройки печати; изображение не нужно отражать зеркально.' ],
+            'uk' => [ 'Друкований термотрансферний папір, що світиться в темряві, для xTool C1 (10 шт.); доступний у варіантах синій і зелений.', 'На кожному аркуші є QR-код, який C1 сканує, щоб автоматично завантажити налаштування друку; зображення не потрібно дзеркально відображати.' ],
+        ],
+    ],
+    '15512445518037' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Papier na naklejki Sparkle do druku z automatycznymi ustawieniami C1 (20 szt.)', 'de' => 'Bedruckbares Sparkle-Aufkleberpapier mit C1-Auto-Einstellung (20 Stk.)', 'ru' => 'Печатная бумага для наклеек Sparkle с автонастройкой C1 (20 шт.)', 'uk' => 'Друкований папір для наліпок Sparkle з автоналаштуванням C1 (20 шт.)' ],
+        'features' => [
+            'pl' => [ 'Papier na naklejki Sparkle do druku w xTool C1 (20 szt.); samoprzylepny, z drobnymi gwiaździstymi drobinkami.', 'Każdy arkusz ma kod QR, który C1 skanuje, by automatycznie wczytać ustawienia druku.' ],
+            'en' => [ 'Printable Sparkle sticker paper for the xTool C1 (20 pcs); self-adhesive, with fine starry flecks.', 'Each sheet carries a QR code that the C1 scans to load the print settings automatically.' ],
+            'de' => [ 'Bedruckbares Sparkle-Aufkleberpapier für den xTool C1 (20 Stk.); selbstklebend, mit feinen sternförmigen Flecken.', 'Jedes Blatt trägt einen QR-Code, den der C1 scannt, um die Druckeinstellungen automatisch zu laden.' ],
+            'ru' => [ 'Печатная бумага для наклеек Sparkle для xTool C1 (20 шт.); самоклеящаяся, с мелкими звёздными блёстками.', 'На каждом листе есть QR-код, который C1 сканирует, чтобы автоматически загрузить настройки печати.' ],
+            'uk' => [ 'Друкований папір для наліпок Sparkle для xTool C1 (20 шт.); самоклейний, з дрібними зірчастими блискітками.', 'На кожному аркуші є QR-код, який C1 сканує, щоб автоматично завантажити налаштування друку.' ],
+        ],
+    ],
+    // M2
+    '9610269491413' => [
+        'fits' => [ '15452856942805' ],
+        'titles' => [ 'pl' => 'Multimaterialowy zestaw startowy Plus do M2/M1 Ultra (84 szt.)', 'de' => 'Multimaterial-Starter-Set Plus für M2/M1 Ultra (84 Stk.)', 'ru' => 'Мультиматериальный стартовый набор Plus для M2/M1 Ultra (84 шт.)', 'uk' => 'Мультиматеріальний стартовий набір Plus для M2/M1 Ultra (84 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów Plus (84 szt.) do xTool M2/M1 Ultra.', 'Rozszerzony zestaw materiałów do domowych projektów DIY.' ],
+            'en' => [ 'Starter material pack Plus (84 pcs) for the xTool M2/M1 Ultra.', 'Deluxe material package for home DIY projects.' ],
+            'de' => [ 'Material-Starter-Set Plus (84 Stk.) für den xTool M2/M1 Ultra.', 'Umfangreiches Materialpaket für Heimwerker- und Bastelprojekte.' ],
+            'ru' => [ 'Стартовый набор материалов Plus (84 шт.) для xTool M2/M1 Ultra.', 'Расширенный набор материалов для домашних DIY-проектов.' ],
+            'uk' => [ 'Стартовий набір матеріалів Plus (84 шт.) для xTool M2/M1 Ultra.', 'Розширений набір матеріалів для домашніх DIY-проєктів.' ],
+        ],
+    ],
+    '9489575870677' => [
+        'fits' => [ '15452856942805' ],
+        'titles' => [ 'pl' => 'Multimaterialowy zestaw startowy do M2/M1 Ultra (62 szt.)', 'de' => 'Multimaterial-Starter-Set für M2/M1 Ultra (62 Stk.)', 'ru' => 'Мультиматериальный стартовый набор для M2/M1 Ultra (62 шт.)', 'uk' => 'Мультиматеріальний стартовий набір для M2/M1 Ultra (62 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów (62 szt.) do xTool M2/M1 Ultra.', 'W zestawie m.in. filc, karton, samoprzylepny winyl, skóra PU do laserowania, blachy aluminiowe i akcesoria.' ],
+            'en' => [ 'Starter material pack (62 pcs) for the xTool M2/M1 Ultra.', 'Includes felt, cardstock, self-adhesive vinyl, laserable PU leather, aluminium sheets and accessories.' ],
+            'de' => [ 'Material-Starter-Set (62 Stk.) für den xTool M2/M1 Ultra.', 'Enthält u. a. Filz, Karton, selbstklebende Vinylfolie, lasergeeignetes PU-Leder, Aluminiumbleche und Zubehör.' ],
+            'ru' => [ 'Стартовый набор материалов (62 шт.) для xTool M2/M1 Ultra.', 'В наборе, в частности, фетр, картон, самоклеящийся винил, PU-кожа для лазерной обработки, алюминиевые листы и аксессуары.' ],
+            'uk' => [ 'Стартовий набір матеріалів (62 шт.) для xTool M2/M1 Ultra.', 'У наборі, зокрема, фетр, картон, самоклейний вініл, PU-шкіра для лазерної обробки, алюмінієві листи та аксесуари.' ],
+        ],
+    ],
+    // O1 Omni
+    '15473936695509' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Biała folia transferowa TPU A3 do druku UV do O1 Omni (20 szt.)', 'de' => 'Weiße TPU-UV-Transferfolie A3 für O1 Omni (20 Stk.)', 'ru' => 'Белая TPU-плёнка A3 для УФ-печати и переноса для O1 Omni (20 шт.)', 'uk' => 'Біла TPU-плівка A3 для УФ-друку та перенесення для O1 Omni (20 шт.)' ],
+        'features' => [
+            'pl' => [ 'Biała folia transferowa TPU w formacie A3 do druku UV w xTool O1 Omni Printer.', 'Zestaw zawiera 20 wstępnie przyciętych arkuszy A3; przeznaczona m.in. do koszulek, odzieży sportowej, czapek, toreb i naszywek z logo.' ],
+            'en' => [ 'White A3 TPU transfer film for UV printing with the xTool O1 Omni Printer.', 'Includes 20 pre-cut A3 sheets; intended for T-shirts, sportswear, hats, bags and logo patches, among other uses.' ],
+            'de' => [ 'Weiße TPU-Transferfolie im Format A3 für den UV-Druck mit dem xTool O1 Omni Printer.', 'Enthält 20 vorgeschnittene A3-Bögen; vorgesehen u. a. für T-Shirts, Sportbekleidung, Mützen, Taschen und Logo-Patches.' ],
+            'ru' => [ 'Белая TPU-плёнка формата A3 для УФ-печати и переноса на xTool O1 Omni Printer.', 'В комплекте 20 заранее нарезанных листов A3; предназначена, в частности, для футболок, спортивной одежды, кепок, сумок и нашивок с логотипом.' ],
+            'uk' => [ 'Біла TPU-плівка формату A3 для УФ-друку та перенесення на xTool O1 Omni Printer.', 'У комплекті 20 заздалегідь нарізаних аркушів A3; призначена, зокрема, для футболок, спортивного одягу, кепок, сумок і нашивок з логотипом.' ],
+        ],
+    ],
+    '9537645904085' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Zestaw rolek folii A/B UV DTF do O1 Omni Printer', 'de' => 'UV-DTF-A/B-Folienrollen-Set für O1 Omni Printer', 'ru' => 'Набор рулонов плёнки A/B для UV DTF для O1 Omni Printer', 'uk' => 'Набір рулонів плівки A/B для UV DTF для O1 Omni Printer' ],
+        'features' => [
+            'pl' => [ 'Zestaw rolek folii A/B do druku UV DTF w xTool O1 Omni Printer.', 'W zestawie: folia A (12,2 in × 82 ft, ok. 31 cm × 25 m), folia B (12,2 in × 98 ft, ok. 31 cm × 30 m) oraz samoprzylepna tuba papierowa do zbierania odpadów folii A.' ],
+            'en' => [ 'A/B film roll set for UV DTF printing with the xTool O1 Omni Printer.', 'Includes A film (12.2 in x 82 ft), transfer B film (12.2 in x 98 ft) and a sticky paper tube for collecting the A film waste.' ],
+            'de' => [ 'A/B-Folienrollen-Set für den UV-DTF-Druck mit dem xTool O1 Omni Printer.', 'Enthalten sind A-Folie (12,2 in × 82 ft, ca. 31 cm × 25 m), B-Folie (12,2 in × 98 ft, ca. 31 cm × 30 m) und eine klebende Papierrolle zum Sammeln des A-Folien-Abfalls.' ],
+            'ru' => [ 'Набор рулонов плёнки A/B для печати UV DTF на xTool O1 Omni Printer.', 'В комплекте: плёнка A (12,2 дюйма × 82 фута, ок. 31 см × 25 м), плёнка B (12,2 дюйма × 98 футов, ок. 31 см × 30 м) и липкая бумажная гильза для сбора отходов плёнки A.' ],
+            'uk' => [ 'Набір рулонів плівки A/B для друку UV DTF на xTool O1 Omni Printer.', 'У комплекті: плівка A (12,2 дюйма × 82 фути, бл. 31 см × 25 м), плівка B (12,2 дюйма × 98 футів, бл. 31 см × 30 м) і липка паперова гільза для збору відходів плівки A.' ],
+        ],
+    ],
+    '9574097780949' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Folia DTF do O1 Omni Printer', 'de' => 'DTF-Folie für O1 Omni Printer', 'ru' => 'DTF-плёнка для O1 Omni Printer', 'uk' => 'DTF-плівка для O1 Omni Printer' ],
+        'features' => [
+            'pl' => [ 'Folia do druku DTF w xTool O1 Omni Printer.', 'Służy do przenoszenia wzorów na tkaniny, takie jak koszulki i bluzy, metodą druku i prasowania na gorąco.' ],
+            'en' => [ 'Film for DTF printing with the xTool O1 Omni Printer.', 'Used to transfer designs onto fabrics such as T-shirts and sweatshirts by printing and heat pressing.' ],
+            'de' => [ 'Folie für den DTF-Druck mit dem xTool O1 Omni Printer.', 'Dient dazu, Motive per Druck und Heißpressen auf Stoffe wie T-Shirts und Sweatshirts zu übertragen.' ],
+            'ru' => [ 'Плёнка для DTF-печати на xTool O1 Omni Printer.', 'Служит для переноса изображений на ткани, например футболки и толстовки, методом печати и горячего прессования.' ],
+            'uk' => [ 'Плівка для DTF-друку на xTool O1 Omni Printer.', 'Слугує для перенесення зображень на тканини, як-от футболки та світшоти, методом друку й гарячого пресування.' ],
+        ],
+    ],
+    // X1
+    '15498508140757' => [
+        'fits' => [ '15473430692053' ],
+        'titles' => [ 'pl' => 'Zestaw startowy materiałów Fiber/MOPA do X1 (130 szt.)', 'de' => 'Fiber/MOPA-Laser-Material-Starter-Set für X1 (130 Stk.)', 'ru' => 'Стартовый набор материалов Fiber/MOPA для X1 (130 шт.)', 'uk' => 'Стартовий набір матеріалів Fiber/MOPA для X1 (130 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów do lasera Fiber/MOPA (130 szt.) do xTool X1 z dodatkową głowicą MOPA.', 'Przeznaczony do znakowania metali, m.in. kolorowego znakowania stali nierdzewnej, aluminium anodowanego i tytanu.' ],
+            'en' => [ 'Fiber/MOPA laser material starter pack (130 pcs) for the xTool X1 with an added MOPA head.', 'Intended for metal marking, including colour marking of stainless steel, anodized aluminium and titanium.' ],
+            'de' => [ 'Material-Starter-Set für Fiber/MOPA-Laser (130 Stk.) für den xTool X1 mit zusätzlichem MOPA-Kopf.', 'Vorgesehen für die Metallmarkierung, u. a. Farbmarkierung von Edelstahl, eloxiertem Aluminium und Titan.' ],
+            'ru' => [ 'Стартовый набор материалов для Fiber/MOPA-лазера (130 шт.) для xTool X1 с дополнительной головкой MOPA.', 'Предназначен для маркировки металлов, в том числе цветной маркировки нержавеющей стали, анодированного алюминия и титана.' ],
+            'uk' => [ 'Стартовий набір матеріалів для Fiber/MOPA-лазера (130 шт.) для xTool X1 з додатковою головкою MOPA.', 'Призначений для маркування металів, зокрема кольорового маркування нержавіючої сталі, анодованого алюмінію та титану.' ],
+        ],
+    ],
+    '15498508042453' => [
+        'fits' => [ '15473430692053', '9187692970197' ],
+        'titles' => [ 'pl' => 'Zestaw startowy materiałów do lasera UV do X1/F2 Ultra UV (15 szt.)', 'de' => 'UV-Laser-Material-Starter-Set für X1/F2 Ultra UV (15 Stk.)', 'ru' => 'Стартовый набор материалов для УФ-лазера для X1/F2 Ultra UV (15 шт.)', 'uk' => 'Стартовий набір матеріалів для УФ-лазера для X1/F2 Ultra UV (15 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów do lasera UV (15 szt.) do xTool X1 i F2 Ultra UV.', 'Zestaw szklanych półfabrykatów przeznaczonych do zastosowań z laserem UV.' ],
+            'en' => [ 'UV laser material starter pack (15 pcs) for the xTool X1 and F2 Ultra UV.', 'A kit of glass blanks selected for UV laser applications.' ],
+            'de' => [ 'Material-Starter-Set für UV-Laser (15 Stk.) für den xTool X1 und F2 Ultra UV.', 'Set aus Glasrohlingen, die für UV-Laseranwendungen ausgewählt wurden.' ],
+            'ru' => [ 'Стартовый набор материалов для УФ-лазера (15 шт.) для xTool X1 и F2 Ultra UV.', 'Набор стеклянных заготовок, подобранных для применения с УФ-лазером.' ],
+            'uk' => [ 'Стартовий набір матеріалів для УФ-лазера (15 шт.) для xTool X1 і F2 Ultra UV.', 'Набір скляних заготовок, дібраних для застосування з УФ-лазером.' ],
+        ],
+    ],
+    // Apparel Printer Plus
+    '15493080285397' => [
+        'fits' => [ '9573828133077' ],
+        'titles' => [ 'pl' => 'Zestaw do wymiany pompy białego tuszu do Apparel Printer/Plus', 'de' => 'Ersatzset für die Weißtinten-Pumpe für Apparel Printer/Plus', 'ru' => 'Комплект для замены насоса белых чернил для Apparel Printer/Plus', 'uk' => 'Комплект для заміни насоса білого чорнила для Apparel Printer/Plus' ],
+        'features' => [
+            'pl' => [ 'Oficjalny zestaw do wymiany pompy białego tuszu w xTool Apparel Printer i Apparel Printer Plus.', 'W zestawie narzędzie ułatwiające samodzielną wymianę pompy; nie są potrzebne dodatkowe narzędzia.' ],
+            'en' => [ 'Official replacement kit for the white ink pump of the xTool Apparel Printer and Apparel Printer Plus.', 'The included tool makes DIY pump replacement easier; no extra tools needed.' ],
+            'de' => [ 'Offizielles Ersatzset für die Weißtinten-Pumpe des xTool Apparel Printer und Apparel Printer Plus.', 'Das enthaltene Werkzeug erleichtert den Pumpenwechsel in Eigenregie; es sind keine weiteren Werkzeuge nötig.' ],
+            'ru' => [ 'Официальный комплект для замены насоса белых чернил в xTool Apparel Printer и Apparel Printer Plus.', 'Входящий в комплект инструмент облегчает самостоятельную замену насоса; дополнительные инструменты не нужны.' ],
+            'uk' => [ 'Офіційний комплект для заміни насоса білого чорнила в xTool Apparel Printer і Apparel Printer Plus.', 'Інструмент у комплекті полегшує самостійну заміну насоса; додаткові інструменти не потрібні.' ],
+        ],
+    ],
+    // WonderPress
+    '9537634468053' => [
+        'fits' => [ '9420620202197' ],
+        'titles' => [ 'pl' => 'Filtr do WonderPress', 'de' => 'Filter für WonderPress', 'ru' => 'Фильтр для WonderPress', 'uk' => 'Фільтр для WonderPress' ],
+        'features' => [
+            'pl' => [ 'Filtr zamienny do modułu grzewczego (baking module) xTool WonderPress.', 'Zestaw zawiera 1 filtr; według xTool wychwytuje dym, opary i zapachy powstające podczas nagrzewania i prasowania.' ],
+            'en' => [ 'Replacement filter for the baking module of the xTool WonderPress.', 'One filter per pack; according to xTool, it captures the smoke, vapour and smells released during heating and pressing.' ],
+            'de' => [ 'Ersatzfilter für das Heizmodul (Baking Module) der xTool WonderPress.', 'Ein Filter pro Packung; laut xTool fängt er Rauch, Dämpfe und Gerüche auf, die beim Erhitzen und Pressen entstehen.' ],
+            'ru' => [ 'Сменный фильтр для модуля нагрева (baking module) xTool WonderPress.', 'В упаковке 1 фильтр; по данным xTool, он улавливает дым, пары и запахи, образующиеся при нагреве и прессовании.' ],
+            'uk' => [ 'Змінний фільтр для модуля нагріву (baking module) xTool WonderPress.', 'В упаковці 1 фільтр; за даними xTool, він вловлює дим, пари та запахи, що утворюються під час нагрівання та пресування.' ],
+        ],
+    ],
+    '9621007728853' => [
+        'fits' => [ '9420620202197' ],
+        'titles' => [ 'pl' => 'Regulowany przyrząd do etui na telefon do WonderPress', 'de' => 'Verstellbare Vorrichtung für Handyhüllen für WonderPress', 'ru' => 'Регулируемое приспособление для чехлов телефонов для WonderPress', 'uk' => 'Регульоване пристосування для чохлів телефонів для WonderPress' ],
+        'features' => [
+            'pl' => [ 'Regulowany przyrząd (jig) do etui na telefon do xTool WonderPress.', 'Wkłada się go do etui, gdzie podpiera je od wewnątrz podczas prasowania; sprężynowe krawędzie z czterech stron dopasowują się do wnętrza etui.' ],
+            'en' => [ 'Adjustable phone case jig for the xTool WonderPress.', 'It sits inside the case and braces it from within during pressing; spring-loaded edges on all four sides adjust to the inside of the case.' ],
+            'de' => [ 'Verstellbare Vorrichtung (Jig) für Handyhüllen für die xTool WonderPress.', 'Sie sitzt in der Hülle und stützt sie beim Pressen von innen; federnde Kanten an allen vier Seiten passen sich dem Innenraum der Hülle an.' ],
+            'ru' => [ 'Регулируемое приспособление (джиг) для чехлов телефонов для xTool WonderPress.', 'Вставляется внутрь чехла и поддерживает его изнутри при прессовании; подпружиненные края с четырёх сторон подстраиваются под внутреннюю поверхность чехла.' ],
+            'uk' => [ 'Регульоване пристосування (джиг) для чохлів телефонів для xTool WonderPress.', 'Вставляється всередину чохла й підтримує його зсередини під час пресування; підпружинені краї з чотирьох боків підлаштовуються під внутрішню поверхню чохла.' ],
+        ],
+    ],
+    // O1 Omni
+    '9574098010325' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Roztwór do wstępnej obróbki tkanin xTool Selected do O1 Omni', 'de' => 'xTool Selected Vorbehandlungslösung für O1 Omni', 'ru' => 'Раствор для предварительной обработки ткани xTool Selected для O1 Omni', 'uk' => 'Розчин для попередньої обробки тканини xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Roztwór do wstępnej obróbki tkanin (pretreatment) do drukarki xTool O1 Omni, stosowany w druku DTG.', 'Pojemność 500 ml; dostępny w wersjach do ciemnych i do jasnych ubrań.' ],
+            'en' => [ 'Pretreatment solution for fabrics for the xTool O1 Omni printer, used in DTG printing.', '500 ml; available in versions for dark-coloured and for light-coloured garments.' ],
+            'de' => [ 'Vorbehandlungslösung für Textilien für den Drucker xTool O1 Omni im DTG-Druck.', '500 ml; erhältlich in Varianten für dunkle und für helle Kleidungsstücke.' ],
+            'ru' => [ 'Раствор для предварительной обработки ткани (pretreatment) для принтера xTool O1 Omni, применяется при DTG-печати.', '500 мл; доступен в вариантах для тёмной и для светлой одежды.' ],
+            'uk' => [ 'Розчин для попередньої обробки тканини (pretreatment) для принтера xTool O1 Omni, застосовується в DTG-друку.', '500 мл; доступний у варіантах для темного та для світлого одягу.' ],
+        ],
+    ],
+    '9574097846485' => [
+        'fits' => [ '9420620202197' ],
+        'titles' => [ 'pl' => 'Zestaw startowy półfabrykatów do sublimacji do WonderPress (76 szt.)', 'de' => 'Starter-Set Sublimationsrohlinge für WonderPress (76 Stk.)', 'ru' => 'Стартовый набор заготовок для сублимации для WonderPress (76 шт.)', 'uk' => 'Стартовий набір заготовок для сублімації для WonderPress (76 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy półfabrykatów do sublimacji do xTool WonderPress, 76 szt.', 'W zestawie półfabrykaty z fabryczną powłoką sublimacyjną oraz rękawice odporne na ciepło.' ],
+            'en' => [ 'Sublimation blanks starter pack for the xTool WonderPress, 76 pcs.', 'Contains blanks with a factory sublimation coating and heat-resistant gloves.' ],
+            'de' => [ 'Starter-Set mit Sublimationsrohlingen für die xTool WonderPress, 76 Stk.', 'Enthält Rohlinge mit werkseitiger Sublimationsbeschichtung sowie hitzebeständige Handschuhe.' ],
+            'ru' => [ 'Стартовый набор заготовок для сублимации для xTool WonderPress, 76 шт.', 'В набор входят заготовки с заводским сублимационным покрытием и термостойкие перчатки.' ],
+            'uk' => [ 'Стартовий набір заготовок для сублімації для xTool WonderPress, 76 шт.', 'До набору входять заготовки із заводським сублімаційним покриттям і термостійкі рукавички.' ],
+        ],
+    ],
+    '9544316158165' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Zestaw startowy materiałów do druku UV do O1 Omni', 'de' => 'Starter-Set UV-bedruckbare Materialien für O1 Omni', 'ru' => 'Стартовый набор материалов для UV-печати для O1 Omni', 'uk' => 'Стартовий набір матеріалів для UV-друку для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów do druku UV na drukarce xTool O1 Omni; dostępny w wersjach Single UV, Dual UV i DT+UV.', 'W zestawie materiały: kryształ, ceramika, cynk, akryl, drewno, szkło, ekoskóra i płótno oraz chusteczki gruntujące do szkła i ceramiki, do metalu i do akrylu.' ],
+            'en' => [ 'UV-printable materials starter pack for the xTool O1 Omni printer; available in Single UV, Dual UV and DT+UV versions.', 'Contains crystal, ceramic, zinc, acrylic, wood, glass, leatherette and canvas materials, plus primer wipes for glass and ceramics, for metal and for acrylic.' ],
+            'de' => [ 'Starter-Set mit Materialien für den UV-Druck für den Drucker xTool O1 Omni; erhältlich in den Varianten Single UV, Dual UV und DT+UV.', 'Enthält Materialien aus Kristall, Keramik, Zink, Acryl, Holz, Glas, Kunstleder und Leinwand sowie Primer-Tücher für Glas und Keramik, für Metall und für Acryl.' ],
+            'ru' => [ 'Стартовый набор материалов для UV-печати на принтере xTool O1 Omni; доступен в вариантах Single UV, Dual UV и DT+UV.', 'В набор входят материалы: кристалл, керамика, цинк, акрил, дерево, стекло, кожзаменитель и холст, а также грунтовочные салфетки для стекла и керамики, для металла и для акрила.' ],
+            'uk' => [ 'Стартовий набір матеріалів для UV-друку на принтері xTool O1 Omni; доступний у варіантах Single UV, Dual UV і DT+UV.', 'До набору входять матеріали: кристал, кераміка, цинк, акрил, дерево, скло, шкірзамінник і полотно, а також ґрунтувальні серветки для скла та кераміки, для металу та для акрилу.' ],
+        ],
+    ],
+    '9537645412565' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Arkusze folii A UV DTF xTool Selected do O1 Omni', 'de' => 'xTool Selected UV-DTF-A-Folie, Bögen, für O1 Omni', 'ru' => 'Листы плёнки A UV DTF xTool Selected для O1 Omni', 'uk' => 'Аркуші плівки A UV DTF xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Wstępnie przycięte arkusze folii A UV DTF do drukarki xTool O1 Omni, stosowane jako podłoże do druku etykiet kryształowych (crystal labels).', 'Dwa rozmiary: 29,7 × 42 cm (30 szt., do standardowej płyty bazowej) i 12 × 31 cm (50 szt., do mini płyty bazowej).' ],
+            'en' => [ 'Pre-cut UV DTF A film sheets for the xTool O1 Omni printer, used as the printing substrate for crystal labels.', 'Two sizes: 29.7 × 42 cm (30 pcs, for the standard baseplate) and 12 × 31 cm (50 pcs, for the mini baseplate).' ],
+            'de' => [ 'Zugeschnittene UV-DTF-A-Folienbögen für den Drucker xTool O1 Omni, als Druckträger für Kristall-Etiketten (Crystal Labels).', 'Zwei Größen: 29,7 × 42 cm (30 Stk., für die Standard-Grundplatte) und 12 × 31 cm (50 Stk., für die Mini-Grundplatte).' ],
+            'ru' => [ 'Предварительно нарезанные листы плёнки A UV DTF для принтера xTool O1 Omni, используются как основа для печати кристаллических этикеток (crystal labels).', 'Два размера: 29,7 × 42 см (30 шт., для стандартной базовой плиты) и 12 × 31 см (50 шт., для мини-плиты).' ],
+            'uk' => [ 'Попередньо нарізані аркуші плівки A UV DTF для принтера xTool O1 Omni, використовуються як основа для друку кристалічних етикеток (crystal labels).', 'Два розміри: 29,7 × 42 см (30 шт., для стандартної базової плити) і 12 × 31 см (50 шт., для міні-плити).' ],
+        ],
+    ],
+    '9537645543637' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Folia B UV DTF xTool Selected do O1 Omni (30 m)', 'de' => 'xTool Selected UV-DTF-B-Folie für O1 Omni (30 m)', 'ru' => 'Плёнка B UV DTF xTool Selected для O1 Omni (30 м)', 'uk' => 'Плівка B UV DTF xTool Selected для O1 Omni (30 м)' ],
+        'features' => [
+            'pl' => [ 'Folia B UV DTF do drukarki xTool O1 Omni, warstwa transferowa przy produkcji podstawowych etykiet kryształowych (crystal labels); stosowana razem z folią A.', 'Rolka 310 mm × 30 m.' ],
+            'en' => [ 'UV DTF B film for the xTool O1 Omni printer, the transfer layer in making basic crystal labels; used together with A film.', 'One roll, 310 mm × 30 m.' ],
+            'de' => [ 'UV-DTF-B-Folie für den Drucker xTool O1 Omni, Transferschicht bei der Herstellung einfacher Kristall-Etiketten (Crystal Labels); wird zusammen mit A-Folie verwendet.', 'Eine Rolle, 310 mm × 30 m.' ],
+            'ru' => [ 'Плёнка B UV DTF для принтера xTool O1 Omni, переносящий слой при изготовлении базовых кристаллических этикеток (crystal labels); используется вместе с плёнкой A.', 'Один рулон, 310 мм × 30 м.' ],
+            'uk' => [ 'Плівка B UV DTF для принтера xTool O1 Omni, переносний шар під час виготовлення базових кристалічних етикеток (crystal labels); використовується разом із плівкою A.', 'Один рулон, 310 мм × 30 м.' ],
+        ],
+    ],
+    '9537645641941' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Klejowa folia transferowa UV DTF xTool Selected do O1 Omni (30 szt.)', 'de' => 'xTool Selected UV-DTF-Klebe-Transferfolie für O1 Omni (30 Stk.)', 'ru' => 'Клеевая переводная плёнка UV DTF xTool Selected для O1 Omni (30 шт.)', 'uk' => 'Клейова плівка для перенесення UV DTF xTool Selected для O1 Omni (30 шт.)' ],
+        'features' => [
+            'pl' => [ 'Folia transferowa UV DTF do drukarki xTool O1 Omni, warstwa transferowa przy produkcji etykiet kryształowych z efektami specjalnymi.', 'Wstępnie przycięte arkusze A3, 30 szt.' ],
+            'en' => [ 'UV DTF adhesive transfer film for the xTool O1 Omni printer, the transfer layer in making special-effect crystal labels.', 'Pre-cut A3 sheets, 30 pcs.' ],
+            'de' => [ 'UV-DTF-Klebe-Transferfolie für den Drucker xTool O1 Omni, Transferschicht bei der Herstellung von Crystal Labels mit Spezialeffekten.', 'Zugeschnittene A3-Bögen, 30 Stk.' ],
+            'ru' => [ 'Клеевая переводная плёнка UV DTF для принтера xTool O1 Omni, переносящий слой при изготовлении кристаллических этикеток со специальными эффектами.', 'Предварительно нарезанные листы A3, 30 шт.' ],
+            'uk' => [ 'Клейова плівка для перенесення UV DTF для принтера xTool O1 Omni, переносний шар під час виготовлення кристалічних етикеток зі спеціальними ефектами.', 'Попередньо нарізані аркуші A3, 30 шт.' ],
+        ],
+    ],
+    '9537645773013' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Folia do usuwania kleju xTool Selected do O1 Omni (100 m)', 'de' => 'xTool Selected Folie zum Entfernen von Kleber für O1 Omni (100 m)', 'ru' => 'Плёнка для удаления клея xTool Selected для O1 Omni (100 м)', 'uk' => 'Плівка для видалення клею xTool Selected для O1 Omni (100 м)' ],
+        'features' => [
+            'pl' => [ 'Folia do usuwania kleju w procesie UV DTF do drukarki xTool O1 Omni; służy do zdejmowania nadmiaru kleju wokół wzoru w etykietach kryształowych z efektami złotymi, srebrnymi i holograficznymi.', 'Rolka 310 mm × 100 m.' ],
+            'en' => [ 'Adhesive removal film for UV DTF on the xTool O1 Omni printer; used to strip excess adhesive around the design in crystal labels with gold, silver and holographic effects.', 'One roll, 310 mm × 100 m.' ],
+            'de' => [ 'Folie zum Entfernen von Kleber im UV-DTF-Prozess für den Drucker xTool O1 Omni; dient dazu, überschüssigen Kleber um das Motiv bei Crystal Labels mit Gold-, Silber- und Holografie-Effekten abzuziehen.', 'Eine Rolle, 310 mm × 100 m.' ],
+            'ru' => [ 'Плёнка для удаления клея в процессе UV DTF для принтера xTool O1 Omni; служит для снятия излишков клея вокруг рисунка на кристаллических этикетках с золотым, серебряным и голографическим эффектом.', 'Один рулон, 310 мм × 100 м.' ],
+            'uk' => [ 'Плівка для видалення клею в процесі UV DTF для принтера xTool O1 Omni; слугує для зняття надлишків клею навколо малюнка на кристалічних етикетках із золотим, срібним і голографічним ефектом.', 'Один рулон, 310 мм × 100 м.' ],
+        ],
+    ],
+    '9539433201877' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Folia do gorącego tłoczenia xTool Selected do O1 Omni (100 m)', 'de' => 'xTool Selected Heißprägefolie für O1 Omni (100 m)', 'ru' => 'Фольга для горячего тиснения xTool Selected для O1 Omni (100 м)', 'uk' => 'Фольга для гарячого тиснення xTool Selected для O1 Omni (100 м)' ],
+        'features' => [
+            'pl' => [ 'Folia do gorącego tłoczenia (hot stamping) do drukarki xTool O1 Omni, używana z laminatorem LM1 do przenoszenia warstw na wydrukowaną grafikę w etykietach kryształowych z efektami specjalnymi.', 'Rolka 310 mm × 100 m; wersje: holograficzna, złota i srebrna.' ],
+            'en' => [ 'Hot stamping foil for the xTool O1 Omni printer, used with an LM1 Laminator to transfer layers onto printed graphics in special-effect crystal labels.', 'One roll, 310 mm × 100 m; available in holographic, gold and silver.' ],
+            'de' => [ 'Heißprägefolie (Hot Stamping) für den Drucker xTool O1 Omni, wird mit dem Laminiergerät LM1 verwendet, um Schichten auf bedruckte Grafiken bei Crystal Labels mit Spezialeffekten zu übertragen.', 'Eine Rolle, 310 mm × 100 m; Varianten: holografisch, Gold und Silber.' ],
+            'ru' => [ 'Фольга для горячего тиснения (hot stamping) для принтера xTool O1 Omni, используется с ламинатором LM1 для переноса слоёв на напечатанную графику на кристаллических этикетках со специальными эффектами.', 'Один рулон, 310 мм × 100 м; варианты: голографическая, золотая и серебряная.' ],
+            'uk' => [ 'Фольга для гарячого тиснення (hot stamping) для принтера xTool O1 Omni, використовується з ламінатором LM1 для перенесення шарів на надруковану графіку на кристалічних етикетках зі спеціальними ефектами.', 'Один рулон, 310 мм × 100 м; варіанти: голографічна, золота та срібна.' ],
+        ],
+    ],
+    '9517915996373' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Podstawowy zestaw tuszy do O1 Omni', 'de' => 'Basis-Tintenset für O1 Omni', 'ru' => 'Базовый набор чернил для O1 Omni', 'uk' => 'Базовий набір чорнил для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Podstawowy zestaw tuszy do drukarki xTool O1 Omni, dobierany do konfiguracji głowicy: Single UV, Dual UV lub DT+UV.', 'W zestawie także zbiornik konserwacyjny.' ],
+            'en' => [ 'Essential ink set for the xTool O1 Omni printer, chosen by printhead configuration: Single UV, Dual UV or DT+UV.', 'Also includes a maintenance tank.' ],
+            'de' => [ 'Basis-Tintenset für den Drucker xTool O1 Omni, passend zur Druckkopf-Konfiguration: Single UV, Dual UV oder DT+UV.', 'Enthält außerdem einen Wartungstank.' ],
+            'ru' => [ 'Базовый набор чернил для принтера xTool O1 Omni, подбирается по конфигурации печатающей головки: Single UV, Dual UV или DT+UV.', 'В комплект также входит обслуживающий бак.' ],
+            'uk' => [ 'Базовий набір чорнил для принтера xTool O1 Omni, добирається за конфігурацією друкувальної головки: Single UV, Dual UV або DT+UV.', 'До комплекту також входить сервісний бак.' ],
+        ],
+    ],
+    '9517915963605' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Chusteczki gruntujące do druku UV xTool Selected do O1 Omni (50 szt.)', 'de' => 'xTool Selected Primer-Tücher für den UV-Druck für O1 Omni (50 Stk.)', 'ru' => 'Грунтовочные салфетки для UV-печати xTool Selected для O1 Omni (50 шт.)', 'uk' => 'Ґрунтувальні серветки для UV-друку xTool Selected для O1 Omni (50 шт.)' ],
+        'features' => [
+            'pl' => [ 'Chusteczki gruntujące (primer) stosowane przed drukiem UV na drukarce xTool O1 Omni.', 'Opakowanie 50 szt.; wersje do szkła i ceramiki, do metalu oraz do akrylu.' ],
+            'en' => [ 'Primer wipes used before UV printing on the xTool O1 Omni printer.', 'Pack of 50 pcs; versions for glass and ceramics, for metal and for acrylic.' ],
+            'de' => [ 'Primer-Tücher, die vor dem UV-Druck mit dem Drucker xTool O1 Omni verwendet werden.', 'Packung mit 50 Stk.; Varianten für Glas und Keramik, für Metall und für Acryl.' ],
+            'ru' => [ 'Грунтовочные салфетки (primer), применяемые перед UV-печатью на принтере xTool O1 Omni.', 'Упаковка 50 шт.; варианты для стекла и керамики, для металла и для акрила.' ],
+            'uk' => [ 'Ґрунтувальні серветки (primer), що застосовуються перед UV-друком на принтері xTool O1 Omni.', 'Упаковка 50 шт.; варіанти для скла та кераміки, для металу та для акрилу.' ],
+        ],
+    ],
+    '9489575641301' => [
+        'fits' => [ '9420620202197' ],
+        'titles' => [ 'pl' => 'Zestaw startowy materiałów do formowania próżniowego do WonderPress (50 szt.)', 'de' => 'Starter-Set Vakuumformmaterial für WonderPress (50 Stk.)', 'ru' => 'Стартовый набор материалов для вакуумной формовки для WonderPress (50 шт.)', 'uk' => 'Стартовий набір матеріалів для вакуумного формування для WonderPress (50 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów do formowania próżniowego do xTool WonderPress, 50 szt.', 'W zestawie arkusze do formowania próżniowego z TPU, PETG i HIPS.' ],
+            'en' => [ 'Vacuum forming material starter pack for the xTool WonderPress, 50 pcs.', 'Contains TPU, PETG and HIPS vacuum forming sheets.' ],
+            'de' => [ 'Starter-Set mit Vakuumformmaterial für die xTool WonderPress, 50 Stk.', 'Enthält Vakuumformplatten aus TPU, PETG und HIPS.' ],
+            'ru' => [ 'Стартовый набор материалов для вакуумной формовки для xTool WonderPress, 50 шт.', 'В набор входят листы для вакуумной формовки из TPU, PETG и HIPS.' ],
+            'uk' => [ 'Стартовий набір матеріалів для вакуумного формування для xTool WonderPress, 50 шт.', 'До набору входять аркуші для вакуумного формування з TPU, PETG і HIPS.' ],
+        ],
+    ],
+    '9475380904149' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Tusz do tkanin DT xTool Selected do O1 Omni', 'de' => 'xTool Selected DT-Textiltinte für O1 Omni', 'ru' => 'Чернила для ткани DT xTool Selected для O1 Omni', 'uk' => 'Чорнило для тканини DT xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Wodny tusz do tkanin (DT) do drukarki xTool O1 Omni, przeznaczony wyłącznie do modeli z głowicą DT.', 'Dostępny jako zestaw podstawowy (DT Fabric Ink Essential Set) oraz w kolorach: biały, czarny, żółty, magenta i cyjan.' ],
+            'en' => [ 'Water-based DT fabric ink for the xTool O1 Omni printer, designed for DT printhead models only.', 'Available as the DT Fabric Ink Essential Set and in white, black, yellow, magenta and cyan.' ],
+            'de' => [ 'Wasserbasierte DT-Textiltinte für den Drucker xTool O1 Omni, ausschließlich für Modelle mit DT-Druckkopf vorgesehen.', 'Erhältlich als Basis-Set (DT Fabric Ink Essential Set) sowie in Weiß, Schwarz, Gelb, Magenta und Cyan.' ],
+            'ru' => [ 'Водные чернила для ткани (DT) для принтера xTool O1 Omni, предназначены только для моделей с печатающей головкой DT.', 'Доступны как базовый набор (DT Fabric Ink Essential Set) и в цветах: белый, чёрный, жёлтый, пурпурный (magenta) и голубой (cyan).' ],
+            'uk' => [ 'Водне чорнило для тканини (DT) для принтера xTool O1 Omni, призначене лише для моделей із друкувальною головкою DT.', 'Доступне як базовий набір (DT Fabric Ink Essential Set) і в кольорах: білий, чорний, жовтий, пурпуровий (magenta) та блакитний (cyan).' ],
+        ],
+    ],
+    '9475381002453' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Tusz UV xTool Selected do O1 Omni', 'de' => 'xTool Selected UV-Tinte für O1 Omni', 'ru' => 'UV-чернила xTool Selected для O1 Omni', 'uk' => 'UV-чорнило xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Tusz UV do drukarki xTool O1 Omni, oparty na czterokolorowym systemie CMYK dopasowanym do profilu ICC xTool.', 'Dostępny jako zestaw podstawowy (UV Ink Essential Set), zestaw rozszerzający (UV Ink Expansion Set) oraz w kolorach: biały, czarny, magenta i żółty.' ],
+            'en' => [ 'UV ink for the xTool O1 Omni printer, based on a four-colour CMYK system matched to the xTool ICC Profile.', 'Available as the UV Ink Essential Set, the UV Ink Expansion Set and in white, black, magenta and yellow.' ],
+            'de' => [ 'UV-Tinte für den Drucker xTool O1 Omni, basierend auf einem Vierfarb-CMYK-System, das auf das xTool-ICC-Profil abgestimmt ist.', 'Erhältlich als Basis-Set (UV Ink Essential Set), Erweiterungs-Set (UV Ink Expansion Set) sowie in Weiß, Schwarz, Magenta und Gelb.' ],
+            'ru' => [ 'UV-чернила для принтера xTool O1 Omni на основе четырёхцветной системы CMYK, согласованной с ICC-профилем xTool.', 'Доступны как базовый набор (UV Ink Essential Set), расширяющий набор (UV Ink Expansion Set) и в цветах: белый, чёрный, пурпурный (magenta) и жёлтый.' ],
+            'uk' => [ 'UV-чорнило для принтера xTool O1 Omni на основі чотириколірної системи CMYK, узгодженої з ICC-профілем xTool.', 'Доступне як базовий набір (UV Ink Essential Set), розширювальний набір (UV Ink Expansion Set) і в кольорах: білий, чорний, пурпуровий (magenta) та жовтий.' ],
+        ],
+    ],
+    '9475381133525' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Zbiornik konserwacyjny DT xTool Selected do O1 Omni', 'de' => 'xTool Selected DT-Wartungstank für O1 Omni', 'ru' => 'Обслуживающий бак DT xTool Selected для O1 Omni', 'uk' => 'Сервісний бак DT xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Zbiornik konserwacyjny DT do drukarki xTool O1 Omni, utrzymujący głowicę drukującą wilgotną.', 'Przeznaczony do modeli xTool z głowicą DT; przed zakupem należy potwierdzić model.' ],
+            'en' => [ 'DT maintenance tank for the xTool O1 Omni printer, keeping the printhead moist.', 'Intended for xTool DT printhead models; please confirm your model before purchasing.' ],
+            'de' => [ 'DT-Wartungstank für den Drucker xTool O1 Omni, der den Druckkopf feucht hält.', 'Vorgesehen für xTool-Modelle mit DT-Druckkopf; bitte vor dem Kauf das Modell prüfen.' ],
+            'ru' => [ 'Обслуживающий бак DT для принтера xTool O1 Omni, поддерживающий печатающую головку во влажном состоянии.', 'Предназначен для моделей xTool с головкой DT; перед покупкой необходимо уточнить модель.' ],
+            'uk' => [ 'Сервісний бак DT для принтера xTool O1 Omni, що підтримує друкувальну головку у вологому стані.', 'Призначений для моделей xTool із головкою DT; перед купівлею необхідно уточнити модель.' ],
+        ],
+    ],
+    '9475381231829' => [
+        'fits' => [ '9475369337045' ],
+        'titles' => [ 'pl' => 'Zbiornik konserwacyjny UV xTool Selected do O1 Omni', 'de' => 'xTool Selected UV-Wartungstank für O1 Omni', 'ru' => 'Обслуживающий бак UV xTool Selected для O1 Omni', 'uk' => 'Сервісний бак UV xTool Selected для O1 Omni' ],
+        'features' => [
+            'pl' => [ 'Zbiornik konserwacyjny UV do drukarki xTool O1 Omni, utrzymujący głowicę drukującą wilgotną.', 'Przeznaczony do modeli xTool z głowicą UV; przed zakupem należy potwierdzić model.' ],
+            'en' => [ 'UV maintenance tank for the xTool O1 Omni printer, keeping the printhead moist.', 'Intended for xTool UV printhead models; please confirm your model before purchasing.' ],
+            'de' => [ 'UV-Wartungstank für den Drucker xTool O1 Omni, der den Druckkopf feucht hält.', 'Vorgesehen für xTool-Modelle mit UV-Druckkopf; bitte vor dem Kauf das Modell prüfen.' ],
+            'ru' => [ 'Обслуживающий бак UV для принтера xTool O1 Omni, поддерживающий печатающую головку во влажном состоянии.', 'Предназначен для моделей xTool с головкой UV; перед покупкой необходимо уточнить модель.' ],
+            'uk' => [ 'Сервісний бак UV для принтера xTool O1 Omni, що підтримує друкувальну головку у вологому стані.', 'Призначений для моделей xTool із головкою UV; перед купівлею необхідно уточнити модель.' ],
+        ],
+    ],
+    // M2
+    '9372812771541' => [
+        'fits' => [ '15452856942805' ],
+        'titles' => [ 'pl' => 'Kaseta z tuszem do xTool M2', 'de' => 'Tintenpatrone für xTool M2', 'ru' => 'Картридж с чернилами для xTool M2', 'uk' => 'Картридж із чорнилом для xTool M2' ],
+        'features' => [
+            'pl' => [ 'Oryginalna kaseta z tuszem CMYK do modułu CMYK xTool M2 (tryb druku atramentowego).', 'Pojemność 40 ml; dostępna w opakowaniach po 1 i 2 szt.' ],
+            'en' => [ 'Genuine CMYK ink cartridge for the xTool M2 CMYK Ink Module (inkjet mode).', '40 ml; available in packs of 1 and 2 pcs.' ],
+            'de' => [ 'Original-CMYK-Tintenpatrone für das CMYK-Tintenmodul des xTool M2 (Inkjet-Modus).', '40 ml; erhältlich in Packungen mit 1 und 2 Stk.' ],
+            'ru' => [ 'Оригинальный картридж с чернилами CMYK для модуля CMYK xTool M2 (режим струйной печати).', '40 мл; доступен в упаковках по 1 и 2 шт.' ],
+            'uk' => [ 'Оригінальний картридж із чорнилом CMYK для модуля CMYK xTool M2 (режим струменевого друку).', '40 мл; доступний в упаковках по 1 та 2 шт.' ],
+        ],
+    ],
+    // Material packs and others
+    '9335893033173' => [
+        'fits' => [ '15473430692053', '9089720189141' ],
+        'titles' => [ 'pl' => 'Zestaw materiałów do laserów CO₂ X1/P3/P2S (31 szt.)', 'de' => 'CO₂-Laser-Materialpaket für X1/P3/P2S (31 Stk.)', 'ru' => 'Набор материалов для CO₂-лазеров X1/P3/P2S (31 шт.)', 'uk' => 'Набір матеріалів для CO₂-лазерів X1/P3/P2S (31 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw materiałów do laserów CO₂ xTool X1, P3 i P2S.', '31 szt. materiałów laserowych (19 rodzajów), m.in. akryl, sklejka, metal, skóra, szkło i drewno liściaste.' ],
+            'en' => [ 'Material pack for the xTool X1, P3 and P2S CO₂ lasers.', '31 pcs of laser materials (19 kinds), including acrylic, plywood, metal, leather, glass and hardwood.' ],
+            'de' => [ 'Materialpaket für die CO₂-Laser xTool X1, P3 und P2S.', '31 Stk. Lasermaterialien (19 Sorten), u. a. Acryl, Sperrholz, Metall, Leder, Glas und Hartholz.' ],
+            'ru' => [ 'Набор материалов для CO₂-лазеров xTool X1, P3 и P2S.', '31 шт. лазерных материалов (19 видов), в том числе акрил, фанера, металл, кожа, стекло и лиственная древесина.' ],
+            'uk' => [ 'Набір матеріалів для CO₂-лазерів xTool X1, P3 і P2S.', '31 шт. лазерних матеріалів (19 видів), зокрема акрил, фанера, метал, шкіра, скло та листяна деревина.' ],
+        ],
+    ],
+    '9313265877205' => [
+        'fits' => [ '9187692970197' ],
+        'titles' => [ 'pl' => 'Przyrząd mocujący do grawerowania wewnątrz kryształowej kuli do xTool F2 Ultra UV', 'de' => 'Haltevorrichtung für Innengravur in Kristallkugeln für xTool F2 Ultra UV', 'ru' => 'Оснастка для гравировки внутри хрустального шара для xTool F2 Ultra UV', 'uk' => 'Оснащення для гравіювання всередині кришталевої кулі для xTool F2 Ultra UV' ],
+        'features' => [
+            'pl' => [ 'Przyrząd mocujący do grawerowania wewnątrz kryształowych kul K9 laserem xTool F2 Ultra UV.', 'Zawiera szklany kubek z podziałką, silikonową podkładkę tłumiącą drgania i przezroczysty pasek antypoślizgowy.' ],
+            'en' => [ 'Jig for inner engraving of K9 crystal balls with the xTool F2 Ultra UV laser.', 'Includes a glass cup with graduation lines, a silicone shock-absorbing pad and a transparent anti-slip strip.' ],
+            'de' => [ 'Haltevorrichtung für die Innengravur von K9-Kristallkugeln mit dem Laser xTool F2 Ultra UV.', 'Enthält einen Glasbecher mit Skalierung, ein stoßdämpfendes Silikonpad und einen transparenten Anti-Rutsch-Streifen.' ],
+            'ru' => [ 'Оснастка для гравировки внутри хрустальных шаров K9 лазером xTool F2 Ultra UV.', 'В комплект входят стеклянный стакан со шкалой, силиконовая амортизирующая подкладка и прозрачная противоскользящая лента.' ],
+            'uk' => [ 'Оснащення для гравіювання всередині кришталевих куль K9 лазером xTool F2 Ultra UV.', 'До комплекту входять скляний стакан зі шкалою, силіконова амортизувальна підкладка та прозора протиковзна стрічка.' ],
+        ],
+    ],
+    '8964454023381' => [
+        'fits' => [ '15445001339093' ],
+        'titles' => [ 'pl' => 'Papier transferowy ze złotą i srebrną folią do xTool Hot Foil Pen C1/M1 Ultra (20 szt.)', 'de' => 'Gold- und Silber-Folientransferpapier für xTool Hot Foil Pen C1/M1 Ultra (20 Stk.)', 'ru' => 'Переводная бумага с золотой и серебряной фольгой для xTool Hot Foil Pen C1/M1 Ultra (20 шт.)', 'uk' => 'Папір для перенесення із золотою та срібною фольгою для xTool Hot Foil Pen C1/M1 Ultra (20 шт.)' ],
+        'features' => [
+            'pl' => [ 'Papier transferowy ze złotą i srebrną folią do pisaka xTool Hot Foil Pen dla C1 i M1 Ultra.', '20 szt.; transfer folii aktywowanej ciepłem na m.in. papier, karton, skórę i akryl.' ],
+            'en' => [ 'Gold and silver foil transfer paper for the xTool Hot Foil Pen for the C1 and M1 Ultra.', '20 pcs; heat-activated foil transfers onto materials such as paper, cardstock, leather and acrylic.' ],
+            'de' => [ 'Gold- und Silber-Folientransferpapier für den xTool Hot Foil Pen für C1 und M1 Ultra.', '20 Stk.; hitzeaktivierter Folientransfer auf Materialien wie Papier, Karton, Leder und Acryl.' ],
+            'ru' => [ 'Переводная бумага с золотой и серебряной фольгой для xTool Hot Foil Pen для C1 и M1 Ultra.', '20 шт.; перенос фольги, активируемой теплом, на такие материалы, как бумага, картон, кожа и акрил.' ],
+            'uk' => [ 'Папір для перенесення із золотою та срібною фольгою для xTool Hot Foil Pen для C1 і M1 Ultra.', '20 шт.; перенесення фольги, що активується теплом, на такі матеріали, як папір, картон, шкіра та акрил.' ],
+        ],
+    ],
+    '8801309589717' => [
+        'fits' => [ '9009695293653', '8523126931669' ],
+        'titles' => [ 'pl' => 'Zestaw materiałów do laserów F1/F2 Ultra (93 szt.)', 'de' => 'Lasermaterial-Paket für F1/F2 Ultra (93 Stk.)', 'ru' => 'Набор лазерных материалов для F1/F2 Ultra (93 шт.)', 'uk' => 'Набір лазерних матеріалів для F1/F2 Ultra (93 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw materiałów do laserów xTool F1 Ultra i F2 Ultra.', '93 szt. materiałów laserowych (16 rodzajów), m.in. akryl, papier, skóra i kamień, oraz 4 rodzaje narzędzi w komplecie.' ],
+            'en' => [ 'Laser material pack for the xTool F1 Ultra and F2 Ultra lasers.', '93 pcs of laser materials (16 kinds), including acrylic, paper, leather and stone, plus 4 types of complimentary tools.' ],
+            'de' => [ 'Lasermaterial-Paket für die Laser xTool F1 Ultra und F2 Ultra.', '93 Stk. Lasermaterialien (16 Sorten), u. a. Acryl, Papier, Leder und Stein, sowie 4 Arten von Werkzeugen im Lieferumfang.' ],
+            'ru' => [ 'Набор лазерных материалов для лазеров xTool F1 Ultra и F2 Ultra.', '93 шт. лазерных материалов (16 видов), в том числе акрил, бумага, кожа и камень, а также 4 вида инструментов в комплекте.' ],
+            'uk' => [ 'Набір лазерних матеріалів для лазерів xTool F1 Ultra і F2 Ultra.', '93 шт. лазерних матеріалів (16 видів), зокрема акрил, папір, шкіра та камінь, а також 4 види інструментів у комплекті.' ],
+        ],
+    ],
+    '8664589107413' => [
+        'fits' => [ '9163846877397' ],
+        'titles' => [ 'pl' => 'Zestaw startowy materiałów do laserów F1/F2 (125 szt.)', 'de' => 'Material-Starter-Set für F1/F2 (125 Stk.)', 'ru' => 'Стартовый набор материалов для F1/F2 (125 шт.)', 'uk' => 'Стартовий набір матеріалів для F1/F2 (125 шт.)' ],
+        'features' => [
+            'pl' => [ 'Zestaw startowy materiałów do laserów xTool F1 i F2.', '125 szt. materiałów laserowych (13 rodzajów), m.in. akryl, sklejka, płyty dwukolorowe, filc, skóra i papier.' ],
+            'en' => [ 'Material starter pack for the xTool F1 and F2 lasers.', '125 pcs of laser materials (13 kinds), including acrylic, plywood, two-color boards, felt, leather and paper.' ],
+            'de' => [ 'Material-Starter-Set für die Laser xTool F1 und F2.', '125 Stk. Lasermaterialien (13 Sorten), u. a. Acryl, Sperrholz, zweifarbige Platten, Filz, Leder und Papier.' ],
+            'ru' => [ 'Стартовый набор материалов для лазеров xTool F1 и F2.', '125 шт. лазерных материалов (13 видов), в том числе акрил, фанера, двухцветные листы, фетр, кожа и бумага.' ],
+            'uk' => [ 'Стартовий набір матеріалів для лазерів xTool F1 і F2.', '125 шт. лазерних матеріалів (13 видів), зокрема акрил, фанера, двокольорові плити, фетр, шкіра та папір.' ],
+        ],
+    ],
 ];
