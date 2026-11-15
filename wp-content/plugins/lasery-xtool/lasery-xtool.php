@@ -495,12 +495,59 @@ function lasery_xtool_fetching_paused( $option = LASERY_XTOOL_OFFERS_PAUSE ) {
 }
 
 /**
+ * One GET from the source, shaped like a wp_remote_get() response. The system curl is preferred:
+ * the source answers PHP's HTTP client on this shared host with 429 "local_rate_limited" whatever
+ * the pause, while the same request from curl succeeds. It is still one polite request with the
+ * same caps; 429 is honoured by the caller. Without a usable curl the WordPress HTTP API is used.
+ */
+function lasery_xtool_request( $url, $max_bytes ) {
+	$fallback = static function () use ( $url, $max_bytes ) {
+		return wp_safe_remote_get( $url, array( 'timeout' => 30, 'redirection' => 0, 'limit_response_size' => $max_bytes + 1, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) ) );
+	};
+	if ( ! function_exists( 'proc_open' ) ) {
+		return $fallback();
+	}
+	$headers_file = tempnam( get_temp_dir(), 'lasery-h' );
+	$body_file    = tempnam( get_temp_dir(), 'lasery-b' );
+	if ( false === $headers_file || false === $body_file ) {
+		return $fallback();
+	}
+	$process = proc_open(
+		array( 'curl', '--silent', '--proto', '=https', '--max-time', '30', '--max-filesize', (string) ( $max_bytes + 1 ), '--header', 'Accept-Encoding: identity', '--dump-header', $headers_file, '--output', $body_file, $url ),
+		array( 1 => array( 'file', '/dev/null', 'w' ), 2 => array( 'file', '/dev/null', 'w' ) ),
+		$pipes
+	);
+	$exit = is_resource( $process ) ? proc_close( $process ) : 127;
+	$head = (string) file_get_contents( $headers_file );
+	$body = (string) file_get_contents( $body_file, false, null, 0, $max_bytes + 1 );
+	unlink( $headers_file );
+	unlink( $body_file );
+	if ( 127 === $exit ) {
+		return $fallback();
+	}
+	// The last header block belongs to the final response.
+	$blocks = preg_split( '/\r?\n\r?\n/', trim( $head ) );
+	$lines  = preg_split( '/\r?\n/', (string) end( $blocks ) );
+	if ( 0 !== $exit || ! preg_match( '~^HTTP/\S+ (\d{3})~', (string) $lines[0], $status ) ) {
+		return new WP_Error( 'lasery_xtool_request', 'curl exit ' . $exit );
+	}
+	$headers = array();
+	foreach ( array_slice( $lines, 1 ) as $line ) {
+		$parts = explode( ':', $line, 2 );
+		if ( 2 === count( $parts ) ) {
+			$headers[ strtolower( trim( $parts[0] ) ) ] = trim( $parts[1] );
+		}
+	}
+	return array( 'headers' => $headers, 'body' => $body, 'response' => array( 'code' => (int) $status[1], 'message' => '' ) );
+}
+
+/**
  * GET from the source. A short HTTP 429 (Retry-After within two minutes) is waited out and retried
  * while $deadline allows; a longer one pauses fetching and returns WP_Error( 'paused' ).
  */
 function lasery_xtool_source_get( $url, $max_bytes, $deadline ) {
 	for ( $attempt = 1; ; ++$attempt ) {
-		$response = wp_safe_remote_get( $url, array( 'timeout' => 30, 'redirection' => 0, 'limit_response_size' => $max_bytes + 1, 'decompress' => false, 'headers' => array( 'Accept-Encoding' => 'identity' ) ) );
+		$response = lasery_xtool_request( $url, $max_bytes );
 		if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
 			return $response;
 		}
