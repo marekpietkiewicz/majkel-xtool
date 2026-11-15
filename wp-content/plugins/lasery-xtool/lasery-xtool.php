@@ -18,7 +18,7 @@ const LASERY_XTOOL_MAX_PRODUCTS = 500;
 const LASERY_XTOOL_PAGE_SIZE    = 250;
 const LASERY_XTOOL_MAX_PAGES    = 8;
 // Raise when lasery_xtool_install() has new work for existing sites.
-const LASERY_XTOOL_SCHEMA       = '7';
+const LASERY_XTOOL_SCHEMA       = '8';
 
 require_once __DIR__ . '/reviewed-product-content.php';
 
@@ -91,6 +91,15 @@ function lasery_xtool_install() {
 			}
 		}
 	}
+	// The badge of the machines xTool published recently; the sync sets it (novelties.php).
+	if ( ! term_exists( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) ) {
+		$term = wp_insert_term( 'Nowość', LASERY_XTOOL_BADGE_TAXONOMY, array( 'slug' => LASERY_XTOOL_NEW_BADGE ) );
+		if ( is_array( $term ) ) {
+			foreach ( array( 'en' => 'New', 'de' => 'Neu', 'ru' => 'Новинка', 'uk' => 'Новинка' ) as $language => $name ) {
+				update_term_meta( $term['term_id'], 'lasery_name_' . $language, $name );
+			}
+		}
+	}
 	// The theme renders the blog, cart and information pages (page-<slug>.php).
 	foreach ( array( 'blog' => 'Blog', LASERY_XTOOL_CART_PAGE => 'Koszyk', 'bezpieczenstwo' => 'Bezpieczeństwo', 'informacje-o-zakupach' => 'Informacje o zakupach' ) as $slug => $title ) {
 		if ( ! get_page_by_path( $slug ) ) {
@@ -132,6 +141,7 @@ function lasery_xtool_deactivate() {
 
 require_once __DIR__ . '/product-kind.php';
 require_once __DIR__ . '/product-badges.php';
+require_once __DIR__ . '/novelties.php';
 require_once __DIR__ . '/order-form.php';
 require_once __DIR__ . '/cart.php';
 require_once __DIR__ . '/product-relations.php';
@@ -720,8 +730,7 @@ function lasery_xtool_alert_when_stale() {
 	}
 	update_option( 'lasery_xtool_last_alert', time(), false );
 	$last = get_option( 'lasery_xtool_last_sync' );
-	wp_mail(
-		get_option( 'admin_email' ),
+	lasery_xtool_notify(
 		'laseryxtool.pl: oferty nie są aktualizowane',
 		sprintf(
 			"Od %s synchronizacja nie pobrała katalogu xTool (ostatni wynik: %s). Po 24 godzinach od ostatniej udanej synchronizacji oferty znikną ze stron produktów.\n\nSprawdź Produkty xTool → Import (ostatnia synchronizacja i ewentualne wstrzymanie po odpowiedzi 429) oraz zadania cron na hostingu.",
@@ -967,6 +976,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 		update_option( LASERY_XTOOL_STATE, array( 'pages' => $walk['pages'] ), false );
 	}
 	update_option( 'lasery_xtool_last_ok', time(), false );
+	lasery_xtool_sync_novelties( $currency, $deadline );
 	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed, 'stale' => $stale ), false );
 	lasery_xtool_release_import_lock();
 }
