@@ -320,10 +320,23 @@ function lasery_xtool_product_offer($post_id, $url) {
     return ['@type' => 'AggregateOffer', 'lowPrice' => $lowest[0], 'highPrice' => number_format(max($prices), 2, '.', ''), 'offerCount' => count($prices)] + $offer;
 }
 
+/** When the newest public product or article last changed (sitemap lastmod of the pages that list them), or ''. */
+function lasery_xtool_newest_change($post_type) {
+    global $wpdb;
+    $time = $wpdb->get_var($wpdb->prepare("SELECT MAX(post_modified_gmt) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish' AND post_password = ''", $post_type));
+    return $time ? mysql2date('c', $time, false) : '';
+}
+
+/** When a page last changed; the blog page changes with every article. */
+function lasery_xtool_page_lastmod($page) {
+    return $page->post_name === 'blog' ? max(mysql2date('c', $page->post_modified_gmt, false), lasery_xtool_newest_change('post')) : mysql2date('c', $page->post_modified_gmt, false);
+}
+
 // Pages in the sitemap carry their language, like products and articles (a page without one redirects).
 add_filter('wp_sitemaps_posts_entry', function ($entry, $post) {
     if ($post->post_type === 'page') {
         $entry['loc'] = add_query_arg('lang', 'pl', remove_query_arg('lang', $entry['loc']));
+        $entry['lastmod'] = lasery_xtool_page_lastmod($post);
     }
     return $entry;
 }, 10, 2);
@@ -377,14 +390,37 @@ function lasery_xtool_indexnow_queue($urls, $delay = MINUTE_IN_SECONDS) {
     }
 }
 
+/** The post's addresses plus the lists that show it: the catalogue for a product, the blog for an article. */
+function lasery_xtool_indexnow_urls($post) {
+    // A hidden product has no address of its own until it is published again.
+    $public = clone $post;
+    $public->post_status = 'publish';
+    $urls = array_values(lasery_xtool_post_language_urls($public));
+    if ($public->post_type === 'lasery_product' || $public->post_type === 'post') {
+        $languages = $public->post_type === 'post' ? [function_exists('lasery_xtool_post_language') ? lasery_xtool_post_language($post->ID) : 'pl'] : array_keys(lasery_xtool_languages());
+        foreach ($languages as $language) {
+            $urls[] = $public->post_type === 'post' ? lasery_xtool_blog_url($language) : lasery_xtool_catalogue_url($language);
+        }
+    }
+    return array_filter($urls);
+}
+
 // A page, product or article that is published (also by scripts), or changes its title, text, excerpt or
 // address. Price changes from the hourly sync do not count.
 add_action('wp_after_insert_post', function ($id, $post, $update, $before) {
     $changed = !$before || $before->post_status !== 'publish' || $post->post_title !== $before->post_title || $post->post_content !== $before->post_content || $post->post_excerpt !== $before->post_excerpt || $post->post_name !== $before->post_name;
     if ($changed && $post->post_status === 'publish' && in_array($post->post_type, ['page', 'post', 'lasery_product'], true)) {
-        lasery_xtool_indexnow_queue(array_values(lasery_xtool_post_language_urls($post)));
+        lasery_xtool_indexnow_queue(lasery_xtool_indexnow_urls($post));
     }
 }, 10, 4);
+
+// A page that stops being public (a product the sync hides, a trashed article): the engines learn that
+// its address is gone, so it leaves their index without waiting for the next visit.
+add_action('transition_post_status', function ($new, $old, $post) {
+    if ($old === 'publish' && $new !== 'publish' && in_array($post->post_type, ['page', 'post', 'lasery_product'], true)) {
+        lasery_xtool_indexnow_queue(lasery_xtool_indexnow_urls($post));
+    }
+}, 10, 3);
 
 // Addresses that could not be delivered (network error, rate limit, server error) are tried again an hour later.
 add_action('lasery_xtool_indexnow_send', 'lasery_xtool_indexnow_send');
