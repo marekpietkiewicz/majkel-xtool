@@ -668,13 +668,14 @@ function lasery_xtool_schedule_sync_retry() {
 
 /**
  * Called hourly by the system cron and WP-Cron; refreshes every existing product and never creates
- * drafts. A run shortly after a successful one is skipped unless $force is set, so the two triggers
- * do not fetch the catalogue twice an hour.
+ * drafts. A run shortly after one that reached the source is skipped unless $force is set, so the two
+ * triggers do not fetch the catalogue twice an hour (products xTool no longer lists make a run
+ * 'incomplete', which still counts).
  */
 add_action( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_existing' );
 function lasery_xtool_sync_existing( $force = false ) {
 	$last = get_option( 'lasery_xtool_last_sync' );
-	if ( true !== $force && is_array( $last ) && isset( $last['time'], $last['result'] ) && in_array( $last['result'], array( 'complete', 'limit' ), true ) && (int) $last['time'] > time() - 30 * MINUTE_IN_SECONDS ) {
+	if ( true !== $force && is_array( $last ) && isset( $last['time'], $last['result'], $last['updated'] ) && 'locklost' !== $last['result'] && (int) $last['time'] > time() - 30 * MINUTE_IN_SECONDS ) {
 		return;
 	}
 	// A run from WP-Cron is a web request with the default time limit.
