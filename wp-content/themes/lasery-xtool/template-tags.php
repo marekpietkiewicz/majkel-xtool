@@ -81,7 +81,22 @@ function lasery_xtool_products($kind, $limit = -1, $extra = []) {
     if ($kind !== '' && function_exists('lasery_xtool_kind_tax_query')) {
         $args['tax_query'] = array_merge($args['tax_query'] ?? [], lasery_xtool_kind_tax_query($kind));
     }
-    return get_posts($args);
+    // The same lists are built several times per page (hero, rails, footer, SEO image).
+    static $cache = [];
+    $key = md5(serialize($args));
+    if (!isset($cache[$key])) {
+        $cache[$key] = get_posts($args);
+        lasery_xtool_prime_thumbnails($cache[$key]);
+    }
+    return $cache[$key];
+}
+
+/** Load the featured images of a list of products with two queries instead of two per product. */
+function lasery_xtool_prime_thumbnails($posts) {
+    $ids = array_filter(array_map('get_post_thumbnail_id', $posts));
+    if ($ids) {
+        _prime_post_caches(array_unique($ids), false, true);
+    }
 }
 
 function lasery_xtool_kind_label($post_id) {
