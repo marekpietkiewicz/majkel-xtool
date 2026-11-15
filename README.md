@@ -47,7 +47,7 @@ Strona główna pokazuje osiem pierwszych urządzeń (na telefonie i tablecie si
 - Własny motyw i wtyczka do importowania oraz aktualizacji produktów. Źródłem jest katalog Shopify xTool; zakres danych wymaga doprecyzowania. Użytkownik potwierdził, że umowa zezwala na automatyczne pobieranie, publikowanie i tłumaczenie materiałów.
 - Interfejs dostępny jest po polsku, angielsku, niemiecku, rosyjsku i ukraińsku. Nazwy i opisy produktów można edytować w każdym z tych języków; brakujący przekład wyświetla oryginał. Automatyczne tłumaczenie nowych produktów nie jest wdrożone.
 - Osobny staging nie został jeszcze skonfigurowany.
-- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (pięć zapytań w odstępach dwóch sekund). Po odpowiedzi 429 pobieranie produktów i zdjęć jest wstrzymywane na godzinę (albo tyle, ile poda `Retry-After`, najwyżej dobę) i wznawia się samo.
+- Cron na hostingu co godzinę odświeża ceny, warianty i dostępność wszystkich produktów jednym pobraniem katalogu xTool (pięć zapytań w odstępach dwóch sekund). Krótką odpowiedź 429 synchronizacja odczekuje i ponawia, dłuższą respektuje (nagłówek `Retry-After`, najwyżej dobę), a pobieranie wznawia się samo; oferty i zdjęcia są wstrzymywane osobno. WP-Cron jest zapasowym wyzwalaczem crona systemowego i ponawia nieudane pobranie po dziesięciu minutach.
 
 Zakres katalogu oraz zasady aktualizowania ręcznych zmian wymagają dalszego doprecyzowania. Użytkownik potwierdził uprawnienia do używania materiałów xTool.
 
