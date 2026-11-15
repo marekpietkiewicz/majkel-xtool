@@ -87,6 +87,8 @@ function lasery_xtool_queue_images( $post_id ) {
 		$queue[] = (int) $post_id;
 		update_option( LASERY_XTOOL_IMAGE_QUEUE, $queue );
 	}
+	// Do not wait for the next cron run: WP-Cron starts on the next visit and keeps going every minute.
+	wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'lasery_xtool_sync_images' );
 }
 
 /**

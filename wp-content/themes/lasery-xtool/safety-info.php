@@ -35,6 +35,7 @@ function lasery_xtool_safety_texts($language = '') {
             'notice_uv' => 'F2 Ultra UV występuje w wersjach o różnych klasach bezpieczeństwa. Sprawdź model, instrukcję i wymaganą ochronę; z RA3 nie pracuje w warunkach klasy 1.',
             'notice_p3' => 'P3 z automatycznym podajnikiem taśmowym jest laserem klasy 4 i wymaga dodatkowych zabezpieczeń, przeszkolenia oraz właściwie dobranych okularów.',
             'notice_ra3' => 'Według xTool F2 i F2 Ultra UV z przystawką RA3 nie pracują w warunkach klasy 1. Sprawdź instrukcję używanego urządzenia i wymagane zabezpieczenia.',
+            'notice_new' => 'Nowy model dodany do oferty. Przed zakupem i użyciem sprawdź w instrukcji dokładnej wersji urządzenia klasę lasera (jeśli ma laser), wymagane zabezpieczenia stanowiska i ochronę oczu.',
             'notice_duo' => 'Zestaw obejmuje różne modele laserów. Sprawdź instrukcję i środki ochrony wymagane dla każdego urządzenia; wersje F2 Ultra UV mają różne klasy bezpieczeństwa.',
             'more' => 'Przeczytaj informacje o bezpieczeństwie',
         ],
@@ -61,6 +62,7 @@ function lasery_xtool_safety_texts($language = '') {
             'notice_uv' => 'The F2 Ultra UV is available in versions with different safety classes. Check the model, instructions and required protection; it does not operate under Class 1 conditions with the RA3.',
             'notice_p3' => 'The P3 with the automatic conveyor feeder is a Class 4 laser and requires additional safeguards, training and suitable protective goggles.',
             'notice_ra3' => 'According to xTool, the F2 and F2 Ultra UV do not operate under Class 1 conditions with the RA3. Check your machine’s instructions and required safeguards.',
+            'notice_new' => 'New model added to the offer. Before buying and using it, check the manual of the exact version for the laser class (if it has a laser), the required workstation safeguards and eye protection.',
             'notice_duo' => 'This bundle contains different laser models. Check the instructions and required protection for each machine; F2 Ultra UV versions have different safety classes.',
             'more' => 'Read the safety information',
         ],
@@ -87,6 +89,7 @@ function lasery_xtool_safety_texts($language = '') {
             'notice_uv' => 'Den F2 Ultra UV gibt es in Versionen mit unterschiedlichen Sicherheitsklassen. Prüfen Sie Modell, Anleitung und erforderlichen Schutz; mit RA3 arbeitet er nicht unter Klasse-1-Bedingungen.',
             'notice_p3' => 'Der P3 mit automatischer Förderband-Zuführung ist ein Laser der Klasse 4 und erfordert zusätzliche Schutzmaßnahmen, Schulung und eine geeignete Schutzbrille.',
             'notice_ra3' => 'Laut xTool arbeiten F2 und F2 Ultra UV mit dem RA3 nicht unter Klasse-1-Bedingungen. Prüfen Sie die Anleitung und die erforderlichen Schutzmaßnahmen.',
+            'notice_new' => 'Neues Modell im Angebot. Prüfen Sie vor Kauf und Nutzung in der Anleitung der genauen Version die Laserklasse (falls ein Laser vorhanden ist), die erforderlichen Schutzmaßnahmen am Arbeitsplatz und den Augenschutz.',
             'notice_duo' => 'Das Set enthält verschiedene Lasermodelle. Prüfen Sie Anleitung und erforderlichen Schutz für jedes Gerät; die F2-Ultra-UV-Versionen haben unterschiedliche Sicherheitsklassen.',
             'more' => 'Sicherheitshinweise lesen',
         ],
@@ -113,6 +116,7 @@ function lasery_xtool_safety_texts($language = '') {
             'notice_uv' => 'F2 Ultra UV выпускается в версиях с разными классами безопасности. Проверьте модель, инструкцию и требуемую защиту; с RA3 он не работает в условиях класса 1.',
             'notice_p3' => 'P3 с автоматическим конвейерным податчиком — лазер класса 4; нужны дополнительные меры защиты, обучение и подходящие защитные очки.',
             'notice_ra3' => 'По данным xTool, F2 и F2 Ultra UV с RA3 не работают в условиях класса 1. Проверьте инструкцию устройства и необходимые меры защиты.',
+            'notice_new' => 'Новая модель в ассортименте. Перед покупкой и использованием проверьте в инструкции к точной версии устройства класс лазера (если он есть), необходимые меры защиты рабочего места и защиту глаз.',
             'notice_duo' => 'В комплект входят разные модели лазеров. Изучите инструкцию и требования к защите каждого устройства; версии F2 Ultra UV имеют разные классы безопасности.',
             'more' => 'Прочитать информацию о безопасности',
         ],
@@ -139,6 +143,7 @@ function lasery_xtool_safety_texts($language = '') {
             'notice_uv' => 'F2 Ultra UV випускається у версіях із різними класами безпеки. Перевірте модель, інструкцію та потрібний захист; із RA3 він не працює в умовах класу 1.',
             'notice_p3' => 'P3 з автоматичним конвеєрним подавачем — лазер класу 4; потрібні додаткові заходи захисту, навчання та відповідні захисні окуляри.',
             'notice_ra3' => 'За даними xTool, F2 та F2 Ultra UV із RA3 не працюють в умовах класу 1. Перевірте інструкцію пристрою та необхідні заходи захисту.',
+            'notice_new' => 'Нова модель в асортименті. Перед купівлею та використанням перевірте в інструкції до точної версії пристрою клас лазера (якщо він є), необхідні заходи захисту робочого місця та захист очей.',
             'notice_duo' => 'Комплект містить різні моделі лазерів. Перевірте інструкцію та потрібний захист для кожного пристрою; версії F2 Ultra UV мають різні класи безпеки.',
             'more' => 'Прочитати інформацію про безпеку',
         ],
@@ -177,7 +182,8 @@ function lasery_xtool_product_safety_notice($post_id, $language = '') {
     ];
     $source = (string) get_post_meta($post_id, LASERY_XTOOL_SOURCE_ID, true);
     if (!isset($keys[$source])) {
-        return '';
+        // A model added by the sync has not been reviewed yet: a general notice stands in for its own.
+        return metadata_exists('post', $post_id, '_lasery_auto_imported') ? lasery_xtool_safety_texts($language)['notice_new'] : '';
     }
     $text = lasery_xtool_safety_texts($language);
     return $text[$keys[$source]] . ($source === '9163846877397' ? ' ' . $text['f2_package'] : '');

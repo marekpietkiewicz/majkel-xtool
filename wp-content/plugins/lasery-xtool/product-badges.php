@@ -33,18 +33,29 @@ function lasery_xtool_has_demo( $post_id ) {
 }
 
 /**
- * The query var lasery_demo_first lists products with a demo before the rest, each group in
- * its usual order (get_posts() needs suppress_filters => false).
+ * The query var lasery_demo_first lists products with a demo first, then the new ones (badge
+ * "nowosc", the newest first) and then the rest, each group in its usual order (get_posts() needs
+ * suppress_filters => false).
  */
 add_filter( 'posts_clauses', 'lasery_xtool_demo_first_clauses', 10, 2 );
 function lasery_xtool_demo_first_clauses( $clauses, $query ) {
-	$term = $query->get( 'lasery_demo_first' ) ? get_term_by( 'slug', LASERY_XTOOL_DEMO_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) : false;
-	if ( ! $term ) {
+	if ( ! $query->get( 'lasery_demo_first' ) ) {
 		return $clauses;
 	}
 	global $wpdb;
-	$clauses['join'] .= $wpdb->prepare( " LEFT JOIN {$wpdb->term_relationships} AS lasery_demo ON lasery_demo.object_id = {$wpdb->posts}.ID AND lasery_demo.term_taxonomy_id = %d", $term->term_taxonomy_id );
-	$clauses['orderby'] = rtrim( 'lasery_demo.object_id IS NULL, ' . $clauses['orderby'], ', ' );
+	$order = '';
+	foreach ( array( 'lasery_demo' => LASERY_XTOOL_DEMO_BADGE, 'lasery_new' => LASERY_XTOOL_NEW_BADGE ) as $alias => $slug ) {
+		$term = get_term_by( 'slug', $slug, LASERY_XTOOL_BADGE_TAXONOMY );
+		if ( $term ) {
+			$clauses['join'] .= $wpdb->prepare( " LEFT JOIN {$wpdb->term_relationships} AS {$alias} ON {$alias}.object_id = {$wpdb->posts}.ID AND {$alias}.term_taxonomy_id = %d", $term->term_taxonomy_id ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$order           .= "{$alias}.object_id IS NULL, ";
+			if ( 'lasery_new' === $alias ) {
+				// Within the new products the newest is first; the others compare equal.
+				$order .= "CASE WHEN {$alias}.object_id IS NULL THEN 0 ELSE -UNIX_TIMESTAMP({$wpdb->posts}.post_date_gmt) END, ";
+			}
+		}
+	}
+	$clauses['orderby'] = rtrim( $order . $clauses['orderby'], ', ' );
 	return $clauses;
 }
 

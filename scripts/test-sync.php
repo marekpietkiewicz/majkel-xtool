@@ -25,7 +25,7 @@ foreach ( glob( rtrim( $args[0], '/' ) . '/products-*.json' ) as $file ) {
 	$doc = json_decode( file_get_contents( $file ) );
 	foreach ( $doc->products as $p ) { $catalog[] = $p; }
 }
-$mock = array( 'catalog' => $catalog, 'requests' => array(), 'mode' => 'ok', 'retry_after' => '600' );
+$mock = array( 'catalog' => $catalog, 'machine' => array(), 'requests' => array(), 'mode' => 'ok', 'retry_after' => '600' );
 add_filter( 'lasery_xtool_pre_request', function ( $pre, $url, $etag ) use ( &$mock ) {
 	$mock['requests'][] = array( $url, $etag );
 	if ( 'network' === $mock['mode'] ) { return new WP_Error( 'x', 'down' ); }
@@ -34,6 +34,14 @@ add_filter( 'lasery_xtool_pre_request', function ( $pre, $url, $etag ) use ( &$m
 	}
 	if ( 'limited' === $mock['mode'] ) {
 		return array( 'headers' => array( 'retry-after' => $mock['retry_after'] ), 'body' => 'local_rate_limited', 'response' => array( 'code' => 429 ) );
+	}
+	if ( false !== strpos( $url, '/collections/machine/' ) ) {
+		$body = wp_json_encode( array( 'products' => $mock['machine'] ) );
+		$tag  = '"col:' . md5( $body ) . '"';
+		if ( $etag && trim( $etag, 'W/' ) === $tag ) {
+			return array( 'headers' => array( 'etag' => $tag ), 'body' => '', 'response' => array( 'code' => 304 ) );
+		}
+		return array( 'headers' => array( 'etag' => $tag ), 'body' => $body, 'response' => array( 'code' => 200 ) );
 	}
 	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $q );
 	$page = (int) $q['page'];
@@ -45,17 +53,18 @@ add_filter( 'lasery_xtool_pre_request', function ( $pre, $url, $etag ) use ( &$m
 	return array( 'headers' => array( 'etag' => $tag ), 'body' => $body, 'response' => array( 'code' => 200 ) );
 }, 10, 3 );
 $product_requests = static function () use ( &$mock ) {
-	return count( array_filter( $mock['requests'], static function ( $r ) { return false !== strpos( $r[0], 'products.json' ); } ) );
+	return count( array_filter( $mock['requests'], static function ( $r ) { return false !== strpos( $r[0], '/products.json' ) && false === strpos( $r[0], '/collections/' ); } ) );
 };
 $conditional_requests = static function () use ( &$mock ) {
-	return count( array_filter( $mock['requests'], static function ( $r ) { return false !== strpos( $r[0], 'products.json' ) && $r[1]; } ) );
+	return count( array_filter( $mock['requests'], static function ( $r ) { return false !== strpos( $r[0], '/products.json' ) && false === strpos( $r[0], '/collections/' ) && $r[1]; } ) );
 };
 $mails = array();
 add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$mails ) { $mails[] = $atts; return true; }, 10, 2 );
 
 // ---- fixtures: 40 real products on the site, 3 of them absent from the source ----------------
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) { wp_delete_post( $id, true ); }
-delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE );
+delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE ); delete_option( LASERY_XTOOL_NOVELTY_STATE );
+if ( ! term_exists( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) ) { lasery_xtool_install(); }
 $site = array_slice( $catalog, 0, 40 );
 $by_source = array();
 foreach ( $site as $raw ) {
@@ -175,6 +184,69 @@ $mock['catalog'][7]->images[0]->src = 'https://cdn.shopify.com/s/files/1/new-ima
 $run();
 $queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
 $check( 'product with a new image is queued', in_array( $by_source[ (string) $mock['catalog'][7]->id ], is_array( $queue ) ? $queue : array(), true ), json_encode( $queue ) );
+
+
+echo "S10 novelties: the manufacturer's machine collection\n";
+$clone = static function ( $index, $changes ) use ( $catalog ) {
+	$p = json_decode( wp_json_encode( $catalog[ $index ] ) );
+	foreach ( $changes as $k => $v ) { $p->$k = $v; }
+	return $p;
+};
+$days = static function ( $n ) { return gmdate( 'c', time() - $n * DAY_IN_SECONDS ); };
+$recent_known = $catalog[3]; $old_known = $catalog[4];
+$new_machine = $clone( 100, array( 'id' => 777000000001, 'title' => 'xTool Test Machine', 'handle' => 'xtool-test-machine', 'published_at' => $days( 1 ), 'body_html' => '<ul><li>Cuts wood and acrylic.</li><li>Eye-safe design for everyone.</li></ul><p>Class 1 enclosure with certified protection.</p><p>Works with the xTool app.</p>' ) );
+foreach ( $new_machine->variants as $v ) { $v->available = true; }
+$skip = array(
+	$clone( 101, array( 'id' => 777000000002, 'title' => '[Refurbished] xTool Old Machine', 'published_at' => $days( 1 ) ) ),
+	$clone( 102, array( 'id' => 777000000003, 'title' => 'Self-Service Kiosk Floor', 'published_at' => $days( 1 ) ) ),
+	$clone( 103, array( 'id' => 777000000004, 'title' => 'xTool Sold Out Machine', 'published_at' => $days( 1 ) ) ),
+);
+foreach ( $skip[2]->variants as $v ) { $v->available = false; }
+$mock['machine'] = array_merge( array( $clone( 3, array( 'published_at' => $days( 10 ) ) ), $clone( 4, array( 'published_at' => $days( 100 ) ) ), $new_machine ), $skip );
+$mails = array();
+$run();
+$new_post = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000001', 'fields' => 'ids' ) );
+$check( 'the unknown available machine is published', 1 === count( $new_post ) && 'publish' === get_post_status( $new_post[0] ) );
+$check( 'refurbished, kiosk and unavailable ones are not imported', 0 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => array( '777000000002', '777000000003', '777000000004' ), 'meta_compare' => 'IN', 'fields' => 'ids' ) ) ) );
+$new_id = $new_post ? $new_post[0] : 0;
+$check( 'its offer is stored and fresh', $new_id && lasery_xtool_source_is_fresh( $new_id ) );
+$check( 'it carries the new badge and the auto-import marker', $new_id && has_term( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $new_id ) && metadata_exists( 'post', $new_id, '_lasery_auto_imported' ) );
+$content = $new_id ? get_post_field( 'post_content', $new_id ) : '';
+$check( 'claims about safety and certification are dropped, the rest stays', false !== strpos( $content, 'Cuts wood' ) && false !== strpos( $content, 'xTool app' ) && false === stripos( $content, 'eye-safe' ) && false === stripos( $content, 'certified' ), $content );
+$check( 'the page gets a general safety notice', $new_id && '' !== lasery_xtool_product_safety_notice( $new_id, 'pl' ) );
+$check( 'the administrator is told once', 1 === count( $mails ) && false !== strpos( $mails[0]['subject'], 'xTool Test Machine' ), count( $mails ) . ' mails' );
+$check( 'a machine published 10 days ago has the badge, one from 100 days ago does not', has_term( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $by_source[ (string) $recent_known->id ] ) && ! has_term( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $by_source[ (string) $old_known->id ] ) );
+
+echo "S11 listing order: demo, then new (newest first), then the rest\n";
+$demo_id = $by_source[ (string) $catalog[10]->id ];
+wp_set_object_terms( $demo_id, LASERY_XTOOL_DEMO_BADGE, LASERY_XTOOL_BADGE_TAXONOMY );
+wp_update_post( array( 'ID' => $by_source[ (string) $recent_known->id ], 'post_date' => gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS ), 'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS ) ) );
+$listing = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'posts_per_page' => 5, 'fields' => 'ids', 'orderby' => array( 'menu_order' => 'ASC', 'date' => 'ASC', 'ID' => 'ASC' ), 'lasery_demo_first' => true, 'suppress_filters' => false ) );
+$check( 'order: demo, newest new, older new, then the rest', array_slice( $listing, 0, 3 ) === array( $demo_id, $new_id, $by_source[ (string) $recent_known->id ] ), json_encode( $listing ) );
+
+echo "S12 the next run changes nothing, and a badge expires\n";
+$mails = array();
+$run();
+$check( 'collection answered 304 and no second import', 1 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000001', 'fields' => 'ids' ) ) ) && 0 === count( $mails ) );
+$state = get_option( LASERY_XTOOL_NOVELTY_STATE );
+$state['members'][ (string) $recent_known->id ] = time() - 70 * DAY_IN_SECONDS;
+update_option( LASERY_XTOOL_NOVELTY_STATE, $state, false );
+$run();
+$check( 'after 60 days the badge is removed by the next sync', ! has_term( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $by_source[ (string) $recent_known->id ] ) );
+
+echo "S13 several unknown machines at once are held back\n";
+$many = array();
+foreach ( array( 110, 111, 112, 113 ) as $i => $index ) {
+	$m = $clone( $index, array( 'id' => 777000000100 + $i, 'title' => 'xTool Bulk ' . $i, 'published_at' => $days( 1 ) ) );
+	foreach ( $m->variants as $v ) { $v->available = true; }
+	$many[] = $m;
+}
+$mock['machine'] = array_merge( $mock['machine'], $many );
+$mails = array();
+$run();
+$run();
+$check( 'none imported', 0 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000100', 'fields' => 'ids' ) ) ) );
+$check( 'one mail for the same set, not one per run', 1 === count( $mails ), count( $mails ) . ' mails' );
 
 WP_CLI::log( "\n$pass passed, $fail failed" );
 if ( $fail ) {
