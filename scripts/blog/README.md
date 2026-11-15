@@ -54,6 +54,10 @@ Opublikowane dodatkowo:
 | `laser-welding-materials` | Spawanie laserowe stali nierdzewnej i aluminium |
 | `buy-xtool` | Gdzie kupić xTool w Polsce: zamówienie krok po kroku |
 | `home-laser-engraver` | Grawerka laserowa do domu dla początkujących |
+| `xtool-c1` | Ploter tnący xTool C1: co robi, dla kogo i kiedy lepszy laser |
+| `xtool-o1-omni` | Drukarka UV xTool O1 Omni: metody druku, moduły i zastosowania |
+| `which-xtool` | Który xTool wybrać: przewodnik po modelach według potrzeb |
+| `laser-first-steps` | Pierwsze uruchomienie lasera: checklista przed grawerowaniem |
 
 Dopisz tu każdy nowy artykuł.
 

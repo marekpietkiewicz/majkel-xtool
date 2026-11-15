@@ -143,4 +143,12 @@ cover('cover-laser-welding-materials.webp', [('metalfab.webp', 470, 590, 790), (
 cover('cover-buy-xtool.webp', [('f2.webp', 280, 210, 745), ('p3.webp', 220, 580, 740), ('m2.webp', 170, 1000, 735), ('metalfab.webp', 360, 1380, 770)], glow=(800, 745))
 # Home laser engraver: M2, S1 and F2.
 cover('cover-home-laser-engraver.webp', [('m2.webp', 200, 330, 740), ('s1.webp', 190, 790, 740), ('f2.webp', 320, 1240, 750)], glow=(800, 745))
+# xTool C1 with a hot foil pen and a CMYK cartridge.
+cover('cover-xtool-c1.webp', [('c1.jpg', 470, 567, 775), ('hotfoil.webp', 260, 1115, 775), ('cmyk.png', 230, 1348, 775)], glow=(800, 745))
+# xTool O1 Omni with the rotary attachment and the laminator.
+cover('cover-xtool-o1-omni.webp', [('o1.webp', 450, 346, 775), ('or1.webp', 250, 870, 775), ('lm1.webp', 230, 1324, 775)], glow=(800, 745))
+# The range: M2, F2 Ultra, P3 and MetalFab.
+cover('cover-which-xtool.webp', [('m2.webp', 190, 243, 770), ('f2ultra.webp', 300, 621, 770), ('p3.webp', 230, 1009, 770), ('metalfab.webp', 330, 1394, 770)], glow=(800, 745))
+# F2, laser safety goggles and M2.
+cover('cover-laser-first-steps.webp', [('f2.webp', 340, 268, 765), ('goggles.png', 200, 682, 765), ('m2.webp', 230, 1215, 765)], glow=(800, 745))
 print('done')
