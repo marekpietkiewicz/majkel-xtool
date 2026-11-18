@@ -167,6 +167,7 @@ $run();
 $check( 'result network', 'network' === $last()['result'] );
 $check( 'no alert yet', 0 === count( $mails ) );
 update_option( 'lasery_xtool_last_ok', time() - 7 * HOUR_IN_SECONDS, false );
+update_post_meta( reset( $by_source ), '_lasery_source_updated_at', (string) ( time() - 7 * HOUR_IN_SECONDS ) );
 $run();
 $check( 'alert mailed once', 1 === count( $mails ), (string) count( $mails ) );
 $run();
