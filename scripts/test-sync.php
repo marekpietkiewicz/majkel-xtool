@@ -63,7 +63,7 @@ add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$mails ) { $mails[] 
 
 // ---- fixtures: 40 real products on the site, 3 of them absent from the source ----------------
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) { wp_delete_post( $id, true ); }
-delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE ); delete_option( LASERY_XTOOL_NOVELTY_STATE );
+delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE ); delete_option( LASERY_XTOOL_NOVELTY_STATE ); delete_option( 'lasery_xtool_novelty_retry_at' ); delete_option( 'lasery_xtool_novelty_retry_failures' );
 if ( ! term_exists( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) ) { lasery_xtool_install(); }
 $site = array_slice( $catalog, 0, 40 );
 $by_source = array();

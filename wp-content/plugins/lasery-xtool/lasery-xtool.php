@@ -136,6 +136,7 @@ function lasery_xtool_deactivate() {
 	}
 	wp_clear_scheduled_hook( 'lasery_xtool_sync_existing' );
 	wp_clear_scheduled_hook( 'lasery_xtool_sync_images' );
+	wp_clear_scheduled_hook( 'lasery_xtool_retry_novelties' );
 	flush_rewrite_rules();
 }
 
@@ -595,10 +596,10 @@ function lasery_xtool_valid_etag( $etag ) {
 }
 
 /**
- * GET from the source. A short HTTP 429 (Retry-After within two minutes) is waited out and retried
- * while $deadline allows; a longer one pauses fetching and returns WP_Error( 'paused' ).
+ * GET from the source. When inline retries are enabled, a short HTTP 429 is waited out and retried
+ * while $deadline allows; otherwise fetching is paused and WP_Error( 'paused' ) is returned.
  */
-function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
+function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '', $retry_inline = true ) {
 	for ( $attempt = 1; ; ++$attempt ) {
 		$response = lasery_xtool_request( $url, $max_bytes, $etag );
 		if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
@@ -608,7 +609,7 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
 		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
 		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 		update_option( 'lasery_xtool_last_rate_limit', array( 'time' => time(), 'path' => $path, 'page' => isset( $query['page'] ) ? (int) $query['page'] : 0, 'retry_after' => $delay ), false );
-		if ( $attempt >= 4 || $delay >= 120 || time() + max( 5, $delay ) + 1 > $deadline ) {
+		if ( ! $retry_inline || $attempt >= 4 || $delay >= 120 || time() + max( 5, $delay ) + 1 > $deadline ) {
 			lasery_xtool_pause_fetching( $response );
 			return new WP_Error( 'paused' );
 		}
@@ -740,6 +741,77 @@ function lasery_xtool_schedule_sync_retry( $delay = 10 * MINUTE_IN_SECONDS ) {
 function lasery_xtool_retry_due() {
 	$at = (int) get_option( 'lasery_xtool_retry_at' );
 	return $at > 0 && $at <= time() && ! lasery_xtool_fetching_paused();
+}
+
+/** Retry the optional collection independently, backing off to at most one attempt per hour. */
+function lasery_xtool_schedule_novelty_retry( $failed = true ) {
+	if ( ! $failed ) {
+		// Leave the due marker untouched: the lock holder may complete it concurrently.
+		$at = max( time() + 2 * MINUTE_IN_SECONDS, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( 'lasery_xtool_retry_at' ) );
+		wp_schedule_single_event( $at, 'lasery_xtool_retry_novelties' );
+		return;
+	}
+	$attempts = min( 4, max( 0, (int) get_option( 'lasery_xtool_novelty_retry_failures' ) ) + 1 );
+	update_option( 'lasery_xtool_novelty_retry_failures', $attempts, false );
+	$delay = min( HOUR_IN_SECONDS, 10 * MINUTE_IN_SECONDS * ( 2 ** max( 0, $attempts - 1 ) ) );
+	$at = max( time() + $delay, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( 'lasery_xtool_retry_at' ) );
+	update_option( 'lasery_xtool_novelty_retry_at', $at, false );
+	wp_schedule_single_event( $at, 'lasery_xtool_retry_novelties' );
+}
+
+function lasery_xtool_novelty_retry_due() {
+	$at = (int) get_option( 'lasery_xtool_novelty_retry_at' );
+	return $at > 0 && $at <= time() && ! lasery_xtool_fetching_paused();
+}
+
+add_action( 'lasery_xtool_retry_novelties', 'lasery_xtool_retry_novelties' );
+function lasery_xtool_retry_novelties() {
+	if ( ! lasery_xtool_novelty_retry_due() ) {
+		return;
+	}
+	if ( (int) get_option( 'lasery_xtool_retry_at' ) ) {
+		lasery_xtool_schedule_novelty_retry( false );
+		return;
+	}
+	if ( function_exists( 'set_time_limit' ) ) {
+		set_time_limit( 120 );
+	}
+	if ( ! lasery_xtool_lock_import() ) {
+		lasery_xtool_schedule_novelty_retry( false );
+		return;
+	}
+	// Another scheduler may have completed the retry or queued offers before this lease was acquired.
+	foreach ( array( 'lasery_xtool_novelty_retry_at', 'lasery_xtool_retry_at', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
+		wp_cache_delete( $option, 'options' );
+	}
+	if ( ! lasery_xtool_novelty_retry_due() ) {
+		lasery_xtool_release_import_lock();
+		return;
+	}
+	if ( (int) get_option( 'lasery_xtool_retry_at' ) ) {
+		lasery_xtool_schedule_novelty_retry( false );
+		lasery_xtool_release_import_lock();
+		return;
+	}
+	$known = get_option( 'lasery_xtool_currency' );
+	$catalog = get_option( LASERY_XTOOL_STATE );
+	$currency = is_array( $known ) && isset( $known['code'] ) && is_string( $known['code'] ) && preg_match( '/^[A-Z]{3}$/D', $known['code'] ) ? $known['code'] : '';
+	if ( '' === $currency || ! isset( $known['at'] ) || ! lasery_xtool_timestamp_is_fresh( (string) $known['at'] ) || ! is_array( $catalog ) || ! isset( $catalog['currency'] ) || $catalog['currency'] !== $currency || ! lasery_xtool_timestamp_is_fresh( (string) get_option( 'lasery_xtool_last_ok' ) ) ) {
+		lasery_xtool_schedule_novelty_retry();
+	} else {
+		lasery_xtool_sync_novelties( $currency, time() + 60 );
+	}
+	lasery_xtool_release_import_lock();
+}
+
+/** Entry point for the host cron; offer retries take priority over optional novelties. */
+function lasery_xtool_run_due_retries() {
+	if ( lasery_xtool_retry_due() ) {
+		do_action( 'lasery_xtool_sync_existing' );
+	}
+	if ( lasery_xtool_novelty_retry_due() ) {
+		do_action( 'lasery_xtool_retry_novelties' );
+	}
 }
 
 /** Tell the administrator when offers have not been refreshed for six hours, at most once a day. */

@@ -64,16 +64,22 @@ function lasery_xtool_import_novelty( $product, $currency ) {
 
 /**
  * One conditional request for the collection, the import of new machines and the badge of the
- * recent ones. A failed request is ignored: the next hourly run tries again.
+ * recent ones. A failed request schedules a separate, bounded retry.
  */
 function lasery_xtool_sync_novelties( $currency, $deadline ) {
+	if ( (int) get_option( 'lasery_xtool_novelty_retry_at' ) > time() ) {
+		return;
+	}
 	$state    = get_option( LASERY_XTOOL_NOVELTY_STATE );
 	$state    = is_array( $state ) ? $state : array();
 	$members  = isset( $state['members'] ) && is_array( $state['members'] ) ? $state['members'] : array(); // source ID => published timestamp
-	$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/collections/machine/products.json?limit=250', LASERY_XTOOL_MAX_BYTES, $deadline, isset( $state['etag'] ) ? $state['etag'] : '' );
+	// Offers have already been refreshed; do not hold their lock while retrying this optional request.
+	$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/collections/machine/products.json?limit=250', LASERY_XTOOL_MAX_BYTES, $deadline, isset( $state['etag'] ) ? $state['etag'] : '', false );
+	$success  = false;
 	if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
 		$raw = lasery_xtool_decode_products( wp_remote_retrieve_body( $response ), LASERY_XTOOL_PAGE_SIZE );
 		if ( false !== $raw ) {
+			$success    = true;
 			$members    = array();
 			$candidates = array();
 			$known      = lasery_xtool_known_source_ids();
@@ -110,10 +116,20 @@ function lasery_xtool_sync_novelties( $currency, $deadline ) {
 						'laseryxtool.pl: nowy produkt ' . $product['title'],
 						sprintf( "Nowa maszyna z głównego katalogu xTool została dodana do oferty i jest widoczna na stronie (z plakietką „Nowość”, zaraz za produktami z demo):\n%s\n\nOpis pochodzi od producenta bez zdań o bezpieczeństwie i certyfikatach, a strona ma ogólny komunikat o bezpieczeństwie. Sprawdź nazwy i opisy w językach oraz klasę lasera w instrukcji, dodaj komunikat bezpieczeństwa modelu, a potem usuń pole niestandardowe _lasery_auto_imported.\nEdycja: %s", get_permalink( $post_id ), admin_url( 'post.php?post=' . $post_id . '&action=edit' ) )
 					);
+				} else {
+					$success = false;
 				}
 			}
-			$state['etag'] = lasery_xtool_valid_etag( wp_remote_retrieve_header( $response, 'etag' ) );
+			$state['etag'] = $success ? lasery_xtool_valid_etag( wp_remote_retrieve_header( $response, 'etag' ) ) : '';
 		}
+	} elseif ( ! is_wp_error( $response ) && 304 === wp_remote_retrieve_response_code( $response ) && ! empty( $state['etag'] ) && lasery_xtool_valid_etag( $state['etag'] ) ) {
+		$success = true;
+	}
+	if ( $success ) {
+		delete_option( 'lasery_xtool_novelty_retry_at' );
+		delete_option( 'lasery_xtool_novelty_retry_failures' );
+	} else {
+		lasery_xtool_schedule_novelty_retry();
 	}
 	$state['members'] = $members;
 	update_option( LASERY_XTOOL_NOVELTY_STATE, $state, false );
