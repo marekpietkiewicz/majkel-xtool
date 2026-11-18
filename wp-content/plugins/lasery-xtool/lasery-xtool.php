@@ -999,9 +999,36 @@ function lasery_xtool_sync_existing( $force = false ) {
 	$partial = null !== $error || $start_page > 1;
 	// Invalidate old ETags before changing any offers. A crash or interrupted walk must not
 	// let a later 304 for the old page confirm data saved from a different page version.
+	$invalidate = array_fill_keys( $walk['downloaded'], true );
+	$seen = array();
+	$duplicates = array();
+	foreach ( $walk['pages'] as $number => $page ) {
+		foreach ( $page['ids'] as $id ) {
+			if ( isset( $targets[ $id ] ) ) {
+				if ( isset( $seen[ $id ] ) && $seen[ $id ] !== $number ) {
+					$duplicates[ $id ] = true;
+				}
+				$seen[ $id ] = $number;
+			}
+		}
+	}
+	foreach ( $walk['pages'] as $number => &$page ) {
+		if ( array_intersect_key( $duplicates, array_fill_keys( $page['ids'], true ) ) ) {
+			// Duplicates across pages do not prove which saved offer a 304 represents.
+			$page['etag'] = '';
+			$invalidate[ $number ] = true;
+		}
+	}
+	unset( $page );
 	if ( is_array( $state ) && isset( $state['pages'] ) && is_array( $state['pages'] ) ) {
+		foreach ( $state['pages'] as $number => $page ) {
+			if ( is_array( $page ) && isset( $page['ids'] ) && is_array( $page['ids'] ) && array_intersect_key( $listed, array_fill_keys( $page['ids'], true ) ) ) {
+				// A product can move to a different page between walks.
+				$invalidate[ $number ] = true;
+			}
+		}
 		$changed = false;
-		foreach ( $walk['downloaded'] as $page ) {
+		foreach ( array_keys( $invalidate ) as $page ) {
 			if ( ! empty( $state['pages'][ $page ]['etag'] ) ) {
 				$state['pages'][ $page ]['etag'] = '';
 				$changed = true;
@@ -1037,7 +1064,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 				} elseif ( ! lasery_xtool_refresh_import_lock() ) {
 					$failure( 'locklost', $updated, count( $confirmed ) );
 					return;
-				} elseif ( lasery_xtool_save_source_data( $row->id, $product ) ) {
+				} elseif ( lasery_xtool_save_source_data( $row->id, $product, false ) ) {
 					++$updated;
 					lasery_xtool_mark_present( $row );
 				} else {
@@ -1179,8 +1206,29 @@ function lasery_xtool_save_products( $products, $result ) {
 	lasery_xtool_redirect_import( compact( 'created', 'updated', 'failed' ) + array( 'result' => $result ) );
 }
 
+/** Prevent an independently saved offer from being confirmed by an older cached page. */
+function lasery_xtool_forget_product_etags( $post_id ) {
+	$id = get_post_meta( $post_id, LASERY_XTOOL_SOURCE_ID, true );
+	$state = get_option( LASERY_XTOOL_STATE );
+	if ( ! is_string( $id ) || ! is_array( $state ) || ! isset( $state['pages'] ) || ! is_array( $state['pages'] ) ) {
+		return true;
+	}
+	$changed = false;
+	foreach ( $state['pages'] as &$page ) {
+		if ( is_array( $page ) && ! empty( $page['etag'] ) && isset( $page['ids'] ) && is_array( $page['ids'] ) && in_array( $id, $page['ids'], true ) ) {
+			$page['etag'] = '';
+			$changed = true;
+		}
+	}
+	unset( $page );
+	return ! $changed || update_option( LASERY_XTOOL_STATE, $state, false );
+}
+
 /** Source data never overwrites edited content, prices or featured images. */
-function lasery_xtool_save_source_data( $post_id, $product ) {
+function lasery_xtool_save_source_data( $post_id, $product, $invalidate_etags = true ) {
+	if ( $invalidate_etags && ! lasery_xtool_forget_product_etags( $post_id ) ) {
+		return false;
+	}
 	$before = lasery_xtool_public_product_state( $post_id );
 	try {
 		$fields = array( 'variants' => '_lasery_source_variants', 'image_url' => '_lasery_source_image_url', 'image_urls' => '_lasery_source_image_urls' );
