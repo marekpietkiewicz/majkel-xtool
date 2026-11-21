@@ -328,8 +328,11 @@ function lasery_xtool_newest_change($post_type) {
 }
 
 /** When a page last changed; the blog page changes with every article. */
-function lasery_xtool_page_lastmod($page) {
-    return $page->post_name === 'blog' ? max(mysql2date('c', $page->post_modified_gmt, false), lasery_xtool_newest_change('post')) : mysql2date('c', $page->post_modified_gmt, false);
+function lasery_xtool_page_lastmod($post, $newest_article = null) {
+    $modified = mysql2date('c', $post->post_modified_gmt, false);
+    return $post->post_type === 'page' && $post->post_name === 'blog'
+        ? max($modified, $newest_article ?? lasery_xtool_newest_change('post'))
+        : $modified;
 }
 
 // Pages in the sitemap carry their language, like products and articles (a page without one redirects).

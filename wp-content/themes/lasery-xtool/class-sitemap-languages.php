@@ -32,7 +32,9 @@ final class Lasery_XTool_Sitemap_Languages extends WP_Sitemaps_Provider {
         $list = [];
         // The catalogue changes with its products, the home page with its products and articles.
         $products = lasery_xtool_newest_change('lasery_product');
-        $home = max($products, lasery_xtool_newest_change('post'));
+        $articles = lasery_xtool_newest_change('post');
+        $home = max($products, $articles);
+        $front = get_option('show_on_front') === 'page' ? get_post(get_option('page_on_front')) : null;
         foreach (array_keys(lasery_xtool_languages()) as $language) {
             foreach (['', 'device', 'accessory'] as $kind) {
                 $url = lasery_xtool_catalogue_url($language, $kind);
@@ -40,18 +42,27 @@ final class Lasery_XTool_Sitemap_Languages extends WP_Sitemaps_Provider {
                     $list[] = ['loc' => $url] + ($products !== '' ? ['lastmod' => $products] : []);
                 }
             }
-            $front = get_option('show_on_front') === 'page' ? get_post(get_option('page_on_front')) : null;
             if ($language !== 'pl' && (!$front || $front->post_password === '')) {
                 $list[] = ['loc' => add_query_arg('lang', $language, home_url('/'))] + ($home !== '' ? ['lastmod' => $home] : []);
             }
         }
         foreach (['page', 'lasery_product'] as $post_type) {
             // The same pages as WordPress's sitemap (e.g. without the cart).
-            $args = apply_filters('wp_sitemaps_posts_query_args', ['post_type' => $post_type, 'post_status' => 'publish', 'posts_per_page' => -1, 'no_found_rows' => true, 'orderby' => 'ID', 'order' => 'ASC'], $post_type);
+            $args = apply_filters('wp_sitemaps_posts_query_args', [
+                'post_type' => $post_type,
+                'post_status' => 'publish',
+                'posts_per_page' => -1,
+                'no_found_rows' => true,
+                'orderby' => 'ID',
+                'order' => 'ASC',
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ], $post_type);
             foreach (get_posts($args) as $post) {
+                $lastmod = lasery_xtool_page_lastmod($post, $articles);
                 foreach (lasery_xtool_post_language_urls($post) as $language => $url) {
                     if ($language !== 'pl') {
-                        $list[] = ['loc' => $url, 'lastmod' => $post->post_type === 'page' ? lasery_xtool_page_lastmod($post) : mysql2date('c', $post->post_modified_gmt, false)];
+                        $list[] = ['loc' => $url, 'lastmod' => $lastmod];
                     }
                 }
             }

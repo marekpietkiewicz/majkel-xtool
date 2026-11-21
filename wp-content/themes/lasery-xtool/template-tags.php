@@ -183,14 +183,43 @@ function lasery_xtool_blog_url($language = '') {
 
 /** Blog posts written in the current language (and matching an optional meta_query). */
 function lasery_xtool_blog_query($args = []) {
-    $args += ['post_type' => 'post', 'post_status' => 'publish', 'ignore_sticky_posts' => true];
+    $args += [
+        'post_type' => 'post',
+        'post_status' => 'publish',
+        'ignore_sticky_posts' => true,
+        'orderby' => ['date' => 'DESC', 'ID' => 'DESC'],
+    ];
     $args['has_password'] = false;
-    if (function_exists('lasery_xtool_language_meta_query')) {
-        $language = lasery_xtool_language_meta_query(lasery_xtool_interface_language());
-        $args['meta_query'] = isset($args['meta_query']) ? ['relation' => 'AND', $args['meta_query'], $language] : $language;
-    }
-    return new WP_Query($args);
+    $query = new WP_Query(lasery_xtool_blog_language_args($args));
+    update_post_thumbnail_cache($query);
+    return $query;
 }
+
+function lasery_xtool_blog_language_args($args) {
+    if (!function_exists('lasery_xtool_post_language')) {
+        return $args;
+    }
+
+    $language = lasery_xtool_interface_language();
+    if ($language === 'pl') {
+        $args['lasery_blog_polish'] = true;
+    } else {
+        $filter = [['key' => '_lasery_language', 'value' => $language]];
+        $args['meta_query'] = !empty($args['meta_query']) ? ['relation' => 'AND', $args['meta_query'], $filter] : $filter;
+    }
+    return $args;
+}
+
+// An article without a language is Polish. Checking for matching rows avoids joining
+// every post meta row just to tell whether a language has been set.
+add_filter('posts_where', function ($where, $query) {
+    if (!$query->get('lasery_blog_polish')) {
+        return $where;
+    }
+    global $wpdb;
+    $language = "SELECT 1 FROM {$wpdb->postmeta} AS lang_meta WHERE lang_meta.post_id = {$wpdb->posts}.ID AND lang_meta.meta_key = '_lasery_language'";
+    return $where . " AND (EXISTS ($language AND lang_meta.meta_value = 'pl') OR NOT EXISTS ($language))";
+}, 10, 2);
 
 /** The blog listing page number (?strona) and its posts, shared by the redirect check, canonical URL and template. */
 function lasery_xtool_blog_listing() {
