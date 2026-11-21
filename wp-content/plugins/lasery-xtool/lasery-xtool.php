@@ -1141,6 +1141,11 @@ function lasery_xtool_sync_existing( $force = false ) {
 	if ( $error ) {
 		$walk = $error->get_error_data();
 	}
+	if ( ! lasery_xtool_refresh_import_lock() ) {
+		// The replacement worker owns the next retry and the result.
+		lasery_xtool_release_import_lock();
+		return;
+	}
 	if ( ! is_array( $walk ) || empty( $walk['pages'] ) ) {
 		$page = (int) ( $walk['next_page'] ?? 0 );
 		$code = $error ? $error->get_error_code() : 'network';
@@ -1155,10 +1160,6 @@ function lasery_xtool_sync_existing( $force = false ) {
 			update_option( 'lasery_xtool_resume_page', $next, false );
 		}
 		$failure( $code, 0, 0, $page );
-		return;
-	}
-	if ( ! lasery_xtool_refresh_import_lock() ) {
-		$failure( 'locklost' );
 		return;
 	}
 	$next_page = (int) ( $walk['next_page'] ?? 0 );
@@ -1227,7 +1228,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 				if ( lasery_xtool_source_hash( $product ) === $row->hash ) {
 					$confirmed[] = $row;
 				} elseif ( ! lasery_xtool_refresh_import_lock() ) {
-					$failure( 'locklost', $updated, count( $confirmed ) );
+					lasery_xtool_release_import_lock();
 					return;
 				} elseif ( lasery_xtool_save_source_data( $row->id, $product, false ) ) {
 					++$updated;

@@ -100,6 +100,7 @@ if ( 'unchanged' === $scenario ) {
 	$second = wp_insert_post( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'draft', 'post_title' => 'Second product' ) );
 	update_post_meta( $second, LASERY_XTOOL_SOURCE_ID, '102' );
 	$search_refreshes = 0; // Ignore the normal save_post refresh for the fixture.
+	$last_sync = get_option( 'lasery_xtool_last_sync' );
 	$lose_lock = static function ( $meta_id, $object_id, $key, $value ) use ( $id ) {
 		if ( $object_id === $id && '_lasery_source_updated_at' === $key && '' !== $value ) {
 			$GLOBALS['lasery_xtool_lock_value'] = 'test-lock-lost';
@@ -108,7 +109,7 @@ if ( 'unchanged' === $scenario ) {
 	add_action( 'updated_post_meta', $lose_lock, 10, 4 );
 	lasery_xtool_sync_existing();
 	remove_action( 'updated_post_meta', $lose_lock, 10 );
-	$check( 'locklost' === get_option( 'lasery_xtool_last_sync' )['result'], 'sync stops after lock is lost' );
+	$check( $last_sync === get_option( 'lasery_xtool_last_sync' ), 'sync stops after lock is lost and leaves the current receipt intact' );
 	$check( '20.00' === get_post_meta( $id, '_lasery_source_variants', true )[0]['price'], 'earlier changed offer is retained' );
 	delete_option( 'lasery_xtool_import_lock' );
 } else {

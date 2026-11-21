@@ -251,6 +251,24 @@ update_option( 'lasery_xtool_import_lock', ( time() - 60 ) . ':abandoned', false
 $due_tick();
 $check( array( 1, 2, 3 ) === $pages() && 'complete' === get_option( 'lasery_xtool_last_sync' )['result'], 'a worker reclaims an abandoned lease and completes the catalog' );
 
+global $wpdb;
+$last_completed = get_option( 'lasery_xtool_last_sync' );
+$replacement_lock = ( time() + 900 ) . ':replacement';
+$replaced = false;
+$replace_during_refresh = static function ( $sql ) use ( $wpdb, $replacement_lock, &$replaced ) {
+	if ( ! $replaced && str_starts_with( $sql, "UPDATE {$wpdb->options} SET option_value" ) && str_contains( $sql, "'lasery_xtool_import_lock'" ) ) {
+		$replaced = true;
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s", $replacement_lock, 'lasery_xtool_import_lock' ) );
+	}
+	return $sql;
+};
+add_filter( 'query', $replace_during_refresh );
+$run();
+remove_filter( 'query', $replace_during_refresh );
+$current_lock = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'lasery_xtool_import_lock' ) );
+$check( $replaced && $replacement_lock === $current_lock && $last_completed === get_option( 'lasery_xtool_last_sync' ) && ! get_option( 'lasery_xtool_retry_at' ), 'a displaced worker leaves the replacement lease, result and retry schedule intact' );
+$wpdb->delete( $wpdb->options, array( 'option_name' => 'lasery_xtool_import_lock' ) );
+
 $saved_catalog = $mock['catalog'];
 $mock['catalog'] = array();
 $run();
