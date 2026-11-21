@@ -99,20 +99,26 @@ function lasery_xtool_queue_images( $post_id ) {
  */
 add_action( 'lasery_xtool_sync_images', 'lasery_xtool_sync_images' );
 function lasery_xtool_sync_images() {
-	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) ) {
+	$audit_before = time() - DAY_IN_SECONDS;
+	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) || ( ! get_option( LASERY_XTOOL_IMAGE_QUEUE ) && (int) get_option( 'lasery_xtool_image_audit' ) >= $audit_before ) ) {
 		return;
 	}
-	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
-	$queue = is_array( $queue ) ? array_map( 'intval', $queue ) : array();
-	$audit = (int) get_option( 'lasery_xtool_image_audit' ) < time() - DAY_IN_SECONDS;
-	if ( ! $queue && ! $audit ) {
-		return;
-	}
-	// A run from WP-Cron is a web request with the default time limit.
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 600 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
+		return;
+	}
+	// Read the queue under the same lease used when an offer adds images.
+	wp_load_alloptions( true );
+	foreach ( array( LASERY_XTOOL_IMAGE_QUEUE, LASERY_XTOOL_IMAGES_PAUSE, 'lasery_xtool_image_audit', 'notoptions' ) as $option ) {
+		wp_cache_delete( $option, 'options' );
+	}
+	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
+	$queue = is_array( $queue ) ? array_map( 'intval', $queue ) : array();
+	$audit = (int) get_option( 'lasery_xtool_image_audit' ) < $audit_before;
+	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) || ( ! $queue && ! $audit ) ) {
+		lasery_xtool_release_import_lock();
 		return;
 	}
 	$posts = $queue;
@@ -181,6 +187,11 @@ function lasery_xtool_sync_images() {
 		++$attempted;
 		$before = lasery_xtool_public_product_state( $post_id );
 		$image = lasery_xtool_import_image( $post_id, $url );
+		if ( ! lasery_xtool_refresh_import_lock() ) {
+			lasery_xtool_product_state_changed( $post_id, $before );
+			$result = 'locklost';
+			break;
+		}
 		lasery_xtool_product_state_changed( $post_id, $before );
 		if ( is_wp_error( $image ) ) {
 			++$failed;
@@ -196,6 +207,9 @@ function lasery_xtool_sync_images() {
 			unset( $retries[ $url ] );
 			update_post_meta( $post_id, '_lasery_image_retries', wp_slash( $retries ) );
 		}
+	}
+	if ( 'locklost' === $result ) {
+		return;
 	}
 	if ( 'complete' === $result && count( $jobs ) > $attempted ) {
 		$result = 'batch';

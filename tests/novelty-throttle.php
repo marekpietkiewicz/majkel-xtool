@@ -4,6 +4,7 @@ if ( '1' !== getenv( 'LASERY_XTOOL_INTEGRATION_TEST' ) || ! defined( 'WP_CLI' ) 
 	throw new RuntimeException( 'This test requires an explicitly enabled disposable WordPress install.' );
 }
 delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+delete_option( 'lasery_xtool_last_rate_limit' );
 delete_option( 'lasery_xtool_retry_at' );
 delete_option( 'lasery_xtool_novelty_retry_at' );
 delete_option( 'lasery_xtool_novelty_retry_failures' );
@@ -46,7 +47,7 @@ add_filter( 'lasery_xtool_pre_request', static function ( $pre, $url, $etag ) us
 	}
 	return array( 'headers' => array( 'retry-after' => '0' ), 'body' => '', 'response' => array( 'code' => 429 ) );
 }, 20, 3 );
-lasery_xtool_sync_novelties( 'EUR', time() + 8 );
+lasery_xtool_sync_novelties( 'EUR', time() + 60 );
 if ( 1 !== $requests ) {
 	WP_CLI::error( 'A novelty rate limit must stop after one request; observed ' . $requests . '.' );
 }
@@ -119,10 +120,18 @@ if ( 1 !== count( $new_products ) || ! lasery_xtool_source_is_fresh( $new_produc
 }
 $mode = 'offers';
 $requests = 0;
-$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/products.json', 1024, time() + 10 );
-if ( 2 !== $requests || is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-	WP_CLI::error( 'A short catalog rate limit should retain its inline retry.' );
+$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/products.json', 1024, time() + 60 );
+if ( 1 !== $requests || ! is_wp_error( $response ) || 'paused' !== $response->get_error_code() ) {
+	WP_CLI::error( 'A short catalog rate limit should stop after one request.' );
 }
+$first_pause = (int) get_option( LASERY_XTOOL_OFFERS_PAUSE );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$requests = 0;
+lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/products.json', 1024, time() + 60 );
+if ( 1 !== $requests || (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) < $first_pause + 299 ) {
+	WP_CLI::error( 'Repeated rate limiting at the same page must increase the cooldown.' );
+}
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 $requests = 0;
 $limited = true;
 update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'network' ), false );

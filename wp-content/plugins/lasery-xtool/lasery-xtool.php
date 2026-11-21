@@ -137,6 +137,7 @@ function lasery_xtool_deactivate() {
 	wp_clear_scheduled_hook( 'lasery_xtool_sync_existing' );
 	wp_clear_scheduled_hook( 'lasery_xtool_sync_images' );
 	wp_clear_scheduled_hook( 'lasery_xtool_retry_novelties' );
+	wp_clear_scheduled_hook( 'lasery_xtool_cron_tick' );
 	flush_rewrite_rules();
 }
 
@@ -180,9 +181,11 @@ function lasery_xtool_import_page() {
 		'locklost' => 'Import przerwany: utracono blokadę. Sprawdź szkice i ponów import.',
 		'complete' => 'Import zakończony.',
 		'partial'  => 'Pobrano część katalogu. Synchronizacja będzie kontynuowana automatycznie.',
+		'paced'    => 'Zakończono pobieranie stron katalogu w osobnych próbach.',
+		'empty'    => 'Brak produktów powiązanych z katalogiem xTool.',
 		'limit'    => 'Import zakończony. Osiągnięto limit pobierania — w źródle mogą być dalsze produkty.',
 		'incomplete' => 'Nie udało się zsynchronizować części produktów. Sprawdź ich dane źródłowe i ponów próbę.',
-		'anomaly'  => 'Z katalogu xTool zniknęła naraz duża część produktów, więc nic nie zostało ukryte. Sprawdź źródło.',
+		'anomaly'  => 'Katalog xTool był pusty, niespójny lub stracił naraz wiele produktów. Sprawdź źródło.',
 	);
 	$result = isset( $_GET['result'] ) && is_string( $_GET['result'] ) ? sanitize_key( wp_unslash( $_GET['result'] ) ) : '';
 	?>
@@ -216,8 +219,22 @@ function lasery_xtool_import_page() {
 				<p>Bez aktualnej oferty (brak w katalogu xTool lub błędne dane): <?php echo esc_html( implode( ', ', array_map( function ( $id ) { return lasery_xtool_plain_text( get_the_title( absint( $id ) ) ); }, $last_sync['stale'] ) ) ); ?>.</p>
 			<?php endif; ?>
 		<?php endif; ?>
+		<?php
+		$host_cron_at = (int) get_option( 'lasery_xtool_host_cron_at' );
+		$next_retry   = max( (int) get_option( 'lasery_xtool_retry_at' ), (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) );
+		?>
+		<?php if ( $host_cron_at ) : ?>
+			<p><?php echo esc_html( 'Ostatnie uruchomienie crona hostingu: ' . wp_date( 'Y-m-d H:i', $host_cron_at ) . '.' ); ?></p>
+		<?php endif; ?>
+		<?php if ( $next_retry > time() ) : ?>
+			<p><?php echo esc_html( 'Najwcześniejsze ponowienie ofert: ' . wp_date( 'Y-m-d H:i', $next_retry ) . '.' ); ?></p>
+		<?php endif; ?>
+		<?php $last_limit = get_option( 'lasery_xtool_last_rate_limit' ); ?>
+		<?php if ( isset( $last_limit['time'], $last_limit['path'], $last_limit['page'] ) ) : ?>
+			<p><?php echo esc_html( 'Ostatnie HTTP 429: ' . wp_date( 'Y-m-d H:i', (int) $last_limit['time'] ) . ', ' . $last_limit['path'] . ( $last_limit['page'] ? ', strona ' . (int) $last_limit['page'] : '' ) . '.' ); ?></p>
+		<?php endif; ?>
 		<?php if ( lasery_xtool_fetching_paused() || lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) ) : ?>
-			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'H:i', max( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( LASERY_XTOOL_IMAGES_PAUSE ) ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
+			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'Y-m-d H:i', max( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( LASERY_XTOOL_IMAGES_PAUSE ) ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="lasery_xtool_resume_fetch">
 				<?php wp_nonce_field( 'lasery_xtool_resume_fetch' ); ?>
@@ -295,7 +312,7 @@ function lasery_xtool_parse_product( $product, $with_content = true ) {
 
 /** The ID of a raw products.json entry as a string, '' when it has none. */
 function lasery_xtool_raw_product_id( $entry ) {
-	return is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) ? (string) $entry->id : '';
+	return is_object( $entry ) && isset( $entry->id ) && ( is_int( $entry->id ) || is_string( $entry->id ) ) && preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $entry->id ) ? (string) $entry->id : '';
 }
 
 /** The raw products of a products.json document with at most $limit entries, or false. */
@@ -469,6 +486,9 @@ function lasery_xtool_resume_fetch() {
 		wp_die( esc_html__( 'Brak uprawnień.', 'lasery-xtool' ), '', array( 'response' => 403 ) );
 	}
 	check_admin_referer( 'lasery_xtool_resume_fetch' );
+	if ( ! lasery_xtool_lock_import() ) {
+		lasery_xtool_redirect_import( array( 'result' => 'locked' ) );
+	}
 	delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 	delete_option( LASERY_XTOOL_IMAGES_PAUSE );
 	lasery_xtool_redirect_import( array() );
@@ -556,6 +576,11 @@ function lasery_xtool_request( $url, $max_bytes, $etag = '' ) {
 	$headers_file = tempnam( get_temp_dir(), 'lasery-h' );
 	$body_file    = tempnam( get_temp_dir(), 'lasery-b' );
 	if ( false === $headers_file || false === $body_file ) {
+		foreach ( array( $headers_file, $body_file ) as $temp_file ) {
+			if ( false !== $temp_file ) {
+				unlink( $temp_file );
+			}
+		}
 		return $fallback();
 	}
 	$command = array( 'curl', '--silent', '--compressed', '--proto', '=https', '--max-time', '30', '--max-filesize', (string) ( $max_bytes + 1 ), '--dump-header', $headers_file, '--output', $body_file );
@@ -577,7 +602,7 @@ function lasery_xtool_request( $url, $max_bytes, $etag = '' ) {
 	// The last header block belongs to the final response.
 	$blocks = preg_split( '/\r?\n\r?\n/', trim( $head ) );
 	$lines  = preg_split( '/\r?\n/', (string) end( $blocks ) );
-	if ( 0 !== $exit || $size > $max_bytes || ! preg_match( '~^HTTP/\S+ (\d{3})~', (string) $lines[0], $status ) ) {
+	if ( ! preg_match( '~^HTTP/\S+ (\d{3})~', $lines[0], $status ) || ( '429' !== $status[1] && ( 0 !== $exit || $size > $max_bytes ) ) ) {
 		return new WP_Error( 'lasery_xtool_request', 'curl exit ' . $exit );
 	}
 	$headers = array();
@@ -595,26 +620,33 @@ function lasery_xtool_valid_etag( $etag ) {
 	return is_string( $etag ) && preg_match( '~^(?:W/)?"[A-Za-z0-9:_.-]{1,200}"$~D', $etag ) ? $etag : '';
 }
 
-/**
- * GET from the source. When inline retries are enabled, a short HTTP 429 is waited out and retried
- * while $deadline allows; otherwise fetching is paused and WP_Error( 'paused' ) is returned.
- */
-function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '', $retry_inline = true ) {
-	for ( $attempt = 1; ; ++$attempt ) {
-		$response = lasery_xtool_request( $url, $max_bytes, $etag );
-		if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
-			return $response;
-		}
-		$delay = lasery_xtool_retry_delay( $response );
-		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
-		parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-		update_option( 'lasery_xtool_last_rate_limit', array( 'time' => time(), 'path' => $path, 'page' => isset( $query['page'] ) ? (int) $query['page'] : 0, 'retry_after' => $delay ), false );
-		if ( ! $retry_inline || $attempt >= 4 || $delay >= 120 || time() + max( 5, $delay ) + 1 > $deadline ) {
-			lasery_xtool_pause_fetching( $response );
-			return new WP_Error( 'paused' );
-		}
-		sleep( max( 5, $delay ) + 1 );
+/** Stop on the first 429 and leave retry timing to the scheduler. */
+function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
+	if ( lasery_xtool_fetching_paused() ) {
+		return new WP_Error( 'paused' );
 	}
+	if ( time() + 30 > $deadline ) {
+		return new WP_Error( 'network' );
+	}
+	$response = lasery_xtool_request( $url, $max_bytes, $etag );
+	if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
+		return $response;
+	}
+
+	$now = time();
+	$delay = lasery_xtool_retry_delay( $response );
+	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+	$page = isset( $query['page'] ) ? (int) $query['page'] : 0;
+	$last = get_option( 'lasery_xtool_last_rate_limit' );
+	$attempts = 1;
+	if ( is_array( $last ) && $path === ( $last['path'] ?? '' ) && $page === (int) ( $last['page'] ?? 0 ) && (int) ( $last['time'] ?? 0 ) > $now - 2 * HOUR_IN_SECONDS ) {
+		$attempts = min( 5, max( 1, (int) ( $last['attempts'] ?? 1 ) ) + 1 );
+	}
+	$cooldown = max( $delay, min( HOUR_IN_SECONDS, 5 * MINUTE_IN_SECONDS * 2 ** ( $attempts - 1 ) ) );
+	update_option( LASERY_XTOOL_OFFERS_PAUSE, $now + $cooldown, false );
+	update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => $path, 'page' => $page, 'retry_after' => $delay, 'attempts' => $attempts ), false );
+	return new WP_Error( 'paused' );
 }
 
 /**
@@ -624,7 +656,7 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '', $retr
  */
 function lasery_xtool_currency( $deadline ) {
 	$known = get_option( 'lasery_xtool_currency' );
-	$known = is_array( $known ) && isset( $known['code'], $known['at'] ) && is_string( $known['code'] ) ? $known : array( 'code' => '', 'at' => 0 );
+	$known = is_array( $known ) && isset( $known['code'], $known['at'] ) && is_string( $known['code'] ) && preg_match( '/^[A-Z]{3}$/D', $known['code'] ) ? $known : array( 'code' => '', 'at' => 0 );
 	if ( '' !== $known['code'] && (int) $known['at'] > time() - DAY_IN_SECONDS ) {
 		return $known['code'];
 	}
@@ -639,7 +671,7 @@ function lasery_xtool_currency( $deadline ) {
 			update_option( 'lasery_xtool_currency', $known, false );
 		}
 	}
-	return $known['code'];
+	return '' === $known['code'] ? new WP_Error( 'network' ) : $known['code'];
 }
 
 /**
@@ -649,10 +681,10 @@ function lasery_xtool_currency( $deadline ) {
  * same structure for this walk, 'complete' => whether the last page was reached ) or a WP_Error
  * ('paused', 'network' or 'format').
  */
-function lasery_xtool_walk_catalog( $known, $deadline, $handle, $start_page = 1 ) {
+function lasery_xtool_walk_catalog( $known, $deadline, $handle, $start_page = 1, $end_page = LASERY_XTOOL_MAX_PAGES ) {
 	$pages = array();
 	$downloaded = array();
-	for ( $page = $start_page; $page <= LASERY_XTOOL_MAX_PAGES; ++$page ) {
+	for ( $page = $start_page; $page <= $end_page; ++$page ) {
 		if ( $page > $start_page ) {
 			// A short pause between pages keeps the requests within the storefront's rate limit.
 			sleep( 1 );
@@ -684,7 +716,7 @@ function lasery_xtool_walk_catalog( $known, $deadline, $handle, $start_page = 1 
 			return array( 'pages' => $pages, 'downloaded' => $downloaded, 'complete' => true );
 		}
 	}
-	return array( 'pages' => $pages, 'downloaded' => $downloaded, 'complete' => false );
+	return array( 'pages' => $pages, 'downloaded' => $downloaded, 'complete' => false, 'next_page' => $end_page < LASERY_XTOOL_MAX_PAGES ? $end_page + 1 : 0 );
 }
 
 /** Every product of the source for the draft import: all pages, each product valid and unique. */
@@ -720,22 +752,26 @@ function lasery_xtool_fetch_source() {
 	return array( 'products' => array_values( $products ), 'result' => $walk['complete'] ? 'complete' : 'limit' );
 }
 
-// The system cron is the main trigger. WP-Cron backs it up, so a stopped or misconfigured system
-// cron cannot leave every offer to expire after a day.
+add_filter( 'cron_schedules', 'lasery_xtool_cron_schedules' );
+function lasery_xtool_cron_schedules( $schedules ) {
+	$schedules['lasery_xtool_five_minutes'] = array( 'interval' => 5 * MINUTE_IN_SECONDS, 'display' => 'Lasery xTool – co 5 minut' );
+	return $schedules;
+}
+
+// The hosting cron and WP-Cron read the same durable schedule.
 add_action( 'init', 'lasery_xtool_schedule_sync' );
 function lasery_xtool_schedule_sync() {
-	foreach ( array( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_images' ) as $hook ) {
+	$hooks = array( 'lasery_xtool_cron_tick' => 'lasery_xtool_five_minutes', 'lasery_xtool_sync_images' => 'hourly' );
+	foreach ( $hooks as $hook => $interval ) {
 		if ( ! wp_next_scheduled( $hook ) ) {
-			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', $hook );
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, $interval, $hook );
 		}
 	}
 }
 
-/** Persist the retry for the hosting scheduler as well as the traffic-driven WP-Cron fallback. */
 function lasery_xtool_schedule_sync_retry( $delay = 10 * MINUTE_IN_SECONDS ) {
 	$at = max( time() + $delay, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) );
 	update_option( 'lasery_xtool_retry_at', $at, false );
-	wp_schedule_single_event( $at, 'lasery_xtool_sync_existing' );
 }
 
 function lasery_xtool_retry_due() {
@@ -743,20 +779,25 @@ function lasery_xtool_retry_due() {
 	return $at > 0 && $at <= time() && ! lasery_xtool_fetching_paused();
 }
 
-/** Retry the optional collection independently, backing off to at most one attempt per hour. */
-function lasery_xtool_schedule_novelty_retry( $failed = true ) {
-	if ( ! $failed ) {
-		// Leave the due marker untouched: the lock holder may complete it concurrently.
-		$at = max( time() + 2 * MINUTE_IN_SECONDS, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( 'lasery_xtool_retry_at' ) );
-		wp_schedule_single_event( $at, 'lasery_xtool_retry_novelties' );
-		return;
+function lasery_xtool_offer_sync_due() {
+	if ( lasery_xtool_fetching_paused() ) {
+		return false;
 	}
+	if ( (int) get_option( 'lasery_xtool_retry_at' ) > 0 ) {
+		return lasery_xtool_retry_due();
+	}
+	$last = get_option( 'lasery_xtool_last_sync' );
+	$interval = in_array( $last['result'] ?? '', array( 'complete', 'incomplete', 'anomaly', 'limit', 'paced', 'empty' ), true ) ? HOUR_IN_SECONDS : 10 * MINUTE_IN_SECONDS;
+	return (int) ( $last['time'] ?? 0 ) <= time() - $interval;
+}
+
+/** Retry the optional collection independently, backing off to at most one attempt per hour. */
+function lasery_xtool_schedule_novelty_retry() {
 	$attempts = min( 4, max( 0, (int) get_option( 'lasery_xtool_novelty_retry_failures' ) ) + 1 );
 	update_option( 'lasery_xtool_novelty_retry_failures', $attempts, false );
-	$delay = min( HOUR_IN_SECONDS, 10 * MINUTE_IN_SECONDS * ( 2 ** max( 0, $attempts - 1 ) ) );
-	$at = max( time() + $delay, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( 'lasery_xtool_retry_at' ) );
+	$delay = min( HOUR_IN_SECONDS, 10 * MINUTE_IN_SECONDS * ( 2 ** ( $attempts - 1 ) ) );
+	$at = max( time() + $delay, (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) );
 	update_option( 'lasery_xtool_novelty_retry_at', $at, false );
-	wp_schedule_single_event( $at, 'lasery_xtool_retry_novelties' );
 }
 
 function lasery_xtool_novelty_retry_due() {
@@ -770,14 +811,12 @@ function lasery_xtool_retry_novelties() {
 		return;
 	}
 	if ( (int) get_option( 'lasery_xtool_retry_at' ) ) {
-		lasery_xtool_schedule_novelty_retry( false );
 		return;
 	}
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 120 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
-		lasery_xtool_schedule_novelty_retry( false );
 		return;
 	}
 	// Another scheduler may have completed the retry or queued offers before this lease was acquired.
@@ -789,7 +828,6 @@ function lasery_xtool_retry_novelties() {
 		return;
 	}
 	if ( (int) get_option( 'lasery_xtool_retry_at' ) ) {
-		lasery_xtool_schedule_novelty_retry( false );
 		lasery_xtool_release_import_lock();
 		return;
 	}
@@ -804,28 +842,44 @@ function lasery_xtool_retry_novelties() {
 	lasery_xtool_release_import_lock();
 }
 
-/** Entry point for the host cron; offer retries take priority over optional novelties. */
-function lasery_xtool_run_due_retries() {
-	if ( lasery_xtool_retry_due() ) {
+/** The periodic entry point also reports stale offers during a source cooldown. */
+add_action( 'lasery_xtool_cron_tick', 'lasery_xtool_run_due_retries', 10, 0 );
+function lasery_xtool_run_due_retries( $hosting_cron = false ) {
+	if ( true === $hosting_cron ) {
+		update_option( 'lasery_xtool_host_cron_at', time(), false );
+	}
+	if ( lasery_xtool_offer_sync_due() ) {
 		do_action( 'lasery_xtool_sync_existing' );
 	}
 	if ( lasery_xtool_novelty_retry_due() ) {
 		do_action( 'lasery_xtool_retry_novelties' );
 	}
+	// Use the import lease to avoid duplicate alerts from simultaneous cron triggers.
+	if ( lasery_xtool_stale_alert_due() && lasery_xtool_lock_import() ) {
+		lasery_xtool_alert_when_stale();
+		lasery_xtool_release_import_lock();
+	}
 }
 
-/** Tell the administrator when offers have not been refreshed for six hours, at most once a day. */
+function lasery_xtool_stale_alert_due() {
+	return time() - (int) get_option( 'lasery_xtool_last_alert' ) >= DAY_IN_SECONDS &&
+		time() - (int) get_option( 'lasery_xtool_alert_attempt' ) >= 30 * MINUTE_IN_SECONDS;
+}
+
+/** Tell the administrator when any currently listed public offer has gone unverified for six hours. */
 function lasery_xtool_alert_when_stale() {
-	$ok = (int) get_option( 'lasery_xtool_last_ok' );
-	if ( ! $ok ) {
-		update_option( 'lasery_xtool_last_ok', time(), false );
-		return;
+	foreach ( array( 'lasery_xtool_last_alert', 'lasery_xtool_alert_attempt', 'notoptions' ) as $option ) {
+		wp_cache_delete( $option, 'options' );
 	}
-	if ( time() - $ok < 6 * HOUR_IN_SECONDS || time() - (int) get_option( 'lasery_xtool_last_alert' ) < DAY_IN_SECONDS ) {
+	if ( ! lasery_xtool_stale_alert_due() ) {
 		return;
 	}
 	$stale = 0;
-	foreach ( lasery_xtool_sync_targets() as $rows ) {
+	$targets = lasery_xtool_sync_targets();
+	if ( false === $targets ) {
+		return;
+	}
+	foreach ( $targets as $rows ) {
 		foreach ( $rows as $row ) {
 			if ( 'publish' === $row->status && null === $row->missing && (int) $row->updated <= time() - 6 * HOUR_IN_SECONDS ) {
 				++$stale;
@@ -835,17 +889,22 @@ function lasery_xtool_alert_when_stale() {
 	if ( ! $stale ) {
 		return;
 	}
-	update_option( 'lasery_xtool_last_alert', time(), false );
+	update_option( 'lasery_xtool_alert_attempt', time(), false );
+	$ok = (int) get_option( 'lasery_xtool_last_ok' );
 	$last = get_option( 'lasery_xtool_last_sync' );
-	lasery_xtool_notify(
+	$retry = max( (int) get_option( 'lasery_xtool_retry_at' ), (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) );
+	if ( lasery_xtool_notify(
 		'laseryxtool.pl: oferty nie są aktualizowane',
 		sprintf(
-			"Ostatnie pełne pobranie katalogu xTool: %s. Liczba opublikowanych produktów, których oferty nie zostały potwierdzone od co najmniej 6 godzin: %d. Ostatni wynik: %s. Każda oferta wygasa po 24 godzinach od jej ostatniego potwierdzenia.\n\nAutomat będzie ponawiał synchronizację. Stan można sprawdzić w Produkty xTool → Import.",
-			wp_date( 'Y-m-d H:i', $ok ),
+			"Ostatnie pełne pobranie katalogu xTool: %s. Liczba opublikowanych produktów, których oferty nie zostały potwierdzone od co najmniej 6 godzin: %d. Ostatni wynik: %s. Każda oferta wygasa po 24 godzinach od jej ostatniego potwierdzenia.\n\nNajbliższa możliwa próba: %s. Szczegóły w Produkty xTool → Import.",
+			$ok ? wp_date( 'Y-m-d H:i', $ok ) : 'brak potwierdzonego pobrania',
 			$stale,
-			is_array( $last ) && isset( $last['result'] ) && is_string( $last['result'] ) ? $last['result'] : 'brak'
+			$last['result'] ?? 'brak',
+			$retry > time() ? wp_date( 'Y-m-d H:i', $retry ) : 'przy najbliższym uruchomieniu synchronizacji'
 		)
-	);
+	) ) {
+		update_option( 'lasery_xtool_last_alert', time(), false );
+	}
 }
 
 /** The products with a source ID, grouped by it, with everything the sync needs in one query. */
@@ -865,6 +924,9 @@ function lasery_xtool_sync_targets() {
 			LASERY_XTOOL_PRODUCT_TYPE
 		)
 	);
+	if ( $wpdb->last_error ) {
+		return false;
+	}
 	$targets = array();
 	foreach ( $rows as $row ) {
 		if ( preg_match( '/^[1-9][0-9]{0,19}$/D', (string) $row->source ) ) {
@@ -904,10 +966,13 @@ function lasery_xtool_mark_present( $row ) {
 		delete_post_meta( $row->id, '_lasery_missing_runs' );
 	}
 	if ( null !== $row->hidden ) {
-		delete_post_meta( $row->id, '_lasery_auto_hidden' );
 		if ( 'draft' === $row->status ) {
-			wp_update_post( array( 'ID' => $row->id, 'post_status' => 'publish' ) );
+			$published = wp_update_post( array( 'ID' => $row->id, 'post_status' => 'publish' ), true );
+			if ( is_wp_error( $published ) || ! $published || 'publish' !== get_post_status( $row->id ) ) {
+				return;
+			}
 		}
+		delete_post_meta( $row->id, '_lasery_auto_hidden' );
 		lasery_xtool_schedule_cache_purge();
 	}
 }
@@ -933,45 +998,49 @@ function lasery_xtool_mark_absent( $row ) {
 	}
 }
 
-/**
- * Called hourly by the system cron and WP-Cron; refreshes every existing product and never creates
- * drafts. The walk is conditional: pages that did not change since the last complete walk answer 304,
- * so a quiet hour costs a few empty responses and two writes; only products whose offer changed are
- * saved. A run shortly after one that reached the source is skipped unless $force is set, so the two
- * triggers do not walk the catalogue twice an hour.
- */
+/** Refresh existing offers on the normal cadence or at the durable retry time. */
 add_action( 'lasery_xtool_sync_existing', 'lasery_xtool_sync_existing' );
 function lasery_xtool_sync_existing( $force = false ) {
-	$last = get_option( 'lasery_xtool_last_sync' );
-	if ( true !== $force && is_array( $last ) && isset( $last['time'], $last['result'], $last['confirmed'] ) && in_array( $last['result'], array( 'complete', 'incomplete', 'anomaly', 'limit' ), true ) && (int) $last['time'] > time() - 30 * MINUTE_IN_SECONDS ) {
-		delete_option( 'lasery_xtool_retry_at' );
+	if ( true !== $force && ! lasery_xtool_offer_sync_due() ) {
 		return;
 	}
-	// A run from WP-Cron is a web request with the default time limit.
 	if ( function_exists( 'set_time_limit' ) ) {
 		set_time_limit( 600 );
 	}
 	if ( ! lasery_xtool_lock_import() ) {
-		// Another import, or the image sync, holds the lock; this one is needed within minutes.
-		lasery_xtool_schedule_sync_retry( 2 * MINUTE_IN_SECONDS );
 		return;
 	}
+	// A concurrent runner may have finished between checking the schedule and acquiring the lease.
+	foreach ( array( 'lasery_xtool_last_sync', 'lasery_xtool_retry_at', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
+		wp_cache_delete( $option, 'options' );
+	}
+	if ( true !== $force && ! lasery_xtool_offer_sync_due() ) {
+		lasery_xtool_release_import_lock();
+		return;
+	}
+
 	$targets = lasery_xtool_sync_targets();
-	$failure = static function ( $code, $updated = 0, $confirmed = 0 ) {
+	$failure = static function ( $code, $updated = 0, $confirmed = 0, $page = 0 ) {
 		// A failed run does not invalidate observed offers; their 24-hour freshness limit still applies.
-		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $code, 'updated' => $updated, 'confirmed' => $confirmed ), false );
-		lasery_xtool_schedule_sync_retry();
+		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $code, 'updated' => $updated, 'confirmed' => $confirmed, 'page' => $page ), false );
+		lasery_xtool_schedule_sync_retry( 'paused' === $code ? 0 : 10 * MINUTE_IN_SECONDS );
 		lasery_xtool_alert_when_stale();
 		lasery_xtool_release_import_lock();
 	};
+	if ( false === $targets ) {
+		$failure( 'storage' );
+		return;
+	}
 	if ( ! $targets ) {
+		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'empty' ), false );
 		delete_option( 'lasery_xtool_retry_at' );
 		delete_option( 'lasery_xtool_resume_page' );
+		delete_option( 'lasery_xtool_paced_started_at' );
 		lasery_xtool_release_import_lock();
 		return;
 	}
 	if ( lasery_xtool_fetching_paused() ) {
-		$failure( 'paused' );
+		lasery_xtool_release_import_lock();
 		return;
 	}
 	$deadline = time() + 420;
@@ -1035,6 +1104,9 @@ function lasery_xtool_sync_existing( $force = false ) {
 	$listed   = array(); // Products on pages that changed, valid or not.
 	$start_page = (int) get_option( 'lasery_xtool_resume_page', 1 );
 	$start_page = $start_page >= 1 && $start_page <= LASERY_XTOOL_MAX_PAGES ? $start_page : 1;
+	$paced_started = (int) get_option( 'lasery_xtool_paced_started_at' );
+	$last_limit = get_option( 'lasery_xtool_last_rate_limit' );
+	$pace = true !== $force && ( ( $start_page > 1 && $paced_started ) || ( '/products.json' === ( $last_limit['path'] ?? '' ) && (int) ( $last_limit['time'] ?? 0 ) > time() - 2 * HOUR_IN_SECONDS ) );
 	$walk     = lasery_xtool_walk_catalog(
 		$known,
 		$deadline,
@@ -1054,34 +1126,50 @@ function lasery_xtool_sync_existing( $force = false ) {
 			}
 			return true;
 		},
-		$start_page
+		$start_page,
+		$pace ? $start_page : LASERY_XTOOL_MAX_PAGES
 	);
 	$error = is_wp_error( $walk ) ? $walk : null;
 	if ( $error ) {
 		$walk = $error->get_error_data();
 	}
 	if ( ! is_array( $walk ) || empty( $walk['pages'] ) ) {
-		$failure( $error ? $error->get_error_code() : 'network' );
+		$page = (int) ( $walk['next_page'] ?? 0 );
+		$code = $error ? $error->get_error_code() : 'network';
+		if ( $page ) {
+			$next = $page;
+			$last = get_option( 'lasery_xtool_last_sync' );
+			// Revisit the failed page on the next sweep if a repeat error would strand known later pages.
+			if ( in_array( $code, array( 'network', 'format' ), true ) && $code === ( $last['result'] ?? '' ) && $page === (int) ( $last['page'] ?? 0 ) && isset( $known[ $page + 1 ] ) ) {
+				$next = $page + 1;
+				delete_option( 'lasery_xtool_paced_started_at' );
+			}
+			update_option( 'lasery_xtool_resume_page', $next, false );
+		}
+		$failure( $code, 0, 0, $page );
 		return;
 	}
 	if ( ! lasery_xtool_refresh_import_lock() ) {
 		$failure( 'locklost' );
 		return;
 	}
-	$partial = null !== $error || $start_page > 1;
+	$next_page = (int) ( $walk['next_page'] ?? 0 );
+	$partial = null !== $error || $start_page > 1 || $next_page > 0;
 	// Invalidate old ETags before changing any offers. A crash or interrupted walk must not
 	// let a later 304 for the old page confirm data saved from a different page version.
 	$invalidate = array_fill_keys( $walk['downloaded'], true );
 	$seen = array();
 	$duplicates = array();
-	foreach ( $walk['pages'] as $number => $page ) {
+	$ids_complete = true;
+	foreach ( $walk['pages'] as $page ) {
+		if ( count( $page['ids'] ) !== $page['count'] ) {
+			$ids_complete = false;
+		}
 		foreach ( $page['ids'] as $id ) {
-			if ( isset( $targets[ $id ] ) ) {
-				if ( isset( $seen[ $id ] ) && $seen[ $id ] !== $number ) {
-					$duplicates[ $id ] = true;
-				}
-				$seen[ $id ] = $number;
+			if ( isset( $seen[ $id ] ) ) {
+				$duplicates[ $id ] = true;
 			}
+			$seen[ $id ] = true;
 		}
 	}
 	foreach ( $walk['pages'] as $number => &$page ) {
@@ -1111,11 +1199,8 @@ function lasery_xtool_sync_existing( $force = false ) {
 			return;
 		}
 	}
-	$present = array();
-	foreach ( $walk['pages'] as $page ) {
-		$present += array_fill_keys( $page['ids'], true );
-	}
-	// Confirm no later than the beginning of this walk, even if a later request spent minutes in backoff.
+	$present = $seen;
+	// Confirm no later than the beginning of this walk.
 	$now       = $source['fetched_at'];
 	$confirmed = array();
 	$updated   = 0;
@@ -1171,13 +1256,28 @@ function lasery_xtool_sync_existing( $force = false ) {
 	}
 	if ( $error ) {
 		update_option( 'lasery_xtool_resume_page', $walk['next_page'], false );
-		$failure( $error->get_error_code(), $updated, count( $confirmed ) );
+		$failure( $error->get_error_code(), $updated, count( $confirmed ), $next_page );
 		return;
 	}
 	if ( $partial ) {
-		update_option( 'lasery_xtool_resume_page', 1, false );
-		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'partial', 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed ), false );
-		lasery_xtool_schedule_sync_retry();
+		if ( $pace && $next_page && 1 === $start_page ) {
+			update_option( 'lasery_xtool_paced_started_at', $now, false );
+		}
+		// A split pass is useful for positive confirmations only. It cannot establish absence.
+		$paced_done = $pace && $walk['complete'] && $paced_started > time() - HOUR_IN_SECONDS;
+		$limit = ! $next_page && ! $walk['complete'];
+		$result = $limit ? 'limit' : ( $paced_done ? 'paced' : 'partial' );
+		if ( $next_page || ( ! $limit && ! $paced_done ) ) {
+			update_option( 'lasery_xtool_resume_page', max( 1, $next_page ), false );
+			lasery_xtool_schedule_sync_retry( $pace ? 4 * MINUTE_IN_SECONDS : 10 * MINUTE_IN_SECONDS );
+		} else {
+			delete_option( 'lasery_xtool_resume_page' );
+			delete_option( 'lasery_xtool_retry_at' );
+		}
+		if ( ! $next_page ) {
+			delete_option( 'lasery_xtool_paced_started_at' );
+		}
+		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed ), false );
 		lasery_xtool_alert_when_stale();
 		lasery_xtool_release_import_lock();
 		return;
@@ -1187,7 +1287,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 	$result = 'complete';
 	if ( ! $walk['complete'] ) {
 		$result = 'limit';
-	} elseif ( count( $absent ) > max( 5, count( $targets ) / 4 ) ) {
+	} elseif ( ! $present || ! $ids_complete || $duplicates || count( $absent ) > max( 5, count( $targets ) / 4 ) ) {
 		$result = 'anomaly';
 	} else {
 		foreach ( $absent as $row ) {
@@ -1210,16 +1310,17 @@ function lasery_xtool_sync_existing( $force = false ) {
 			return;
 		}
 	}
-	if ( $walk['complete'] ) {
+	if ( 'complete' === $result ) {
 		update_option( 'lasery_xtool_last_ok', time(), false );
 	}
 	delete_option( 'lasery_xtool_resume_page' );
-	lasery_xtool_sync_novelties( $currency, $deadline );
+	delete_option( 'lasery_xtool_paced_started_at' );
 	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed, 'stale' => $stale ), false );
 	delete_option( 'lasery_xtool_retry_at' );
-	if ( ! $walk['complete'] ) {
-		lasery_xtool_alert_when_stale();
+	if ( 'complete' === $result && ! (int) get_option( 'lasery_xtool_novelty_retry_at' ) ) {
+		update_option( 'lasery_xtool_novelty_retry_at', time() + 5 * MINUTE_IN_SECONDS, false );
 	}
+	lasery_xtool_alert_when_stale();
 	lasery_xtool_release_import_lock();
 }
 

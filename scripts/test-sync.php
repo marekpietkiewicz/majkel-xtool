@@ -63,7 +63,7 @@ add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$mails ) { $mails[] 
 
 // ---- fixtures: 40 real products on the site, 3 of them absent from the source ----------------
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) { wp_delete_post( $id, true ); }
-delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE ); delete_option( LASERY_XTOOL_NOVELTY_STATE ); delete_option( 'lasery_xtool_novelty_retry_at' ); delete_option( 'lasery_xtool_novelty_retry_failures' );
+delete_option( LASERY_XTOOL_STATE ); delete_option( 'lasery_xtool_last_sync' ); delete_option( 'lasery_xtool_currency' ); delete_option( LASERY_XTOOL_OFFERS_PAUSE ); delete_option( 'lasery_xtool_last_ok' ); delete_option( 'lasery_xtool_last_alert' ); delete_option( 'lasery_xtool_alert_attempt' ); delete_option( 'lasery_xtool_last_rate_limit' ); delete_option( LASERY_XTOOL_IMAGE_QUEUE ); delete_option( LASERY_XTOOL_NOVELTY_STATE ); delete_option( 'lasery_xtool_novelty_retry_at' ); delete_option( 'lasery_xtool_novelty_retry_failures' );
 if ( ! term_exists( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY ) ) { lasery_xtool_install(); }
 $site = array_slice( $catalog, 0, 40 );
 $by_source = array();
@@ -154,7 +154,7 @@ $mock['mode'] = 'limited';
 $m = $run();
 $check( 'result paused', 'paused' === $last()['result'] );
 $check( 'pause lasts about as long as Retry-After', abs( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) - ( time() + 600 ) ) < 5 );
-$check( 'retry scheduled for when the pause ends', (bool) wp_next_scheduled( 'lasery_xtool_sync_existing' ) );
+$check( 'retry scheduled for when the pause ends', (int) get_option( 'lasery_xtool_retry_at' ) >= time() + 595 && (bool) wp_next_scheduled( 'lasery_xtool_cron_tick' ) );
 $check( 'offers still fresh (freshness window)', lasery_xtool_source_is_fresh( reset( $by_source ) ) );
 $m = $run();
 $check( 'while paused: no request at all', 0 === count( $mock['requests'] ), json_encode( $mock['requests'] ) );
@@ -188,6 +188,10 @@ $check( 'product with a new image is queued', in_array( $by_source[ (string) $mo
 
 
 echo "S10 novelties: the manufacturer's machine collection\n";
+$retry_novelties = static function () {
+	update_option( 'lasery_xtool_novelty_retry_at', time() - 1, false );
+	do_action( 'lasery_xtool_retry_novelties' );
+};
 $clone = static function ( $index, $changes ) use ( $catalog ) {
 	$p = json_decode( wp_json_encode( $catalog[ $index ] ) );
 	foreach ( $changes as $k => $v ) { $p->$k = $v; }
@@ -206,6 +210,7 @@ foreach ( $skip[2]->variants as $v ) { $v->available = false; }
 $mock['machine'] = array_merge( array( $clone( 3, array( 'published_at' => $days( 10 ) ) ), $clone( 4, array( 'published_at' => $days( 100 ) ) ), $new_machine ), $skip );
 $mails = array();
 $run();
+$retry_novelties();
 $new_post = get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000001', 'fields' => 'ids' ) );
 $check( 'the unknown available machine is published', 1 === count( $new_post ) && 'publish' === get_post_status( $new_post[0] ) );
 $check( 'refurbished, kiosk and unavailable ones are not imported', 0 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => array( '777000000002', '777000000003', '777000000004' ), 'meta_compare' => 'IN', 'fields' => 'ids' ) ) ) );
@@ -228,11 +233,13 @@ $check( 'order: demo, newest new, older new, then the rest', array_slice( $listi
 echo "S12 the next run changes nothing, and a badge expires\n";
 $mails = array();
 $run();
+$retry_novelties();
 $check( 'collection answered 304 and no second import', 1 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000001', 'fields' => 'ids' ) ) ) && 0 === count( $mails ) );
 $state = get_option( LASERY_XTOOL_NOVELTY_STATE );
 $state['members'][ (string) $recent_known->id ] = time() - 70 * DAY_IN_SECONDS;
 update_option( LASERY_XTOOL_NOVELTY_STATE, $state, false );
 $run();
+$retry_novelties();
 $check( 'after 60 days the badge is removed by the next sync', ! has_term( LASERY_XTOOL_NEW_BADGE, LASERY_XTOOL_BADGE_TAXONOMY, $by_source[ (string) $recent_known->id ] ) );
 
 echo "S13 several unknown machines at once are held back\n";
@@ -245,7 +252,9 @@ foreach ( array( 110, 111, 112, 113 ) as $i => $index ) {
 $mock['machine'] = array_merge( $mock['machine'], $many );
 $mails = array();
 $run();
+$retry_novelties();
 $run();
+$retry_novelties();
 $check( 'none imported', 0 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000100', 'fields' => 'ids' ) ) ) );
 $check( 'one mail for the same set, not one per run', 1 === count( $mails ), count( $mails ) . ' mails' );
 

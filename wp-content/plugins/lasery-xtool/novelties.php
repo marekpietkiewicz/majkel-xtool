@@ -3,7 +3,7 @@
  * New machines of xTool's main catalogue. The collection "machine" is the manufacturer's list of the
  * machines it sells and recommends. A machine in it that the site does not know yet is published at
  * once, and every machine of it that xTool published within the last 60 days carries the "Nowość"
- * badge, which lists it right after the products with a demo. The sync calls this once an hour.
+ * badge, which lists it right after the products with a demo. The scheduler checks it after the offer sync.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -18,7 +18,7 @@ const LASERY_XTOOL_NOVELTY_SKIP   = '/Refurbished|Kiosk|Gift|Payment|mBot|mBuild
 
 /** Mail the site's administrator (the address in Settings → General). */
 function lasery_xtool_notify( $subject, $body ) {
-	wp_mail( get_option( 'admin_email' ), $subject, $body );
+	return wp_mail( get_option( 'admin_email' ), $subject, $body );
 }
 
 /**
@@ -73,8 +73,8 @@ function lasery_xtool_sync_novelties( $currency, $deadline ) {
 	$state    = get_option( LASERY_XTOOL_NOVELTY_STATE );
 	$state    = is_array( $state ) ? $state : array();
 	$members  = isset( $state['members'] ) && is_array( $state['members'] ) ? $state['members'] : array(); // source ID => published timestamp
-	// Offers have already been refreshed; do not hold their lock while retrying this optional request.
-	$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/collections/machine/products.json?limit=250', LASERY_XTOOL_MAX_BYTES, $deadline, isset( $state['etag'] ) ? $state['etag'] : '', false );
+	// Each tick sends at most one request for this optional collection.
+	$response = lasery_xtool_source_get( LASERY_XTOOL_SOURCE_URL . '/collections/machine/products.json?limit=250', LASERY_XTOOL_MAX_BYTES, $deadline, isset( $state['etag'] ) ? $state['etag'] : '' );
 	$success  = false;
 	if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
 		$raw = lasery_xtool_decode_products( wp_remote_retrieve_body( $response ), LASERY_XTOOL_PAGE_SIZE );

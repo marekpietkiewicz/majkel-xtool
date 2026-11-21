@@ -7,7 +7,7 @@ if ( '1' !== getenv( 'LASERY_XTOOL_INTEGRATION_TEST' ) || ! defined( 'WP_CLI' ) 
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) {
 	wp_delete_post( $id, true );
 }
-foreach ( array( LASERY_XTOOL_STATE, LASERY_XTOOL_OFFERS_PAUSE, 'lasery_xtool_last_sync', 'lasery_xtool_last_ok', 'lasery_xtool_resume_page', 'lasery_xtool_retry_at', 'lasery_xtool_novelty_retry_at', 'lasery_xtool_novelty_retry_failures', 'lasery_xtool_import_lock' ) as $option ) {
+foreach ( array( LASERY_XTOOL_STATE, LASERY_XTOOL_OFFERS_PAUSE, 'lasery_xtool_last_sync', 'lasery_xtool_last_ok', 'lasery_xtool_resume_page', 'lasery_xtool_retry_at', 'lasery_xtool_novelty_retry_at', 'lasery_xtool_novelty_retry_failures', 'lasery_xtool_import_lock', 'lasery_xtool_last_alert', 'lasery_xtool_alert_attempt', 'lasery_xtool_last_rate_limit', 'lasery_xtool_paced_started_at', 'lasery_xtool_host_cron_at' ) as $option ) {
 	delete_option( $option );
 }
 
@@ -161,6 +161,7 @@ $mails = array();
 add_filter( 'pre_wp_mail', static function ( $result, $mail ) use ( &$mails ) { $mails[] = $mail; return true; }, 20, 2 );
 update_option( 'lasery_xtool_last_ok', time() - 7 * HOUR_IN_SECONDS, false );
 delete_option( 'lasery_xtool_last_alert' );
+delete_option( 'lasery_xtool_alert_attempt' );
 foreach ( $post_ids as $id ) {
 	update_post_meta( $id, '_lasery_source_updated_at', (string) time() );
 }
@@ -192,14 +193,79 @@ $check( array( 1 ) === $pages() && 'paused' === get_option( 'lasery_xtool_last_s
 delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 
 update_option( 'lasery_xtool_import_lock', ( time() + 900 ) . ':held-by-another-process', false );
-delete_option( 'lasery_xtool_retry_at' );
+$due = time() - 1;
+update_option( 'lasery_xtool_retry_at', $due, false );
 $run();
-$check( (int) get_option( 'lasery_xtool_retry_at' ) > time(), 'lock contention schedules a hosting-cron retry' );
-update_option( 'lasery_xtool_retry_at', time() - 1, false );
+$check( $due === (int) get_option( 'lasery_xtool_retry_at' ) && array() === $pages(), 'lock contention leaves the due retry untouched' );
 $check( lasery_xtool_retry_due(), 'the hosting watchdog sees a due retry' );
 update_option( LASERY_XTOOL_OFFERS_PAUSE, time() + 300, false );
 $check( ! lasery_xtool_retry_due(), 'the hosting watchdog respects the source pause' );
 delete_option( 'lasery_xtool_import_lock' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+
+// Drive each scheduled batch through the same action used by WordPress and the hosting cron.
+$mock['limited_page'] = 0;
+$mock['catalog'][250]['variants'] = $catalog[250]['variants'];
+$baseline_ok = (int) get_option( 'lasery_xtool_last_ok' );
+$missing_runs = get_post_meta( $ghost, '_lasery_missing_runs', true );
+$due_tick = static function ( $host = false ) use ( &$mock ) {
+	$mock['requests'] = array();
+	update_option( 'lasery_xtool_retry_at', time() - 1, false );
+	if ( $host ) {
+		lasery_xtool_run_due_retries( true );
+	} else {
+		do_action( 'lasery_xtool_cron_tick' );
+	}
+};
+$due_tick( true );
+$check( array( 1 ) === $pages() && 2 === (int) get_option( 'lasery_xtool_resume_page' ) && (int) get_option( 'lasery_xtool_host_cron_at' ) >= time() - 5, 'the host watchdog records its heartbeat and paces page one after a recent 429' );
+$not_before = (int) get_option( 'lasery_xtool_retry_at' );
+$mock['requests'] = array();
+do_action( 'lasery_xtool_sync_existing' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( array() === $pages() && $not_before === (int) get_option( 'lasery_xtool_retry_at' ), 'overlapping cron triggers honor the queued retry without moving it' );
+$due_tick();
+$check( array( 2 ) === $pages() && 3 === (int) get_option( 'lasery_xtool_resume_page' ), 'WP-Cron shares the durable cursor and fetches only page two' );
+$due_tick();
+$check( array( 3 ) === $pages() && 'paced' === get_option( 'lasery_xtool_last_sync' )['result'] && ! get_option( 'lasery_xtool_retry_at' ), 'the last page finishes a paced sweep without another immediate sweep' );
+$check( $baseline_ok === (int) get_option( 'lasery_xtool_last_ok' ) && $missing_runs === get_post_meta( $ghost, '_lasery_missing_runs', true ), 'split sweeps never count as full absence evidence' );
+$check( wp_get_schedule( 'lasery_xtool_cron_tick' ) === 'lasery_xtool_five_minutes', 'the WordPress fallback has an independent recurring hook' );
+
+$mock['network_page'] = 1;
+delete_option( 'lasery_xtool_last_rate_limit' );
+$due_tick();
+$check( array( 1 ) === $pages() && 1 === (int) get_option( 'lasery_xtool_resume_page' ), 'a network error first retries the same page' );
+$due_tick();
+$check( array( 1 ) === $pages() && 2 === (int) get_option( 'lasery_xtool_resume_page' ), 'the same network error twice makes room for known later pages' );
+$due_tick();
+$check( array( 2, 3 ) === $pages() && 1 === (int) get_option( 'lasery_xtool_resume_page' ), 'after confirming the known tail the first page is queued again' );
+$mock['network_page'] = 0;
+update_option( 'lasery_xtool_import_lock', ( time() - 60 ) . ':abandoned', false );
+$due_tick();
+$check( array( 1, 2, 3 ) === $pages() && 'complete' === get_option( 'lasery_xtool_last_sync' )['result'], 'a worker reclaims an abandoned lease and completes the catalog' );
+
+$saved_catalog = $mock['catalog'];
+$mock['catalog'] = array();
+$run();
+$check( 'anomaly' === get_option( 'lasery_xtool_last_sync' )['result'] && lasery_xtool_source_is_fresh( $post_ids[0] ), 'an empty successful response cannot mark the whole catalogue absent' );
+$mock['catalog'] = $saved_catalog;
+
+delete_option( 'lasery_xtool_last_alert' );
+delete_option( 'lasery_xtool_alert_attempt' );
+update_option( 'lasery_xtool_last_ok', time(), false );
+update_post_meta( $post_ids[0], '_lasery_source_updated_at', (string) ( time() - 7 * HOUR_IN_SECONDS ) );
+update_option( LASERY_XTOOL_OFFERS_PAUSE, time() + DAY_IN_SECONDS, false );
+$reject_mail = static function () { return false; };
+add_filter( 'pre_wp_mail', $reject_mail, 30 );
+$mock['requests'] = array();
+$prior_mails = count( $mails );
+do_action( 'lasery_xtool_cron_tick' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( array() === $pages() && count( $mails ) === $prior_mails + 1 && ! get_option( 'lasery_xtool_last_alert' ), 'stale offers are reported during cooldown, with failed mail throttled separately' );
+remove_filter( 'pre_wp_mail', $reject_mail, 30 );
+update_option( 'lasery_xtool_alert_attempt', time() - 31 * MINUTE_IN_SECONDS, false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( count( $mails ) === $prior_mails + 2 && (int) get_option( 'lasery_xtool_last_alert' ) > time() - 30, 'the next mail attempt can recover and is then deduplicated for a day' );
 delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 
 WP_CLI::success( 'Sync recovery integration test completed.' );

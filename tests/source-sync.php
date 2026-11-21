@@ -33,7 +33,7 @@ foreach ( $products as $product ) {
 $manual = lasery_xtool_parse_products( wp_json_encode( array( 'products' => array( $products[0] ) ) ) );
 $check( is_array( $manual ) && 1 === count( $manual ) && ! array_key_exists( 'variants', $manual[0] ), 'manual JSON still accepts absent variants' );
 
-$request = static function ( $preempt, $args, $url ) use ( $products ) {
+$request = static function ( $preempt, $url ) use ( $products ) {
 	if ( str_starts_with( $url, 'https://www.xtool.eu/meta.json' ) ) {
 		$body = wp_json_encode( array( 'currency' => 'EUR' ) );
 	} elseif ( str_starts_with( $url, 'https://www.xtool.eu/products.json' ) ) {
@@ -43,9 +43,9 @@ $request = static function ( $preempt, $args, $url ) use ( $products ) {
 	}
 	return array( 'headers' => array(), 'body' => $body, 'response' => array( 'code' => 200, 'message' => 'OK' ), 'cookies' => array(), 'filename' => null );
 };
-add_filter( 'pre_http_request', $request, 10, 3 );
-lasery_xtool_sync_existing();
-remove_filter( 'pre_http_request', $request, 10 );
+add_filter( 'lasery_xtool_pre_request', $request, 20, 2 );
+lasery_xtool_sync_existing( true );
+remove_filter( 'lasery_xtool_pre_request', $request, 20 );
 
 $sync = get_option( 'lasery_xtool_last_sync' );
 $check( 'incomplete' === $sync['result'] && 2 === $sync['updated'] && 2 === $sync['failed'], 'sync reports valid and invalid products separately' );
@@ -57,9 +57,9 @@ $check( array() === lasery_xtool_available_variants( $ids['103'] ), 'empty varia
 
 $prior_time = get_post_meta( $ids['102'], '_lasery_source_updated_at', true );
 $offline = static function () { return new WP_Error( 'offline', 'Test network failure' ); };
-add_filter( 'pre_http_request', $offline );
-lasery_xtool_sync_existing();
-remove_filter( 'pre_http_request', $offline );
+add_filter( 'lasery_xtool_pre_request', $offline, 20 );
+lasery_xtool_sync_existing( true );
+remove_filter( 'lasery_xtool_pre_request', $offline, 20 );
 $check( 'network' === get_option( 'lasery_xtool_last_sync' )['result'], 'network failure is reported' );
 $check( $prior_time === get_post_meta( $ids['102'], '_lasery_source_updated_at', true ) && lasery_xtool_source_is_fresh( $ids['102'] ), 'network failure keeps the last verified offer within its freshness limit' );
 
