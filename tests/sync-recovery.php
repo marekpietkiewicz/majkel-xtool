@@ -338,4 +338,67 @@ do_action( 'lasery_xtool_cron_tick' );
 $check( count( $mails ) === $prior_mails + 2 && (int) get_option( 'lasery_xtool_last_alert' ) > time() - 30, 'the next mail attempt can recover and is then deduplicated for a day' );
 delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 
+$invalid_304 = static function () use ( $response ) { return $response( 304 ); };
+add_filter( 'lasery_xtool_pre_request', $invalid_304, 30 );
+$mock['requests'] = array();
+$invalid_proof = array( 1 => array( 'etag' => 'invalid cached tag', 'ids' => array( '1000001' ), 'count' => 1 ) );
+$walk = lasery_xtool_walk_catalog( $invalid_proof, time() + 60, '__return_true' );
+remove_filter( 'lasery_xtool_pre_request', $invalid_304, 30 );
+$check( is_wp_error( $walk ) && 'network' === $walk->get_error_code() && array( '' ) === array_column( $mock['requests'], 'etag' ), 'an unconditional request cannot reuse a 304 from an invalid cached ETag' );
+
+$missing_post = wp_insert_post( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'publish', 'post_title' => 'Missing with failing marker write' ), true );
+$check( ! is_wp_error( $missing_post ) && $missing_post > 0, 'create a target for the hide recovery test' );
+update_post_meta( $missing_post, LASERY_XTOOL_SOURCE_ID, '9999998' );
+update_post_meta( $missing_post, '_lasery_missing_runs', LASERY_XTOOL_MISSING_RUNS - 1 );
+$block_marker = static function ( $allowed, $post_id, $key ) use ( $missing_post ) {
+	return $missing_post === $post_id && '_lasery_auto_hidden' === $key ? false : $allowed;
+};
+add_filter( 'update_post_metadata', $block_marker, 10, 3 );
+$run();
+remove_filter( 'update_post_metadata', $block_marker, 10 );
+$check( 'incomplete' === get_option( 'lasery_xtool_last_sync' )['result'] && 'publish' === get_post_status( $missing_post ), 'a failed marker write leaves the product published and reports an incomplete sync' );
+$run();
+$check( 'draft' === get_post_status( $missing_post ) && '1' === get_post_meta( $missing_post, '_lasery_auto_hidden', true ), 'the next successful write lets the sync hide the missing product safely' );
+$restored = $catalog[0];
+$restored['id'] = 9999998;
+$mock['catalog'][] = $restored;
+$run();
+$check( 'publish' === get_post_status( $missing_post ) && ! metadata_exists( 'post', $missing_post, '_lasery_auto_hidden' ), 'a returning product is republished and its marker is cleared' );
+
+$old_sync = array( 'time' => time() - 2 * HOUR_IN_SECONDS, 'result' => 'complete' );
+$new_sync = array( 'time' => time(), 'result' => 'complete' );
+update_option( 'lasery_xtool_last_sync', $old_sync, true );
+$check( $old_sync === get_option( 'lasery_xtool_last_sync' ), 'preload the old autoloaded receipt before a competing cron finishes' );
+$finish_before_lease = static function ( $sql ) use ( $wpdb, $new_sync ) {
+	if ( str_starts_with( $sql, 'INSERT IGNORE INTO' ) && str_contains( $sql, "'lasery_xtool_import_lock'" ) ) {
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s", maybe_serialize( $new_sync ), 'lasery_xtool_last_sync' ) );
+	}
+	return $sql;
+};
+add_filter( 'query', $finish_before_lease );
+$mock['requests'] = array();
+do_action( 'lasery_xtool_sync_existing' );
+remove_filter( 'query', $finish_before_lease );
+$check( array() === $pages() && $new_sync === get_option( 'lasery_xtool_last_sync' ), 'a racing cron reloads an autoloaded receipt under the lease and skips duplicate traffic' );
+
+$admins = get_users( array( 'role' => 'administrator', 'number' => 1, 'fields' => 'ID' ) );
+wp_set_current_user( reset( $admins ) );
+$paused_until = time() + HOUR_IN_SECONDS;
+update_option( LASERY_XTOOL_OFFERS_PAUSE, $paused_until, false );
+update_option( LASERY_XTOOL_IMAGES_PAUSE, $paused_until, false );
+update_option( 'lasery_xtool_retry_at', $paused_until, false );
+update_option( 'lasery_xtool_novelty_retry_at', $paused_until + MINUTE_IN_SECONDS, false );
+$_REQUEST['_wpnonce'] = wp_create_nonce( 'lasery_xtool_resume_fetch' );
+$redirect = static function () { throw new RuntimeException( 'EXPECTED_RESUME_REDIRECT' ); };
+add_filter( 'wp_redirect', $redirect, 1 );
+try {
+	lasery_xtool_resume_fetch();
+} catch ( RuntimeException $error ) {
+	if ( 'EXPECTED_RESUME_REDIRECT' !== $error->getMessage() ) {
+		throw $error;
+	}
+}
+remove_filter( 'wp_redirect', $redirect, 1 );
+$check( lasery_xtool_retry_due() && ! lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) && $paused_until + MINUTE_IN_SECONDS === (int) get_option( 'lasery_xtool_novelty_retry_at' ), 'the admin resume action releases the old cooldown without moving a separate retry' );
+
 WP_CLI::success( 'Sync recovery integration test completed.' );

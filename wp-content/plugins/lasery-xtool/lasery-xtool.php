@@ -489,8 +489,18 @@ function lasery_xtool_resume_fetch() {
 	if ( ! lasery_xtool_lock_import() ) {
 		lasery_xtool_redirect_import( array( 'result' => 'locked' ) );
 	}
+	$now = time();
+	$paused_until = (int) get_option( LASERY_XTOOL_OFFERS_PAUSE );
+	if ( $paused_until > $now ) {
+		foreach ( array( 'lasery_xtool_retry_at', 'lasery_xtool_novelty_retry_at' ) as $option ) {
+			if ( $paused_until === (int) get_option( $option ) ) {
+				update_option( $option, $now, false );
+			}
+		}
+	}
 	delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 	delete_option( LASERY_XTOOL_IMAGES_PAUSE );
+	lasery_xtool_release_import_lock();
 	lasery_xtool_redirect_import( array() );
 }
 
@@ -696,7 +706,7 @@ function lasery_xtool_walk_catalog( $known, $deadline, $handle, $start_page = 1,
 			sleep( 1 );
 		}
 		$url      = add_query_arg( array( 'limit' => LASERY_XTOOL_PAGE_SIZE, 'page' => $page ), LASERY_XTOOL_SOURCE_URL . '/products.json' );
-		$etag     = isset( $known[ $page ]['etag'] ) ? $known[ $page ]['etag'] : '';
+		$etag     = lasery_xtool_valid_etag( $known[ $page ]['etag'] ?? '' );
 		$response = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, $deadline, $etag );
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error( 'paused' === $response->get_error_code() ? 'paused' : 'network', '', array( 'pages' => $pages, 'downloaded' => $downloaded, 'next_page' => $page ) );
@@ -832,7 +842,7 @@ function lasery_xtool_retry_novelties() {
 		return;
 	}
 	// Another scheduler may have completed the retry or queued offers before this lease was acquired.
-	foreach ( array( 'lasery_xtool_novelty_retry_at', 'lasery_xtool_retry_at', 'lasery_xtool_last_sync', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
+	foreach ( array( 'lasery_xtool_novelty_retry_at', 'lasery_xtool_retry_at', 'lasery_xtool_last_sync', LASERY_XTOOL_OFFERS_PAUSE, 'alloptions', 'notoptions' ) as $option ) {
 		wp_cache_delete( $option, 'options' );
 	}
 	if ( ! lasery_xtool_novelty_retry_due() ) {
@@ -1000,16 +1010,29 @@ function lasery_xtool_mark_absent( $row ) {
 	$runs = (int) $row->missing + 1;
 	if ( '' !== (string) $row->updated ) {
 		update_post_meta( $row->id, '_lasery_source_updated_at', '' );
+		if ( '' !== get_post_meta( $row->id, '_lasery_source_updated_at', true ) ) {
+			return false;
+		}
 		lasery_xtool_schedule_cache_purge();
 	}
 	if ( $runs <= LASERY_XTOOL_MISSING_RUNS ) {
 		update_post_meta( $row->id, '_lasery_missing_runs', $runs );
+		if ( (string) $runs !== get_post_meta( $row->id, '_lasery_missing_runs', true ) ) {
+			return false;
+		}
 	}
 	if ( $runs >= LASERY_XTOOL_MISSING_RUNS && 'publish' === $row->status ) {
 		update_post_meta( $row->id, '_lasery_auto_hidden', '1' );
-		wp_update_post( array( 'ID' => $row->id, 'post_status' => 'draft' ) );
+		if ( '1' !== get_post_meta( $row->id, '_lasery_auto_hidden', true ) ) {
+			return false;
+		}
+		$hidden = wp_update_post( array( 'ID' => $row->id, 'post_status' => 'draft' ), true );
+		if ( is_wp_error( $hidden ) || ! $hidden || 'draft' !== get_post_status( $row->id ) ) {
+			return false;
+		}
 		lasery_xtool_schedule_cache_purge();
 	}
+	return true;
 }
 
 /** Refresh existing offers on the normal cadence or at the durable retry time. */
@@ -1025,7 +1048,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 		return;
 	}
 	// A concurrent runner may have finished between checking the schedule and acquiring the lease.
-	foreach ( array( 'lasery_xtool_last_sync', 'lasery_xtool_retry_at', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
+	foreach ( array( 'lasery_xtool_last_sync', 'lasery_xtool_retry_at', LASERY_XTOOL_OFFERS_PAUSE, 'alloptions', 'notoptions' ) as $option ) {
 		wp_cache_delete( $option, 'options' );
 	}
 	if ( true !== $force && ! lasery_xtool_offer_sync_due() ) {
@@ -1321,7 +1344,9 @@ function lasery_xtool_sync_existing( $force = false ) {
 		$result = 'anomaly';
 	} else {
 		foreach ( $absent as $row ) {
-			lasery_xtool_mark_absent( $row );
+			if ( ! lasery_xtool_mark_absent( $row ) ) {
+				++$failed;
+			}
 		}
 	}
 	foreach ( $absent as $row ) {
