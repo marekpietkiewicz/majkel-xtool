@@ -110,8 +110,7 @@ function lasery_xtool_sync_images() {
 		return;
 	}
 	// Read the queue under the same lease used when an offer adds images.
-	wp_load_alloptions( true );
-	foreach ( array( LASERY_XTOOL_IMAGE_QUEUE, LASERY_XTOOL_IMAGES_PAUSE, 'lasery_xtool_image_audit', 'notoptions' ) as $option ) {
+	foreach ( array( LASERY_XTOOL_IMAGE_QUEUE, LASERY_XTOOL_IMAGES_PAUSE, 'lasery_xtool_image_audit', 'alloptions', 'notoptions' ) as $option ) {
 		wp_cache_delete( $option, 'options' );
 	}
 	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );

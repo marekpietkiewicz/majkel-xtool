@@ -186,6 +186,24 @@ $run();
 $queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
 $check( 'product with a new image is queued', in_array( $by_source[ (string) $mock['catalog'][7]->id ], is_array( $queue ) ? $queue : array(), true ), json_encode( $queue ) );
 
+$image_post = $by_source[ (string) $mock['catalog'][7]->id ];
+$image_url = 'https://cdn.shopify.com/race-test.webp';
+update_post_meta( $image_post, '_lasery_source_image_urls', array( $image_url ) );
+update_post_meta( $image_post, '_lasery_image_retries', array( $image_url => time() + HOUR_IN_SECONDS ) );
+update_option( LASERY_XTOOL_IMAGE_QUEUE, array( PHP_INT_MAX ), true );
+$enqueue_before_image_lease = static function ( $sql ) use ( $image_post, $wpdb ) {
+	if ( str_starts_with( $sql, 'INSERT IGNORE INTO' ) && str_contains( $sql, "'lasery_xtool_import_lock'" ) ) {
+		// Another worker finished adding the image after this worker cached the old queue.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s", maybe_serialize( array( $image_post ) ), LASERY_XTOOL_IMAGE_QUEUE ) );
+	}
+	return $sql;
+};
+add_filter( 'query', $enqueue_before_image_lease );
+lasery_xtool_sync_images();
+remove_filter( 'query', $enqueue_before_image_lease );
+$check( 'an image queued by another worker survives a cached emptying pass', array( $image_post ) === get_option( LASERY_XTOOL_IMAGE_QUEUE ) );
+update_option( LASERY_XTOOL_IMAGE_QUEUE, $queue );
+
 
 echo "S10 novelties: the manufacturer's machine collection\n";
 $retry_novelties = static function () {

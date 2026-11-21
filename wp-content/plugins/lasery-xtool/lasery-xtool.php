@@ -213,7 +213,7 @@ function lasery_xtool_import_page() {
 		<h2>Pobierz produkty xTool</h2>
 		<?php $last_sync = get_option( 'lasery_xtool_last_sync' ); ?>
 		<?php if ( is_array( $last_sync ) && isset( $last_sync['time'], $last_sync['result'] ) && is_numeric( $last_sync['time'] ) && is_string( $last_sync['result'] ) ) : ?>
-			<p><?php echo esc_html( 'Ostatnia synchronizacja: ' . wp_date( 'Y-m-d H:i', (int) $last_sync['time'] ) . '. ' . ( isset( $messages[ $last_sync['result'] ] ) ? $messages[ $last_sync['result'] ] : 'Nieznany wynik.' ) ); ?>
+			<p><?php echo esc_html( 'Ostatnia synchronizacja: ' . wp_date( 'Y-m-d H:i T', (int) $last_sync['time'] ) . '. ' . ( isset( $messages[ $last_sync['result'] ] ) ? $messages[ $last_sync['result'] ] : 'Nieznany wynik.' ) ); ?>
 			<?php if ( isset( $last_sync['updated'], $last_sync['failed'] ) ) : ?><?php printf( ' Zaktualizowano: %d, błędy: %d.', absint( $last_sync['updated'] ), absint( $last_sync['failed'] ) ); ?><?php endif; ?></p>
 			<?php if ( ! empty( $last_sync['stale'] ) && is_array( $last_sync['stale'] ) ) : ?>
 				<p>Bez aktualnej oferty (brak w katalogu xTool lub błędne dane): <?php echo esc_html( implode( ', ', array_map( function ( $id ) { return lasery_xtool_plain_text( get_the_title( absint( $id ) ) ); }, $last_sync['stale'] ) ) ); ?>.</p>
@@ -224,17 +224,17 @@ function lasery_xtool_import_page() {
 		$next_retry   = max( (int) get_option( 'lasery_xtool_retry_at' ), (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) );
 		?>
 		<?php if ( $host_cron_at ) : ?>
-			<p><?php echo esc_html( 'Ostatnie uruchomienie crona hostingu: ' . wp_date( 'Y-m-d H:i', $host_cron_at ) . '.' ); ?></p>
+			<p><?php echo esc_html( 'Ostatnie uruchomienie crona hostingu: ' . wp_date( 'Y-m-d H:i T', $host_cron_at ) . '.' ); ?></p>
 		<?php endif; ?>
 		<?php if ( $next_retry > time() ) : ?>
-			<p><?php echo esc_html( 'Najwcześniejsze ponowienie ofert: ' . wp_date( 'Y-m-d H:i', $next_retry ) . '.' ); ?></p>
+			<p><?php echo esc_html( 'Najwcześniejsze ponowienie ofert: ' . wp_date( 'Y-m-d H:i T', $next_retry ) . '.' ); ?></p>
 		<?php endif; ?>
 		<?php $last_limit = get_option( 'lasery_xtool_last_rate_limit' ); ?>
 		<?php if ( isset( $last_limit['time'], $last_limit['path'], $last_limit['page'] ) ) : ?>
-			<p><?php echo esc_html( 'Ostatnie HTTP 429: ' . wp_date( 'Y-m-d H:i', (int) $last_limit['time'] ) . ', ' . $last_limit['path'] . ( $last_limit['page'] ? ', strona ' . (int) $last_limit['page'] : '' ) . '.' ); ?></p>
+			<p><?php echo esc_html( 'Ostatnie HTTP 429: ' . wp_date( 'Y-m-d H:i T', (int) $last_limit['time'] ) . ', ' . $last_limit['path'] . ( $last_limit['page'] ? ', strona ' . (int) $last_limit['page'] : '' ) . '.' ); ?></p>
 		<?php endif; ?>
 		<?php if ( lasery_xtool_fetching_paused() || lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) ) : ?>
-			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'Y-m-d H:i', max( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( LASERY_XTOOL_IMAGES_PAUSE ) ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
+			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'Y-m-d H:i T', max( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( LASERY_XTOOL_IMAGES_PAUSE ) ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="lasery_xtool_resume_fetch">
 				<?php wp_nonce_field( 'lasery_xtool_resume_fetch' ); ?>
@@ -897,10 +897,10 @@ function lasery_xtool_alert_when_stale() {
 		'laseryxtool.pl: oferty nie są aktualizowane',
 		sprintf(
 			"Ostatnie pełne pobranie katalogu xTool: %s. Liczba opublikowanych produktów, których oferty nie zostały potwierdzone od co najmniej 6 godzin: %d. Ostatni wynik: %s. Każda oferta wygasa po 24 godzinach od jej ostatniego potwierdzenia.\n\nNajbliższa możliwa próba: %s. Szczegóły w Produkty xTool → Import.",
-			$ok ? wp_date( 'Y-m-d H:i', $ok ) : 'brak potwierdzonego pobrania',
+			$ok ? wp_date( 'Y-m-d H:i T', $ok ) : 'brak potwierdzonego pobrania',
 			$stale,
 			$last['result'] ?? 'brak',
-			$retry > time() ? wp_date( 'Y-m-d H:i', $retry ) : 'przy najbliższym uruchomieniu synchronizacji'
+			$retry > time() ? wp_date( 'Y-m-d H:i T', $retry ) : 'przy najbliższym uruchomieniu synchronizacji'
 		)
 	) ) {
 		update_option( 'lasery_xtool_last_alert', time(), false );
