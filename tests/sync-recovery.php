@@ -238,6 +238,51 @@ update_option( 'lasery_xtool_novelty_retry_at', time() - 1, false );
 do_action( 'lasery_xtool_cron_tick' );
 $check( 1 === $mock['novelty_requests'] && ! get_option( 'lasery_xtool_novelty_retry_at' ), 'recent paced coverage also allows a novelty check when the last full walk is old' );
 
+// A single repeatedly throttled page must not starve the rest of the catalog after cooldown.
+$mock['limited_page'] = 3;
+$now = time();
+update_option( 'lasery_xtool_last_sync', array( 'time' => $now, 'result' => 'paused', 'page' => 3 ), false );
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 3, 'retry_after' => 60, 'attempts' => 3 ), false );
+update_option( 'lasery_xtool_resume_page', 3, false );
+update_option( LASERY_XTOOL_OFFERS_PAUSE, $now + 20 * MINUTE_IN_SECONDS, false );
+$due_tick();
+$check( array() === $pages() && 3 === (int) get_option( 'lasery_xtool_resume_page' ), 'repeated 429 blocks all catalog traffic for the entire cooldown' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$due_tick();
+$check( array( 1 ) === $pages(), 'after cooldown a stuck later page gives way to the first page once' );
+$due_tick();
+$check( array( 2 ) === $pages(), 'the paced sweep confirms the next reachable page' );
+$due_tick();
+$check( array( 3 ) === $pages() && 'paused' === get_option( 'lasery_xtool_last_sync' )['result'] && (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) >= time() + 39 * MINUTE_IN_SECONDS, 'the sweep returns to the blocked page and retains its escalating cooldown' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$mock['limited_page'] = 0;
+
+$now = time();
+update_option( 'lasery_xtool_last_sync', array( 'time' => $now, 'result' => 'paused', 'page' => 1 ), false );
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 1, 'retry_after' => 60, 'attempts' => 3 ), false );
+update_option( 'lasery_xtool_resume_page', 1, false );
+$due_tick();
+$check( array( 2 ) === $pages(), 'a repeatedly throttled first page gives way to the known tail after cooldown' );
+$due_tick();
+$check( array( 3 ) === $pages() && 1 === (int) get_option( 'lasery_xtool_resume_page' ) && 'partial' === get_option( 'lasery_xtool_last_sync' )['result'], 'the known tail returns to the first page without reporting full coverage' );
+
+$now = time();
+update_option( 'lasery_xtool_last_sync', array( 'time' => $now, 'result' => 'paused', 'page' => 2 ), false );
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 2, 'retry_after' => 60, 'attempts' => 3 ), false );
+update_option( 'lasery_xtool_resume_page', 2, false );
+$due_tick();
+$check( array( 3 ) === $pages() && 1 === (int) get_option( 'lasery_xtool_resume_page' ), 'a blocked middle page gives later pages a turn before restarting the sweep' );
+
+$now = time();
+update_option( 'lasery_xtool_last_sync', array( 'time' => $now, 'result' => 'paused', 'page' => 3 ), false );
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 3, 'retry_after' => 60, 'attempts' => 3 ), false );
+update_option( 'lasery_xtool_resume_page', 3, false );
+$mock['limited_page'] = 1;
+$due_tick();
+$check( array( 1 ) === $pages() && (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) >= time() + 39 * MINUTE_IN_SECONDS, '429 on the alternate page preserves the backoff for a likely source-wide limit' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$mock['limited_page'] = 0;
+
 $mock['network_page'] = 1;
 delete_option( 'lasery_xtool_last_rate_limit' );
 $due_tick();

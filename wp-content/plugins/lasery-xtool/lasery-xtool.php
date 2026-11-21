@@ -640,8 +640,14 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
 	$page = isset( $query['page'] ) ? (int) $query['page'] : 0;
 	$last = get_option( 'lasery_xtool_last_rate_limit' );
 	$attempts = 1;
-	if ( is_array( $last ) && $path === ( $last['path'] ?? '' ) && $page === (int) ( $last['page'] ?? 0 ) && (int) ( $last['time'] ?? 0 ) > $now - 2 * HOUR_IN_SECONDS ) {
-		$attempts = min( 5, max( 1, (int) ( $last['attempts'] ?? 1 ) ) + 1 );
+	if ( $path === ( $last['path'] ?? '' ) && (int) ( $last['time'] ?? 0 ) > $now - 2 * HOUR_IN_SECONDS ) {
+		$last_page = (int) ( $last['page'] ?? 0 );
+		$last_run = get_option( 'lasery_xtool_last_sync' );
+		$still_limited = '/products.json' === $path && 'paused' === ( $last_run['result'] ?? '' ) &&
+			$last_page === (int) ( $last_run['page'] ?? 0 ) && (int) ( $last['attempts'] ?? 0 ) >= 3;
+		if ( $page === $last_page || $still_limited ) {
+			$attempts = min( 5, max( 1, (int) ( $last['attempts'] ?? 1 ) ) + 1 );
+		}
 	}
 	$cooldown = max( $delay, min( HOUR_IN_SECONDS, 5 * MINUTE_IN_SECONDS * 2 ** ( $attempts - 1 ) ) );
 	update_option( LASERY_XTOOL_OFFERS_PAUSE, $now + $cooldown, false );
@@ -1114,7 +1120,19 @@ function lasery_xtool_sync_existing( $force = false ) {
 	$start_page = $start_page >= 1 && $start_page <= LASERY_XTOOL_MAX_PAGES ? $start_page : 1;
 	$paced_started = (int) get_option( 'lasery_xtool_paced_started_at' );
 	$last_limit = get_option( 'lasery_xtool_last_rate_limit' );
-	$pace = true !== $force && ( ( $start_page > 1 && $paced_started ) || ( '/products.json' === ( $last_limit['path'] ?? '' ) && (int) ( $last_limit['time'] ?? 0 ) > time() - 2 * HOUR_IN_SECONDS ) );
+	$catalog_limited = '/products.json' === ( $last_limit['path'] ?? '' );
+	$last_sync = get_option( 'lasery_xtool_last_sync' );
+	$repeated_limit = true !== $force && $catalog_limited && (int) ( $last_limit['page'] ?? 0 ) === $start_page &&
+		(int) ( $last_limit['attempts'] ?? 0 ) >= 3 && 'paused' === ( $last_sync['result'] ?? '' ) &&
+		(int) ( $last_sync['page'] ?? 0 ) === $start_page && isset( $known[1], $known[2] );
+	if ( $repeated_limit ) {
+		// The global cooldown has already passed. Confirm other known pages before returning here.
+		$start_page = isset( $known[ $start_page + 1 ] ) ? $start_page + 1 : 1;
+		$paced_started = 0;
+		delete_option( 'lasery_xtool_paced_started_at' );
+	}
+	$pace = true !== $force && ( $repeated_limit || ( $start_page > 1 && $paced_started ) ||
+		( $catalog_limited && (int) ( $last_limit['time'] ?? 0 ) > time() - 2 * HOUR_IN_SECONDS ) );
 	$walk     = lasery_xtool_walk_catalog(
 		$known,
 		$deadline,
