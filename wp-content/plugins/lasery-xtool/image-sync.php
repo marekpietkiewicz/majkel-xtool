@@ -35,6 +35,19 @@ function lasery_xtool_product_gallery_items( $post_id ) {
 		return $items;
 	}
 	$urls = lasery_xtool_source_image_urls( $post_id );
+	[ $images ] = lasery_xtool_source_gallery_meta( $post_id );
+	$gallery = array();
+	// The images' own records and meta, in two queries instead of two per image.
+	_prime_post_caches( array_filter( array_map( 'absint', $images ) ), false, true );
+	foreach ( $urls as $url ) {
+		$id = absint( $images[ $url ] ?? 0 );
+		$gallery[] = array( 'id' => lasery_xtool_source_image_exists( $id ) ? $id : 0, 'url' => $url );
+	}
+	return $gallery;
+}
+
+/** Saved images and the legacy single-image record, used by the gallery and by the sync. */
+function lasery_xtool_source_gallery_meta( $post_id ) {
 	$images = get_post_meta( $post_id, '_lasery_local_gallery', true );
 	$images = is_array( $images ) ? $images : array();
 	$old_source = get_post_meta( $post_id, '_lasery_local_image_source', true );
@@ -42,17 +55,12 @@ function lasery_xtool_product_gallery_items( $post_id ) {
 	if ( is_string( $old_source ) && $old_source && $old_id && ! isset( $images[ $old_source ] ) ) {
 		$images[ $old_source ] = $old_id;
 	}
-	$gallery = array();
-	// The images' own records and meta, in two queries instead of two per image.
-	_prime_post_caches( array_filter( array_map( 'absint', $images ) ), false, true );
-	foreach ( $urls as $url ) {
-		$id = isset( $images[ $url ] ) ? absint( $images[ $url ] ) : 0;
-		if ( ! $id || 'attachment' !== get_post_type( $id ) || 'image/webp' !== get_post_mime_type( $id ) || ! get_attached_file( $id ) || ! file_exists( get_attached_file( $id ) ) ) {
-			$id = 0;
-		}
-		$gallery[] = array( 'id' => $id, 'url' => $url );
-	}
-	return $gallery;
+	return array( $images, $old_source, $old_id );
+}
+
+function lasery_xtool_source_image_exists( $id ) {
+	return $id && 'attachment' === get_post_type( $id ) && 'image/webp' === get_post_mime_type( $id ) &&
+		( $file = get_attached_file( $id ) ) && file_exists( $file );
 }
 
 /** Return only locally stored images, in the current source order. */
@@ -91,14 +99,41 @@ function lasery_xtool_queue_images( $post_id ) {
 	wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'lasery_xtool_sync_images' );
 }
 
+/** Read the product and attachment metadata in batches before checking files. */
+function lasery_xtool_sync_image_galleries( $post_ids ) {
+	update_postmeta_cache( $post_ids );
+	$galleries = array();
+	$attachments = array();
+	foreach ( $post_ids as $post_id ) {
+		$gallery = lasery_xtool_source_gallery_meta( $post_id );
+		$galleries[ $post_id ] = $gallery;
+		foreach ( lasery_xtool_source_image_urls( $post_id ) as $url ) {
+			$id = absint( $gallery[0][ $url ] ?? 0 );
+			if ( $id ) {
+				$attachments[ $id ] = true;
+			}
+		}
+	}
+	foreach ( array_chunk( array_keys( $attachments ), 200 ) as $ids ) {
+		_prime_post_caches( $ids, false, true );
+	}
+	return $galleries;
+}
+
+/** Hostido checks every five minutes but reserves at least twenty minutes between image batches. */
+function lasery_xtool_host_images_due() {
+	$last = get_option( 'lasery_xtool_last_image_sync' );
+	return (int) ( $last['time'] ?? 0 ) <= time() - 20 * MINUTE_IN_SECONDS;
+}
+
 /**
- * Called by the system cron every twenty minutes and by WP-Cron; downloads at most three images per
+ * Called by the hosting watchdog and by WP-Cron; downloads at most three images per
  * run and, while more are waiting, asks WP-Cron for the next run in a minute. A run with an empty queue
  * does nothing, so only the daily audit (which rebuilds the queue from all products and repairs
  * drift, such as a deleted media file) walks every image.
  */
 add_action( 'lasery_xtool_sync_images', 'lasery_xtool_sync_images' );
-function lasery_xtool_sync_images() {
+function lasery_xtool_sync_images( $hosting_cron = false ) {
 	$audit_before = time() - DAY_IN_SECONDS;
 	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) || ( ! get_option( LASERY_XTOOL_IMAGE_QUEUE ) && (int) get_option( 'lasery_xtool_image_audit' ) >= $audit_before ) ) {
 		return;
@@ -110,13 +145,14 @@ function lasery_xtool_sync_images() {
 		return;
 	}
 	// Read the queue under the same lease used when an offer adds images.
-	foreach ( array( LASERY_XTOOL_IMAGE_QUEUE, LASERY_XTOOL_IMAGES_PAUSE, 'lasery_xtool_image_audit', 'alloptions', 'notoptions' ) as $option ) {
+	foreach ( array( LASERY_XTOOL_IMAGE_QUEUE, LASERY_XTOOL_IMAGES_PAUSE, 'lasery_xtool_image_audit', 'lasery_xtool_last_image_sync', 'alloptions', 'notoptions' ) as $option ) {
 		wp_cache_delete( $option, 'options' );
 	}
 	$queue = get_option( LASERY_XTOOL_IMAGE_QUEUE );
 	$queue = is_array( $queue ) ? array_map( 'intval', $queue ) : array();
 	$audit = (int) get_option( 'lasery_xtool_image_audit' ) < $audit_before;
-	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) || ( ! $queue && ! $audit ) ) {
+	if ( lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) || ( ! $queue && ! $audit ) ||
+		( true === $hosting_cron && ! lasery_xtool_host_images_due() ) ) {
 		lasery_xtool_release_import_lock();
 		return;
 	}
@@ -139,20 +175,13 @@ function lasery_xtool_sync_images() {
 	$primary = array();
 	$other = array();
 	$missing = array(); // Images still to be stored, per product.
-	foreach ( $posts as $post_id ) {
+	foreach ( lasery_xtool_sync_image_galleries( $posts ) as $post_id => [ $images, $old_url, $old_id ] ) {
 		$urls = lasery_xtool_source_image_urls( $post_id );
-		$images = get_post_meta( $post_id, '_lasery_local_gallery', true );
-		$images = is_array( $images ) ? $images : array();
-		$old_url = get_post_meta( $post_id, '_lasery_local_image_source', true );
-		$old_id = absint( get_post_meta( $post_id, '_lasery_local_image_attachment_id', true ) );
-		if ( is_string( $old_url ) && $old_url && $old_id && ! isset( $images[ $old_url ] ) ) {
-			$images[ $old_url ] = $old_id;
-		}
 		$retries = get_post_meta( $post_id, '_lasery_image_retries', true );
 		$retries = is_array( $retries ) ? $retries : array();
 		foreach ( $urls as $index => $url ) {
-			$id = isset( $images[ $url ] ) ? absint( $images[ $url ] ) : 0;
-			if ( $id && 'attachment' === get_post_type( $id ) && 'image/webp' === get_post_mime_type( $id ) && get_attached_file( $id ) && file_exists( get_attached_file( $id ) ) ) {
+			$id = absint( $images[ $url ] ?? 0 );
+			if ( lasery_xtool_source_image_exists( $id ) ) {
 				if ( 0 === $index && ( $old_url !== $url || $old_id !== $id ) ) {
 					$before = lasery_xtool_public_product_state( $post_id );
 					lasery_xtool_set_source_thumbnail( $post_id, $url, $id );

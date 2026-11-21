@@ -73,6 +73,7 @@ foreach ( $post_ids as $id ) {
 	update_post_meta( $id, '_lasery_source_updated_at', (string) ( time() - HOUR_IN_SECONDS ) );
 }
 $baseline_ok = (int) get_option( 'lasery_xtool_last_ok' );
+$old_first_page_etag = get_option( LASERY_XTOOL_STATE )['pages'][1]['etag'];
 $missing_runs = get_post_meta( $ghost, '_lasery_missing_runs', true );
 $mock['catalog'][0]['variants'][0]['price'] = '70.00';
 $mock['limited_page'] = 2;
@@ -108,10 +109,13 @@ $check( array( 3 ) === $pages() && (int) get_post_meta( $post_ids[500], '_lasery
 $check( 'partial' === get_option( 'lasery_xtool_last_sync' )['result'] && 1 === (int) get_option( 'lasery_xtool_resume_page' ) && (int) get_option( 'lasery_xtool_retry_at' ) > time(), 'the next retry starts a full walk after partial recovery' );
 $check( $missing_runs === get_post_meta( $ghost, '_lasery_missing_runs', true ) && 'publish' === get_post_status( $ghost ), 'a walk spanning retries cannot hide an absent product' );
 
-// An old 304 must not confirm data saved from a newer partial page.
+// The last complete sweep had 10.00. Only the new partial page proof describes 70.00.
+$partial_etag = get_option( LASERY_XTOOL_STATE )['pages'][1]['etag'];
 $mock['catalog'][0]['variants'][0]['price'] = '10.00';
 $run();
-$check( '' === $mock['requests'][0]['etag'] && '10.00' === get_post_meta( $post_ids[0], '_lasery_source_variants', true )[0]['price'], 'a changed partial page is fetched again before its old ETag can confirm a different price' );
+$check( '' !== $partial_etag && $old_first_page_etag !== $partial_etag && $partial_etag === $mock['requests'][0]['etag']
+	&& '10.00' === get_post_meta( $post_ids[0], '_lasery_source_variants', true )[0]['price'],
+	'the changed page is re-downloaded when the source price reverts and its new ETag no longer matches' );
 $check( 'complete' === get_option( 'lasery_xtool_last_sync' )['result'] && ! get_option( 'lasery_xtool_retry_at' ), 'a complete walk clears the retry' );
 $check( (int) get_post_meta( $ghost, '_lasery_missing_runs', true ) === (int) $missing_runs + 1, 'only a complete walk counts absence' );
 
@@ -150,6 +154,20 @@ remove_filter( 'pre_update_option_' . LASERY_XTOOL_STATE, $block_final_state, 10
 $check( 'storage' === get_option( 'lasery_xtool_last_sync' )['result'] && '' === get_option( LASERY_XTOOL_STATE )['pages'][1]['etag'] && (int) get_option( 'lasery_xtool_retry_at' ) > time(), 'a failed final state write retains the invalidated ETag and schedules a retry' );
 $run();
 $check( '' === $mock['requests'][0]['etag'] && '56.00' === get_post_meta( $post_ids[0], '_lasery_source_variants', true )[0]['price'], 'recovery after a state-write failure re-fetches the changed page' );
+
+$mock['catalog'][0]['variants'][0]['price'] = '57.00';
+$mock['limited_page'] = 2;
+add_filter( 'pre_update_option_' . LASERY_XTOOL_STATE, $block_final_state, 10, 2 );
+$run();
+remove_filter( 'pre_update_option_' . LASERY_XTOOL_STATE, $block_final_state, 10 );
+$check( 'storage' === get_option( 'lasery_xtool_last_sync' )['result'] && '' === get_option( LASERY_XTOOL_STATE )['pages'][1]['etag']
+	&& 2 === (int) get_option( 'lasery_xtool_resume_page' ) && lasery_xtool_fetching_paused(),
+	'a failed partial proof keeps the failed-page cursor and the rate-limit cooldown' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$mock['limited_page'] = 0;
+$run();
+$check( array( 2, 3 ) === $pages(), 'a proof write failure does not re-download a verified earlier page on resume' );
+$run();
 
 // A 304 after malformed source data must not resurrect the old offer.
 unset( $mock['catalog'][250]['variants'] );

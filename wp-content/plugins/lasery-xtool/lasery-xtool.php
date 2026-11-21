@@ -527,7 +527,7 @@ function lasery_xtool_handle_fetch() {
 const LASERY_XTOOL_OFFERS_PAUSE = 'lasery_xtool_fetch_paused';
 const LASERY_XTOOL_IMAGES_PAUSE = 'lasery_xtool_images_paused';
 const LASERY_XTOOL_SOURCE_URL   = 'https://www.xtool.eu';
-// Page ETags and product IDs of the last complete walk of products.json; they make an unchanged page a 304.
+// ETags and product IDs of verified products.json pages. They make an unchanged page a 304.
 const LASERY_XTOOL_STATE        = 'lasery_xtool_catalog_state';
 // An offer the source stopped listing is hidden after this many consecutive complete walks without it.
 const LASERY_XTOOL_MISSING_RUNS = 3;
@@ -872,22 +872,46 @@ function lasery_xtool_run_due_retries( $hosting_cron = false ) {
 	if ( true === $hosting_cron ) {
 		update_option( 'lasery_xtool_host_cron_at', time(), false );
 	}
-	if ( lasery_xtool_offer_sync_due() ) {
+	$offers_due = lasery_xtool_offer_sync_due();
+	if ( $offers_due ) {
 		do_action( 'lasery_xtool_sync_existing' );
 	}
-	if ( lasery_xtool_novelty_retry_due() ) {
+	$novelties_due = ! (int) get_option( 'lasery_xtool_retry_at' ) && lasery_xtool_novelty_retry_due();
+	if ( $novelties_due ) {
 		do_action( 'lasery_xtool_retry_novelties' );
 	}
-	// Use the import lease to avoid duplicate alerts from simultaneous cron triggers.
-	if ( lasery_xtool_stale_alert_due() && lasery_xtool_lock_import() ) {
+	// Count first; only contenders for a real alert need to take the import lease.
+	if ( lasery_xtool_stale_alert_due() && lasery_xtool_stale_offer_count() && lasery_xtool_lock_import() ) {
 		lasery_xtool_alert_when_stale();
 		lasery_xtool_release_import_lock();
+	}
+	// Keep image batches out of the same PHP run as an xTool catalogue request.
+	if ( true === $hosting_cron && ! $offers_due && ! $novelties_due && lasery_xtool_host_images_due() ) {
+		do_action( 'lasery_xtool_sync_images', true );
 	}
 }
 
 function lasery_xtool_stale_alert_due() {
 	return time() - (int) get_option( 'lasery_xtool_last_alert' ) >= DAY_IN_SECONDS &&
 		time() - (int) get_option( 'lasery_xtool_alert_attempt' ) >= 30 * MINUTE_IN_SECONDS;
+}
+
+/** Count public source products with no recent confirmation, excluding those known to be absent. */
+function lasery_xtool_stale_offer_count() {
+	global $wpdb;
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} p
+			WHERE p.post_type = %s AND p.post_status = 'publish'
+			AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} s WHERE s.post_id = p.ID AND s.meta_key = %s
+				AND CHAR_LENGTH(s.meta_value) BETWEEN 1 AND 20 AND LEFT(s.meta_value, 1) <> '0' AND s.meta_value NOT REGEXP '[^0-9]')
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key = '_lasery_missing_runs' AND m.meta_value IS NOT NULL)
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} u WHERE u.post_id = p.ID AND u.meta_key = '_lasery_source_updated_at' AND CAST(u.meta_value AS SIGNED) > %d)",
+			LASERY_XTOOL_PRODUCT_TYPE,
+			LASERY_XTOOL_SOURCE_ID,
+			time() - 6 * HOUR_IN_SECONDS
+		)
+	);
 }
 
 /** Tell the administrator when any currently listed public offer has gone unverified for six hours. */
@@ -898,18 +922,7 @@ function lasery_xtool_alert_when_stale() {
 	if ( ! lasery_xtool_stale_alert_due() ) {
 		return;
 	}
-	$stale = 0;
-	$targets = lasery_xtool_sync_targets();
-	if ( false === $targets ) {
-		return;
-	}
-	foreach ( $targets as $rows ) {
-		foreach ( $rows as $row ) {
-			if ( 'publish' === $row->status && null === $row->missing && (int) $row->updated <= time() - 6 * HOUR_IN_SECONDS ) {
-				++$stale;
-			}
-		}
-	}
+	$stale = lasery_xtool_stale_offer_count();
 	if ( ! $stale ) {
 		return;
 	}
@@ -1266,7 +1279,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 				}
 			} elseif ( isset( $data[ $id ] ) ) {
 				$product = array_merge( $data[ $id ], $source );
-				if ( lasery_xtool_source_hash( $product ) === $row->hash ) {
+				if ( null !== $row->updated && lasery_xtool_source_hash( $product ) === $row->hash ) {
 					$confirmed[] = $row;
 				} elseif ( ! lasery_xtool_refresh_import_lock() ) {
 					lasery_xtool_release_import_lock();
@@ -1303,6 +1316,34 @@ function lasery_xtool_sync_existing( $force = false ) {
 	if ( ! lasery_xtool_confirm_offers( wp_list_pluck( $confirmed, 'id' ), $now ) ) {
 		$failure( 'storage', $updated, count( $confirmed ) );
 		return;
+	}
+	// Save each checked page only after its offers were written. Earlier, unchecked pages
+	// keep their existing proofs (including invalidations for products that moved).
+	if ( $partial || $walk['complete'] ) {
+		foreach ( $walk['pages'] as &$page ) {
+			if ( count( $page['ids'] ) !== $page['count'] || array_intersect_key( $unconfirmed, array_fill_keys( $page['ids'], true ) ) ) {
+				$page['etag'] = '';
+			}
+		}
+		unset( $page );
+		$pages = $walk['pages'];
+		if ( $partial && $known ) {
+			$pages = array_replace( array_intersect_key( $state['pages'], $known ), $pages );
+		}
+		$new_state = array( 'pages' => $pages, 'currency' => $currency );
+		if ( $state !== $new_state ) {
+			if ( ! lasery_xtool_refresh_import_lock() ) {
+				lasery_xtool_release_import_lock();
+				return;
+			}
+			if ( ! update_option( LASERY_XTOOL_STATE, $new_state, false ) ) {
+				if ( $error && $next_page ) {
+					update_option( 'lasery_xtool_resume_page', $next_page, false );
+				}
+				$failure( 'storage', $updated, count( $confirmed ), $error ? $next_page : 0 );
+				return;
+			}
+		}
 	}
 	if ( $error ) {
 		update_option( 'lasery_xtool_resume_page', $walk['next_page'], false );
@@ -1351,19 +1392,6 @@ function lasery_xtool_sync_existing( $force = false ) {
 	}
 	foreach ( $absent as $row ) {
 		$stale[] = $row->id;
-	}
-	if ( $walk['complete'] ) {
-		foreach ( $walk['pages'] as &$page ) {
-			if ( array_intersect_key( $unconfirmed, array_fill_keys( $page['ids'], true ) ) ) {
-				$page['etag'] = '';
-			}
-		}
-		unset( $page );
-		$new_state = array( 'pages' => $walk['pages'], 'currency' => $currency );
-		if ( $state !== $new_state && ! update_option( LASERY_XTOOL_STATE, $new_state, false ) ) {
-			$failure( 'storage', $updated, count( $confirmed ) );
-			return;
-		}
 	}
 	if ( 'complete' === $result ) {
 		update_option( 'lasery_xtool_last_ok', time(), false );
@@ -1464,6 +1492,15 @@ function lasery_xtool_save_source_data( $post_id, $product, $invalidate_etags = 
 			// Files have no verified storefront context; never reuse an old currency.
 			$product['currency'] = isset( $product['currency'] ) ? $product['currency'] : '';
 			$product['fetched_at'] = isset( $product['fetched_at'] ) ? (string) $product['fetched_at'] : '';
+			$hash = lasery_xtool_source_hash( $product );
+			$previous_hash = get_post_meta( $post_id, '_lasery_source_hash', true );
+			if ( '' !== $previous_hash && $hash !== $previous_hash ) {
+				// The old hash must not confirm changed data after an interrupted write.
+				update_post_meta( $post_id, '_lasery_source_hash', '' );
+				if ( '' !== get_post_meta( $post_id, '_lasery_source_hash', true ) ) {
+					return false;
+				}
+			}
 			// Hide a changing offer until all its fields are saved. For an identical
 			// offer, preserve the old timestamp while refreshing it: concurrent page
 			// loads must not cache a spurious stale message during an ordinary sync.
@@ -1491,7 +1528,8 @@ function lasery_xtool_save_source_data( $post_id, $product, $invalidate_etags = 
 		}
 		// Last, so that a half-saved offer never matches its hash and is saved again by the next sync.
 		if ( array_key_exists( 'variants', $product ) ) {
-			update_post_meta( $post_id, '_lasery_source_hash', lasery_xtool_source_hash( $product ) );
+			update_post_meta( $post_id, '_lasery_source_hash', $hash );
+			return $hash === get_post_meta( $post_id, '_lasery_source_hash', true );
 		}
 		return true;
 	} finally {
