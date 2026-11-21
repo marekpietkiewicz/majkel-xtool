@@ -800,6 +800,12 @@ function lasery_xtool_schedule_novelty_retry() {
 	update_option( 'lasery_xtool_novelty_retry_at', $at, false );
 }
 
+function lasery_xtool_queue_novelties() {
+	if ( ! (int) get_option( 'lasery_xtool_novelty_retry_at' ) ) {
+		update_option( 'lasery_xtool_novelty_retry_at', time() + 5 * MINUTE_IN_SECONDS, false );
+	}
+}
+
 function lasery_xtool_novelty_retry_due() {
 	$at = (int) get_option( 'lasery_xtool_novelty_retry_at' );
 	return $at > 0 && $at <= time() && ! lasery_xtool_fetching_paused();
@@ -820,7 +826,7 @@ function lasery_xtool_retry_novelties() {
 		return;
 	}
 	// Another scheduler may have completed the retry or queued offers before this lease was acquired.
-	foreach ( array( 'lasery_xtool_novelty_retry_at', 'lasery_xtool_retry_at', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
+	foreach ( array( 'lasery_xtool_novelty_retry_at', 'lasery_xtool_retry_at', 'lasery_xtool_last_sync', LASERY_XTOOL_OFFERS_PAUSE, 'notoptions' ) as $option ) {
 		wp_cache_delete( $option, 'options' );
 	}
 	if ( ! lasery_xtool_novelty_retry_due() ) {
@@ -834,7 +840,9 @@ function lasery_xtool_retry_novelties() {
 	$known = get_option( 'lasery_xtool_currency' );
 	$catalog = get_option( LASERY_XTOOL_STATE );
 	$currency = is_array( $known ) && isset( $known['code'] ) && is_string( $known['code'] ) && preg_match( '/^[A-Z]{3}$/D', $known['code'] ) ? $known['code'] : '';
-	if ( '' === $currency || ! isset( $known['at'] ) || ! lasery_xtool_timestamp_is_fresh( (string) $known['at'] ) || ! is_array( $catalog ) || ! isset( $catalog['currency'] ) || $catalog['currency'] !== $currency || ! lasery_xtool_timestamp_is_fresh( (string) get_option( 'lasery_xtool_last_ok' ) ) ) {
+	$last = get_option( 'lasery_xtool_last_sync' );
+	$checked_at = 'paced' === ( $last['result'] ?? '' ) ? (string) $last['time'] : (string) get_option( 'lasery_xtool_last_ok' );
+	if ( '' === $currency || ! isset( $known['at'] ) || ! lasery_xtool_timestamp_is_fresh( (string) $known['at'] ) || ! is_array( $catalog ) || ! isset( $catalog['currency'] ) || $catalog['currency'] !== $currency || ! lasery_xtool_timestamp_is_fresh( $checked_at ) ) {
 		lasery_xtool_schedule_novelty_retry();
 	} else {
 		lasery_xtool_sync_novelties( $currency, time() + 60 );
@@ -1278,6 +1286,9 @@ function lasery_xtool_sync_existing( $force = false ) {
 			delete_option( 'lasery_xtool_paced_started_at' );
 		}
 		update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed ), false );
+		if ( $paced_done ) {
+			lasery_xtool_queue_novelties();
+		}
 		lasery_xtool_alert_when_stale();
 		lasery_xtool_release_import_lock();
 		return;
@@ -1317,8 +1328,8 @@ function lasery_xtool_sync_existing( $force = false ) {
 	delete_option( 'lasery_xtool_paced_started_at' );
 	update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => $failed ? 'incomplete' : $result, 'updated' => $updated, 'confirmed' => count( $confirmed ), 'failed' => $failed, 'stale' => $stale ), false );
 	delete_option( 'lasery_xtool_retry_at' );
-	if ( 'complete' === $result && ! (int) get_option( 'lasery_xtool_novelty_retry_at' ) ) {
-		update_option( 'lasery_xtool_novelty_retry_at', time() + 5 * MINUTE_IN_SECONDS, false );
+	if ( 'complete' === $result ) {
+		lasery_xtool_queue_novelties();
 	}
 	lasery_xtool_alert_when_stale();
 	lasery_xtool_release_import_lock();

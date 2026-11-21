@@ -28,9 +28,10 @@ for ( $i = 0; $i < 501; ++$i ) {
 		'variants' => array( array( 'id' => 2000001 + $i, 'title' => 'Default', 'price' => '10.00', 'available' => true ) ),
 	);
 }
-$mock = array( 'catalog' => $catalog, 'limited_page' => 0, 'network_page' => 0, 'requests' => array() );
+$mock = array( 'catalog' => $catalog, 'limited_page' => 0, 'network_page' => 0, 'requests' => array(), 'novelty_requests' => 0 );
 add_filter( 'lasery_xtool_pre_request', static function ( $pre, $url, $etag ) use ( &$mock, $response ) {
 	if ( false !== strpos( $url, '/collections/machine/' ) ) {
+		++$mock['novelty_requests'];
 		return $response( 200, '{"products":[]}' );
 	}
 	if ( false !== strpos( $url, '/meta.json' ) ) {
@@ -206,7 +207,9 @@ delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 // Drive each scheduled batch through the same action used by WordPress and the hosting cron.
 $mock['limited_page'] = 0;
 $mock['catalog'][250]['variants'] = $catalog[250]['variants'];
-$baseline_ok = (int) get_option( 'lasery_xtool_last_ok' );
+delete_option( 'lasery_xtool_novelty_retry_at' );
+$baseline_ok = time() - 2 * DAY_IN_SECONDS;
+update_option( 'lasery_xtool_last_ok', $baseline_ok, false );
 $missing_runs = get_post_meta( $ghost, '_lasery_missing_runs', true );
 $due_tick = static function ( $host = false ) use ( &$mock ) {
 	$mock['requests'] = array();
@@ -230,6 +233,10 @@ $due_tick();
 $check( array( 3 ) === $pages() && 'paced' === get_option( 'lasery_xtool_last_sync' )['result'] && ! get_option( 'lasery_xtool_retry_at' ), 'the last page finishes a paced sweep without another immediate sweep' );
 $check( $baseline_ok === (int) get_option( 'lasery_xtool_last_ok' ) && $missing_runs === get_post_meta( $ghost, '_lasery_missing_runs', true ), 'split sweeps never count as full absence evidence' );
 $check( wp_get_schedule( 'lasery_xtool_cron_tick' ) === 'lasery_xtool_five_minutes', 'the WordPress fallback has an independent recurring hook' );
+$check( 0 === $mock['novelty_requests'] && (int) get_option( 'lasery_xtool_novelty_retry_at' ) > time(), 'the paced sweep queues novelties separately' );
+update_option( 'lasery_xtool_novelty_retry_at', time() - 1, false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( 1 === $mock['novelty_requests'] && ! get_option( 'lasery_xtool_novelty_retry_at' ), 'recent paced coverage also allows a novelty check when the last full walk is old' );
 
 $mock['network_page'] = 1;
 delete_option( 'lasery_xtool_last_rate_limit' );
