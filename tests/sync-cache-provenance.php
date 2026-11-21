@@ -96,4 +96,41 @@ $run();
 $state = get_option( LASERY_XTOOL_STATE );
 $check( '' === $state['pages'][1]['etag'] && '' === $state['pages'][2]['etag'], 'duplicates are safe even on the first catalog walk without a prior cache' );
 
+$mock['catalog'][1] = $filler;
+$run();
+$last_full = get_option( 'lasery_xtool_last_ok' );
+$mock['catalog'][0]['variants'][0]['price'] = '42.00';
+$mock['limited_page'] = 2;
+$run();
+$proof = get_option( LASERY_XTOOL_STATE )['pages'][1]['etag'];
+$check( '' !== $proof && $proof !== $mock['requests'][1] && '42.00' === $price( $posts[0] ),
+	'a saved page retains its new ETag when a later page is throttled' );
+$check( $last_full === get_option( 'lasery_xtool_last_ok' ), 'a saved partial proof does not advance full coverage' );
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$mock['limited_page'] = 0;
+$run();
+$check( ! isset( $mock['requests'][1] ) && $last_full === get_option( 'lasery_xtool_last_ok' ),
+	'the resumed tail keeps the earlier page proof and remains partial' );
+$run();
+$check( $proof === $mock['requests'][1] && '42.00' === $price( $posts[0] ),
+	'the next sweep can reuse the saved proof without downloading page one again' );
+
+$block_new_hash = static function ( $allowed, $post_id, $key, $value ) use ( $posts ) {
+	return $posts[0] === $post_id && '_lasery_source_hash' === $key && '' !== $value ? false : $allowed;
+};
+add_filter( 'update_post_metadata', $block_new_hash, 10, 4 );
+$mock['catalog'][0]['variants'][0]['price'] = '43.00';
+$run();
+remove_filter( 'update_post_metadata', $block_new_hash, 10 );
+$check( '' === get_option( LASERY_XTOOL_STATE )['pages'][1]['etag'] && '43.00' === $price( $posts[0] )
+	&& 'incomplete' === get_option( 'lasery_xtool_last_sync' )['result'], 'a failed offer hash write cannot produce a page proof' );
+$mock['catalog'][0]['variants'][0]['price'] = '42.00';
+$run();
+$check( '' === $mock['requests'][1] && '42.00' === $price( $posts[0] ),
+	'a reverting source price cannot match an obsolete hash after an interrupted write' );
+delete_post_meta( $posts[0], '_lasery_source_updated_at' );
+$run();
+$check( '' === $mock['requests'][1] && lasery_xtool_source_is_fresh( $posts[0] ),
+	'a revalidated legacy offer gets a missing timestamp back' );
+
 WP_CLI::success( 'Sync cache provenance integration test completed.' );
