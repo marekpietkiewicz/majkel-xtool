@@ -347,6 +347,10 @@ add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
     if (in_array($post_type, ['post', 'page', 'lasery_product'], true)) {
         $args['has_password'] = false;
     }
+    if ($post_type === 'post') {
+        // Article permalinks include the language from post meta.
+        $args['update_post_meta_cache'] = true;
+    }
     return $args;
 }, 10, 2);
 
@@ -367,12 +371,14 @@ add_action('wp_after_insert_post', function ($id, $post, $update, $before) {
 
 // Post archives and feeds list the articles of the interface language only.
 add_action('pre_get_posts', function ($query) {
-    if (is_admin() || !$query->is_main_query() || $query->is_singular() || $query->is_search() || $query->is_comment_feed() || $query->is_post_type_archive() || !function_exists('lasery_xtool_language_meta_query')) {
+    if (is_admin() || !$query->is_main_query() || $query->is_singular() || $query->is_search() || $query->is_comment_feed() || $query->is_post_type_archive() || !function_exists('lasery_xtool_post_language')) {
         return;
     }
     if ($query->is_home() || $query->is_archive() || $query->is_feed()) {
         $query->set('has_password', false);
-        $query->set('meta_query', lasery_xtool_language_meta_query(lasery_xtool_interface_language()));
+        $args = lasery_xtool_blog_language_args(['meta_query' => $query->get('meta_query', [])]);
+        $query->set('meta_query', $args['meta_query'] ?? []);
+        $query->set('lasery_blog_polish', $args['lasery_blog_polish'] ?? false);
     }
 });
 

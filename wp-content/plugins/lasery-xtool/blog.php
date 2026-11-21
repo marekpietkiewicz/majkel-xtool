@@ -27,24 +27,24 @@ function lasery_xtool_post_translations( $post_id, $published_only = true ) {
 		return $cache[ $key ];
 	}
 	$args = array(
-			'post_type'      => 'post',
-			'post_status'    => $published_only ? 'publish' : array( 'publish', 'future', 'draft', 'pending', 'private', 'trash' ),
-			'meta_key'       => '_lasery_translation_of',
-			'meta_value'     => $original,
-			'fields'         => 'ids',
-			'posts_per_page' => 20,
-			'no_found_rows'  => true,
+			'post_type'              => 'post',
+			'post_status'            => $published_only ? 'publish' : array( 'publish', 'future', 'draft', 'pending', 'private', 'trash' ),
+			'meta_key'               => '_lasery_translation_of',
+			'meta_value'             => $original,
+			'posts_per_page'         => 20,
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
 		);
 	if ( $published_only ) {
 		$args['has_password'] = false;
 	}
-	$ids = get_posts( $args );
+	$posts = get_posts( $args );
 	$translations = array();
 	if ( ! $published_only || ( 'publish' === get_post_status( $original ) && '' === get_post_field( 'post_password', $original ) ) ) {
 		$translations[ lasery_xtool_post_language( $original ) ] = $original;
 	}
-	foreach ( $ids as $id ) {
-		$translations[ lasery_xtool_post_language( $id ) ] = $id;
+	foreach ( $posts as $post ) {
+		$translations[ lasery_xtool_post_language( $post->ID ) ] = $post->ID;
 	}
 	$cache[ $key ] = $translations;
 	return $translations;
@@ -54,15 +54,6 @@ function lasery_xtool_post_translations( $post_id, $published_only = true ) {
 function lasery_xtool_language_taken( $post_id, $language ) {
 	$translations = lasery_xtool_post_translations( $post_id, false );
 	return isset( $translations[ $language ] ) && (int) $translations[ $language ] !== (int) $post_id;
-}
-
-/** Limit a post query to one language. */
-function lasery_xtool_language_meta_query( $language ) {
-	$query = array( array( 'key' => '_lasery_language', 'value' => $language ) );
-	if ( 'pl' === $language ) {
-		$query = array( 'relation' => 'OR', $query[0], array( 'key' => '_lasery_language', 'compare' => 'NOT EXISTS' ) );
-	}
-	return $query;
 }
 
 // Post URLs carry their language, so the interface always matches the article.
