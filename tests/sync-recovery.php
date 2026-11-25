@@ -301,6 +301,46 @@ $check( array( 1 ) === $pages() && (int) get_option( LASERY_XTOOL_OFFERS_PAUSE )
 delete_option( LASERY_XTOOL_OFFERS_PAUSE );
 $mock['limited_page'] = 0;
 
+$url = add_query_arg( array( 'limit' => 250, 'page' => 1 ), LASERY_XTOOL_SOURCE_URL . '/products.json' );
+$now = time();
+update_option( 'lasery_xtool_last_sync', array( 'time' => $now - 3 * HOUR_IN_SECONDS, 'result' => 'paused', 'page' => 1 ), false );
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now - 3 * HOUR_IN_SECONDS, 'path' => '/products.json', 'page' => 1, 'retry_after' => 60, 'attempts' => 5 ), false );
+$mock['limited_page'] = 1;
+$limited = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, time() + MINUTE_IN_SECONDS );
+$rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
+$check( is_wp_error( $limited ) && 6 === $rate_limit['attempts'] && (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) >= time() + 159 * MINUTE_IN_SECONDS, 'a repeated 429 keeps its streak beyond two hours and increases the cooldown' );
+
+$mock['limited_page'] = 0;
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+$body = wp_json_encode( array( 'products' => array_slice( $mock['catalog'], 0, 250 ) ) );
+$etag = '"' . md5( $body ) . '"';
+$confirmed = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, time() + MINUTE_IN_SECONDS, $etag );
+$rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
+$check( 304 === wp_remote_retrieve_response_code( $confirmed ) && 0 === $rate_limit['attempts'], 'a 304 from the same page clears its persistent 429 streak' );
+
+$now = time();
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 1, 'retry_after' => 60, 'attempts' => 6 ), false );
+$other_page_url = add_query_arg( array( 'limit' => 250, 'page' => 2 ), LASERY_XTOOL_SOURCE_URL . '/products.json' );
+$other_page = lasery_xtool_source_get( $other_page_url, LASERY_XTOOL_MAX_BYTES, time() + MINUTE_IN_SECONDS );
+$rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
+$check( 200 === wp_remote_retrieve_response_code( $other_page ) && 6 === $rate_limit['attempts'] && 1 === $rate_limit['page'], 'a successful response from another page does not clear the blocked page streak' );
+
+$now = time();
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => '/products.json', 'page' => 1, 'retry_after' => 60, 'attempts' => 6 ), false );
+$mock['limited_page'] = 0;
+$recovered = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, time() + MINUTE_IN_SECONDS );
+$rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
+$check( 200 === wp_remote_retrieve_response_code( $recovered ) && 0 === $rate_limit['attempts'], 'a fresh response from the same page clears its persistent 429 streak' );
+
+$now = time();
+update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now - 3 * HOUR_IN_SECONDS, 'path' => '/products.json', 'page' => 1, 'retry_after' => 60, 'attempts' => 9 ), false );
+$mock['limited_page'] = 1;
+$limited = lasery_xtool_source_get( $url, LASERY_XTOOL_MAX_BYTES, time() + MINUTE_IN_SECONDS );
+$rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
+$check( is_wp_error( $limited ) && 10 === $rate_limit['attempts'] && (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ) >= time() + DAY_IN_SECONDS - 5, 'a persistent source outage backs off to at most one retry per day' );
+$mock['limited_page'] = 0;
+delete_option( LASERY_XTOOL_OFFERS_PAUSE );
+
 $mock['network_page'] = 1;
 delete_option( 'lasery_xtool_last_rate_limit' );
 $due_tick();
