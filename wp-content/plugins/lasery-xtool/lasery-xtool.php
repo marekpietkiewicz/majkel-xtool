@@ -639,27 +639,40 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
 		return new WP_Error( 'network' );
 	}
 	$response = lasery_xtool_request( $url, $max_bytes, $etag );
-	if ( is_wp_error( $response ) || 429 !== wp_remote_retrieve_response_code( $response ) ) {
+	if ( is_wp_error( $response ) ) {
+		return $response;
+	}
+	$code = wp_remote_retrieve_response_code( $response );
+	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+	$page = isset( $query['page'] ) ? (int) $query['page'] : 0;
+	if ( in_array( $code, array( 200, 304 ), true ) ) {
+		$last = get_option( 'lasery_xtool_last_rate_limit' );
+		if ( $path === ( $last['path'] ?? '' ) && $page === (int) ( $last['page'] ?? 0 ) && ! empty( $last['attempts'] ) ) {
+			$last['attempts'] = 0;
+			update_option( 'lasery_xtool_last_rate_limit', $last, false );
+		}
+	}
+	if ( 429 !== $code ) {
 		return $response;
 	}
 
 	$now = time();
 	$delay = lasery_xtool_retry_delay( $response );
-	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
-	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-	$page = isset( $query['page'] ) ? (int) $query['page'] : 0;
 	$last = get_option( 'lasery_xtool_last_rate_limit' );
 	$attempts = 1;
-	if ( $path === ( $last['path'] ?? '' ) && (int) ( $last['time'] ?? 0 ) > $now - 2 * HOUR_IN_SECONDS ) {
+	if ( $path === ( $last['path'] ?? '' ) ) {
 		$last_page = (int) ( $last['page'] ?? 0 );
 		$last_run = get_option( 'lasery_xtool_last_sync' );
 		$still_limited = '/products.json' === $path && 'paused' === ( $last_run['result'] ?? '' ) &&
 			$last_page === (int) ( $last_run['page'] ?? 0 ) && (int) ( $last['attempts'] ?? 0 ) >= 3;
 		if ( $page === $last_page || $still_limited ) {
-			$attempts = min( 5, max( 1, (int) ( $last['attempts'] ?? 1 ) ) + 1 );
+			$attempts = min( 10, max( 0, (int) ( $last['attempts'] ?? 0 ) ) );
+			$attempts = min( 10, $attempts + 1 );
 		}
 	}
-	$cooldown = max( $delay, min( HOUR_IN_SECONDS, 5 * MINUTE_IN_SECONDS * 2 ** ( $attempts - 1 ) ) );
+	$backoff = min( DAY_IN_SECONDS, 5 * MINUTE_IN_SECONDS * 2 ** ( $attempts - 1 ) );
+	$cooldown = max( $delay, $backoff );
 	update_option( LASERY_XTOOL_OFFERS_PAUSE, $now + $cooldown, false );
 	update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => $path, 'page' => $page, 'retry_after' => $delay, 'attempts' => $attempts ), false );
 	return new WP_Error( 'paused' );
