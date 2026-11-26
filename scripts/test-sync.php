@@ -59,7 +59,23 @@ $conditional_requests = static function () use ( &$mock ) {
 	return count( array_filter( $mock['requests'], static function ( $r ) { return false !== strpos( $r[0], '/products.json' ) && false === strpos( $r[0], '/collections/' ) && $r[1]; } ) );
 };
 $mails = array();
-add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$mails ) { $mails[] = $atts; return true; }, 10, 2 );
+$notice_sender = '';
+$notice_sender_hook_active = false;
+$failed_notice_sender_hook_active = false;
+add_filter( 'pre_wp_mail', function ( $null, $atts ) use ( &$mails, &$notice_sender, &$notice_sender_hook_active, &$failed_notice_sender_hook_active ) {
+	$mails[] = $atts;
+	if ( isset( $atts['subject'] ) && 'laseryxtool.pl: oferty nie są aktualizowane' === $atts['subject'] ) {
+		$notice_sender_hook_active = false !== has_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
+		$mailer = (object) array( 'From' => 'alerts@laseryxtool.pl', 'Sender' => '' );
+		do_action( 'phpmailer_init', $mailer );
+		$notice_sender = $mailer->Sender;
+	}
+	if ( isset( $atts['subject'] ) && 'laseryxtool.pl: test failed notification' === $atts['subject'] ) {
+		$failed_notice_sender_hook_active = false !== has_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
+		return false;
+	}
+	return true;
+}, 10, 2 );
 
 // ---- fixtures: 40 real products on the site, 3 of them absent from the source ----------------
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) { wp_delete_post( $id, true ); }
@@ -170,6 +186,8 @@ update_option( 'lasery_xtool_last_ok', time() - 7 * HOUR_IN_SECONDS, false );
 update_post_meta( reset( $by_source ), '_lasery_source_updated_at', (string) ( time() - 7 * HOUR_IN_SECONDS ) );
 $run();
 $check( 'alert mailed once', 1 === count( $mails ), (string) count( $mails ) );
+$check( 'stale alert aligns its envelope sender with the visible sender', $notice_sender_hook_active && 'alerts@laseryxtool.pl' === $notice_sender, 'sender=' . $notice_sender );
+$check( 'temporary sender hook is removed after the alert', false === has_action( 'phpmailer_init', 'lasery_xtool_mail_sender' ) );
 $run();
 $check( 'not mailed again within a day', 1 === count( $mails ) );
 $mock['mode'] = 'ok';
@@ -275,6 +293,9 @@ $run();
 $retry_novelties();
 $check( 'none imported', 0 === count( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'meta_key' => LASERY_XTOOL_SOURCE_ID, 'meta_value' => '777000000100', 'fields' => 'ids' ) ) ) );
 $check( 'one mail for the same set, not one per run', 1 === count( $mails ), count( $mails ) . ' mails' );
+$mail_failed = lasery_xtool_notify( 'laseryxtool.pl: test failed notification', 'Test message.' );
+$check( 'a failed notification preserves the wp_mail result', false === $mail_failed );
+$check( 'temporary sender hook is removed after a failed notification', $failed_notice_sender_hook_active && false === has_action( 'phpmailer_init', 'lasery_xtool_mail_sender' ) );
 
 WP_CLI::log( "\n$pass passed, $fail failed" );
 if ( $fail ) {
