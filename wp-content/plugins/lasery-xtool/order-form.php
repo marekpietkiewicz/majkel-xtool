@@ -702,8 +702,8 @@ function lasery_xtool_order_release_ip( $reservation ) {
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $reservation[0], (string) $reservation[1] ) );
 }
 
-/** Bounces of order messages go to the sender address. */
-function lasery_xtool_order_mail_sender( $mailer ) {
+/** Align the envelope sender with the visible sender for SPF/DMARC and bounce handling. */
+function lasery_xtool_mail_sender( $mailer ) {
 	if ( is_email( $mailer->From ) ) {
 		$mailer->Sender = $mailer->From;
 	}
@@ -768,12 +768,12 @@ function lasery_xtool_order_mail( $to, $email, $headers ) {
 		$mailer->AltBody = lasery_xtool_email_text( $email );
 	};
 	$headers[] = 'Content-Type: text/html; charset=UTF-8';
-	add_action( 'phpmailer_init', 'lasery_xtool_order_mail_sender' );
+	add_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
 	add_action( 'phpmailer_init', $alternative );
 	try {
 		return wp_mail( $to, $email['title'], lasery_xtool_email_html( $email ), $headers );
 	} finally {
-		remove_action( 'phpmailer_init', 'lasery_xtool_order_mail_sender' );
+		remove_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
 		remove_action( 'phpmailer_init', $alternative );
 	}
 }

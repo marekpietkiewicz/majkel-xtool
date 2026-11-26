@@ -18,7 +18,12 @@ const LASERY_XTOOL_NOVELTY_SKIP   = '/Refurbished|Kiosk|Gift|Payment|mBot|mBuild
 
 /** Mail the site's administrator (the address in Settings → General). */
 function lasery_xtool_notify( $subject, $body ) {
-	return wp_mail( get_option( 'admin_email' ), $subject, $body );
+	add_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
+	try {
+		return wp_mail( get_option( 'admin_email' ), $subject, $body );
+	} finally {
+		remove_action( 'phpmailer_init', 'lasery_xtool_mail_sender' );
+	}
 }
 
 /**
