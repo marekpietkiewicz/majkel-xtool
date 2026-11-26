@@ -898,6 +898,10 @@ function lasery_xtool_run_due_retries( $hosting_cron = false ) {
 		lasery_xtool_alert_when_stale();
 		lasery_xtool_release_import_lock();
 	}
+	if ( lasery_xtool_recovery_alert_due() && lasery_xtool_lock_import() ) {
+		lasery_xtool_alert_when_recovered();
+		lasery_xtool_release_import_lock();
+	}
 	// Keep image batches out of the same PHP run as an xTool catalogue request.
 	if ( true === $hosting_cron && ! $offers_due && ! $novelties_due && lasery_xtool_host_images_due() ) {
 		do_action( 'lasery_xtool_sync_images', true );
@@ -909,20 +913,23 @@ function lasery_xtool_stale_alert_due() {
 		time() - (int) get_option( 'lasery_xtool_alert_attempt' ) >= 30 * MINUTE_IN_SECONDS;
 }
 
-/** Count public source products with no recent confirmation, excluding those known to be absent. */
-function lasery_xtool_stale_offer_count() {
+/** Count public source products without recent confirmation, optionally including those marked absent. */
+function lasery_xtool_stale_offer_count( $include_known_absent = false ) {
 	global $wpdb;
+	$missing_clause = $include_known_absent ? '' : "AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key = '_lasery_missing_runs' AND m.meta_value IS NOT NULL)";
 	return (int) $wpdb->get_var(
 		$wpdb->prepare(
 			"SELECT COUNT(*) FROM {$wpdb->posts} p
 			WHERE p.post_type = %s AND p.post_status = 'publish'
 			AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} s WHERE s.post_id = p.ID AND s.meta_key = %s
 				AND CHAR_LENGTH(s.meta_value) BETWEEN 1 AND 20 AND LEFT(s.meta_value, 1) <> '0' AND s.meta_value NOT REGEXP '[^0-9]')
-			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key = '_lasery_missing_runs' AND m.meta_value IS NOT NULL)
-			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} u WHERE u.post_id = p.ID AND u.meta_key = '_lasery_source_updated_at' AND CAST(u.meta_value AS SIGNED) > %d)",
+			{$missing_clause}
+			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} u WHERE u.post_id = p.ID AND u.meta_key = '_lasery_source_updated_at'
+				AND u.meta_value REGEXP '^[0-9]+$' AND CAST(u.meta_value AS SIGNED) > %d AND CAST(u.meta_value AS SIGNED) <= %d)",
 			LASERY_XTOOL_PRODUCT_TYPE,
 			LASERY_XTOOL_SOURCE_ID,
-			time() - 6 * HOUR_IN_SECONDS
+			time() - 6 * HOUR_IN_SECONDS,
+			time()
 		)
 	);
 }
@@ -954,6 +961,42 @@ function lasery_xtool_alert_when_stale() {
 		)
 	) ) {
 		update_option( 'lasery_xtool_last_alert', time(), false );
+	}
+}
+
+/** Acknowledge one stale-offer alert after a full, fresh catalogue sweep. */
+function lasery_xtool_recovery_alert_due() {
+	foreach ( array( 'lasery_xtool_last_alert', 'lasery_xtool_last_recovery_alert', 'lasery_xtool_recovery_attempt', 'lasery_xtool_last_sync', 'notoptions' ) as $option ) {
+		wp_cache_delete( $option, 'options' );
+	}
+	$last_alert = (int) get_option( 'lasery_xtool_last_alert' );
+	$last_sync  = get_option( 'lasery_xtool_last_sync' );
+	$result     = is_array( $last_sync ) && isset( $last_sync['result'] ) && is_string( $last_sync['result'] ) ? $last_sync['result'] : '';
+	$sync_time  = is_array( $last_sync ) && isset( $last_sync['time'] ) && is_numeric( $last_sync['time'] ) ? (int) $last_sync['time'] : 0;
+	return $last_alert > (int) get_option( 'lasery_xtool_last_recovery_alert' ) &&
+		in_array( $result, array( 'complete', 'paced' ), true ) &&
+		$sync_time > $last_alert &&
+		time() - (int) get_option( 'lasery_xtool_recovery_attempt' ) >= 30 * MINUTE_IN_SECONDS;
+}
+
+function lasery_xtool_alert_when_recovered() {
+	if ( ! lasery_xtool_recovery_alert_due() || lasery_xtool_stale_offer_count( true ) ) {
+		return;
+	}
+	$last_alert = (int) get_option( 'lasery_xtool_last_alert' );
+	$last_sync  = get_option( 'lasery_xtool_last_sync' );
+	$sync_time  = is_array( $last_sync ) && isset( $last_sync['time'] ) && is_numeric( $last_sync['time'] ) ? (int) $last_sync['time'] : 0;
+	update_option( 'lasery_xtool_recovery_attempt', time(), false );
+	if ( lasery_xtool_notify(
+		'laseryxtool.pl: oferty znów aktualne',
+		sprintf(
+			"Pełna synchronizacja katalogu xTool zakończyła się %s. Wszystkie opublikowane produkty powiązane z katalogiem xTool mają potwierdzone dane ofert; bez potwierdzenia od co najmniej 6 godzin: 0. Poprzedni alert wysłano %s.",
+			wp_date( 'Y-m-d H:i T', $sync_time ),
+			wp_date( 'Y-m-d H:i T', $last_alert )
+		)
+	) ) {
+		update_option( 'lasery_xtool_last_recovery_alert', $last_alert, false );
+		delete_option( 'lasery_xtool_recovery_attempt' );
 	}
 }
 
@@ -1386,6 +1429,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 			lasery_xtool_queue_novelties();
 		}
 		lasery_xtool_alert_when_stale();
+		lasery_xtool_alert_when_recovered();
 		lasery_xtool_release_import_lock();
 		return;
 	}
@@ -1417,6 +1461,7 @@ function lasery_xtool_sync_existing( $force = false ) {
 		lasery_xtool_queue_novelties();
 	}
 	lasery_xtool_alert_when_stale();
+	lasery_xtool_alert_when_recovered();
 	lasery_xtool_release_import_lock();
 }
 

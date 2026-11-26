@@ -40,6 +40,8 @@ Katalog pobiera systemowy `curl` (bez niego wtyczka używa HTTP API WordPressa).
 
 Na produkcji jeden wpis crona Hostido co pięć minut sprawdza oferty, nowości i alerty. Gdy nie ma należnego pobrania katalogu ani nowości, może sprawdzić kolejkę zdjęć. Po przebiegu zdjęć cron Hostido czeka co najmniej 20 minut na kolejną partię. WP-Cron ma własne cykliczne zdarzenie `lasery_xtool_cron_tick` dla ofert, nowości i alertów oraz osobne zdarzenia dla zdjęć. Przy ruchu na stronie realizuje zadania także w razie przerwy crona Hostido. Panel **Produkty xTool → Import** pokazuje ostatnie uruchomienie crona hostingu i najwcześniejszy termin ponowienia ofert. W bazie `lasery_xtool_resume_page` przechowuje stronę wznowienia, `lasery_xtool_last_rate_limit` ostatnie 429 z identyfikatorem strony i opóźnieniem, a `lasery_xtool_host_cron_at` czas ostatniego wywołania przez Hostido. Alert opiera się na wieku poszczególnych opublikowanych ofert. Cron sprawdza go także w czasie wstrzymania źródła. Po nieudanym wysłaniu poczta jest ponawiana najwcześniej po 30 minutach, a po udanym przekazaniu do systemu pocztowego najwcześniej po dobie.
 
+Po wcześniejszym alercie o nieaktualnych ofertach pełny przebieg, który potwierdzi aktualność wszystkich opublikowanych produktów xTool, wysyła jednorazowe powiadomienie o odzyskaniu. Częściowy przebieg go nie wywoła, a nieudaną wysyłkę ponowi po 30 minutach.
+
 Wpis crona Hostido zastępuje wcześniejsze osobne wpisy `lasery_xtool_sync_existing` i `lasery_xtool_sync_images`. Zachowaj pozostałe zadania w crontabie.
 
 ```cron
