@@ -7,7 +7,7 @@ if ( '1' !== getenv( 'LASERY_XTOOL_INTEGRATION_TEST' ) || ! defined( 'WP_CLI' ) 
 foreach ( get_posts( array( 'post_type' => LASERY_XTOOL_PRODUCT_TYPE, 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) ) as $id ) {
 	wp_delete_post( $id, true );
 }
-foreach ( array( LASERY_XTOOL_STATE, LASERY_XTOOL_OFFERS_PAUSE, 'lasery_xtool_last_sync', 'lasery_xtool_last_ok', 'lasery_xtool_resume_page', 'lasery_xtool_retry_at', 'lasery_xtool_novelty_retry_at', 'lasery_xtool_novelty_retry_failures', 'lasery_xtool_import_lock', 'lasery_xtool_last_alert', 'lasery_xtool_alert_attempt', 'lasery_xtool_last_rate_limit', 'lasery_xtool_paced_started_at', 'lasery_xtool_host_cron_at' ) as $option ) {
+foreach ( array( LASERY_XTOOL_STATE, LASERY_XTOOL_OFFERS_PAUSE, 'lasery_xtool_last_sync', 'lasery_xtool_last_ok', 'lasery_xtool_resume_page', 'lasery_xtool_retry_at', 'lasery_xtool_novelty_retry_at', 'lasery_xtool_novelty_retry_failures', 'lasery_xtool_import_lock', 'lasery_xtool_last_alert', 'lasery_xtool_last_recovery_alert', 'lasery_xtool_recovery_attempt', 'lasery_xtool_alert_attempt', 'lasery_xtool_last_rate_limit', 'lasery_xtool_paced_started_at', 'lasery_xtool_host_cron_at' ) as $option ) {
 	delete_option( $option );
 }
 
@@ -190,6 +190,85 @@ update_post_meta( $post_ids[250], '_lasery_source_updated_at', (string) ( time()
 lasery_xtool_alert_when_stale();
 lasery_xtool_alert_when_stale();
 $check( 1 === count( $mails ) && false !== strpos( $mails[0]['message'], '6 godzin: 1.' ), 'a genuinely stale offer triggers one accurate alert' );
+
+foreach ( $post_ids as $id ) {
+	update_post_meta( $id, '_lasery_source_updated_at', (string) time() );
+}
+$mail_count = count( $mails );
+delete_option( 'lasery_xtool_last_alert' );
+delete_option( 'lasery_xtool_last_recovery_alert' );
+delete_option( 'lasery_xtool_recovery_attempt' );
+update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'complete' ), false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a fresh catalogue without a preceding stale alert does not send a recovery mail' );
+
+$incident = time() - 60;
+update_option( 'lasery_xtool_last_alert', $incident, false );
+update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'partial' ), false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'partial catalogue progress does not send a recovery mail' );
+
+update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'complete' ), false );
+update_post_meta( $post_ids[250], '_lasery_source_updated_at', (string) ( time() - 7 * HOUR_IN_SECONDS ) );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a complete walk with any stale active offer does not send a recovery mail' );
+update_post_meta( $post_ids[250], '_lasery_source_updated_at', (string) time() );
+
+wp_update_post( array( 'ID' => $ghost, 'post_status' => 'publish' ) );
+update_post_meta( $ghost, '_lasery_missing_runs', '1' );
+update_post_meta( $ghost, '_lasery_source_updated_at', (string) ( time() - 7 * HOUR_IN_SECONDS ) );
+$check( 0 === lasery_xtool_stale_offer_count() && 1 === lasery_xtool_stale_offer_count( true ), 'the normal stale-offer count excludes known absence while recovery checks every published product' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a stale published product marked absent still blocks a recovery mail until it is unpublished' );
+wp_update_post( array( 'ID' => $ghost, 'post_status' => 'draft' ) );
+
+update_post_meta( $post_ids[250], '_lasery_source_updated_at', (string) ( time() + HOUR_IN_SECONDS ) );
+$check( 1 === lasery_xtool_stale_offer_count( true ), 'a future offer timestamp is not treated as fresh' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a future-dated offer blocks a recovery mail' );
+update_post_meta( $post_ids[250], '_lasery_source_updated_at', 'not-a-timestamp' );
+$check( 1 === lasery_xtool_stale_offer_count( true ), 'a malformed offer timestamp is not treated as fresh' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a malformed offer timestamp blocks a recovery mail' );
+update_post_meta( $post_ids[250], '_lasery_source_updated_at', (string) time() );
+
+update_option( 'lasery_xtool_last_alert', time(), false );
+update_option( 'lasery_xtool_last_sync', array( 'time' => time() - 1, 'result' => 'complete' ), false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count === count( $mails ), 'a successful sync from before the stale alert does not send a recovery mail' );
+
+$incident = time() - 60;
+update_option( 'lasery_xtool_last_alert', $incident, false );
+update_option( 'lasery_xtool_last_sync', array( 'time' => time(), 'result' => 'complete' ), false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count + 1 === count( $mails ) && 'laseryxtool.pl: oferty znów aktualne' === $mails[ $mail_count ]['subject']
+	&& (string) $incident === (string) get_option( 'lasery_xtool_last_recovery_alert' ), 'a full fresh catalogue sends one recovery mail and acknowledges the stale alert' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count + 1 === count( $mails ), 'the recovery mail is not repeated on later cron ticks' );
+
+$incident = max( time() - 60, (int) get_option( 'lasery_xtool_last_recovery_alert' ) + 1 );
+update_option( 'lasery_xtool_last_alert', $incident, false );
+update_option( 'lasery_xtool_last_sync', array( 'time' => $incident + 1, 'result' => 'paced' ), false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $mail_count + 2 === count( $mails ) && (string) $incident === (string) get_option( 'lasery_xtool_last_recovery_alert' ), 'a fully paced fresh sweep also sends one recovery mail' );
+
+$incident = max( time() - 60, (int) get_option( 'lasery_xtool_last_recovery_alert' ) + 1 );
+update_option( 'lasery_xtool_last_alert', $incident, false );
+update_option( 'lasery_xtool_last_sync', array( 'time' => $incident + 1, 'result' => 'complete' ), false );
+update_option( 'lasery_xtool_recovery_attempt', time() - 31 * MINUTE_IN_SECONDS, false );
+$reject_recovery = static function ( $result, $mail ) {
+	return isset( $mail['subject'] ) && 'laseryxtool.pl: oferty znów aktualne' === $mail['subject'] ? false : $result;
+};
+add_filter( 'pre_wp_mail', $reject_recovery, 30, 2 );
+do_action( 'lasery_xtool_cron_tick' );
+$failed_recovery_count = count( $mails );
+$check( $mail_count + 3 === $failed_recovery_count && (string) $incident !== (string) get_option( 'lasery_xtool_last_recovery_alert' ), 'a failed recovery mail does not acknowledge the outage' );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $failed_recovery_count === count( $mails ), 'a failed recovery mail is throttled between retry attempts' );
+remove_filter( 'pre_wp_mail', $reject_recovery, 30 );
+update_option( 'lasery_xtool_recovery_attempt', time() - 31 * MINUTE_IN_SECONDS, false );
+do_action( 'lasery_xtool_cron_tick' );
+$check( $failed_recovery_count + 1 === count( $mails ) && (string) $incident === (string) get_option( 'lasery_xtool_last_recovery_alert' ), 'a failed recovery mail is retried after the cooldown' );
 
 $header = gmdate( 'D, d M Y H:i:s', time() + 2 * HOUR_IN_SECONDS ) . ' GMT';
 lasery_xtool_pause_fetching( $response( 429, '', array( 'retry-after' => $header ) ) );
