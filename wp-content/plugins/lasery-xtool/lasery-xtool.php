@@ -232,6 +232,21 @@ function lasery_xtool_import_page() {
 		<?php $last_limit = get_option( 'lasery_xtool_last_rate_limit' ); ?>
 		<?php if ( isset( $last_limit['time'], $last_limit['path'], $last_limit['page'] ) ) : ?>
 			<p><?php echo esc_html( 'Ostatnie HTTP 429: ' . wp_date( 'Y-m-d H:i T', (int) $last_limit['time'] ) . ', ' . $last_limit['path'] . ( $last_limit['page'] ? ', strona ' . (int) $last_limit['page'] : '' ) . '.' ); ?></p>
+			<?php
+			$limit_details = array();
+			if ( isset( $last_limit['response_class'] ) && is_string( $last_limit['response_class'] ) ) {
+				$limit_details[] = 'Klasa odpowiedzi: ' . $last_limit['response_class'];
+			}
+			if ( isset( $last_limit['request_id'] ) && is_string( $last_limit['request_id'] ) ) {
+				$limit_details[] = 'ID żądania: ' . $last_limit['request_id'];
+			}
+			if ( isset( $last_limit['cf_ray'] ) && is_string( $last_limit['cf_ray'] ) ) {
+				$limit_details[] = 'CF-Ray: ' . $last_limit['cf_ray'];
+			}
+			?>
+			<?php if ( $limit_details ) : ?>
+				<p><?php echo esc_html( implode( '; ', $limit_details ) . '.' ); ?></p>
+			<?php endif; ?>
 		<?php endif; ?>
 		<?php if ( lasery_xtool_fetching_paused() || lasery_xtool_fetching_paused( LASERY_XTOOL_IMAGES_PAUSE ) ) : ?>
 			<p><?php echo esc_html( 'Pobieranie wstrzymano po odpowiedzi 429 do ' . wp_date( 'Y-m-d H:i T', max( (int) get_option( LASERY_XTOOL_OFFERS_PAUSE ), (int) get_option( LASERY_XTOOL_IMAGES_PAUSE ) ) ) . '; potem wznowi się samo. Wcześniej wznów je tylko, gdy ograniczenie źródła na pewno minęło.' ); ?></p>
@@ -548,6 +563,35 @@ function lasery_xtool_retry_delay( $response ) {
 	return false === $date ? 5 * MINUTE_IN_SECONDS : max( 0, $date - time() );
 }
 
+/** Retain only allowlisted diagnostics from a 429; never store its body or arbitrary headers. */
+function lasery_xtool_rate_limit_diagnostics( $response ) {
+	$diagnostics = array();
+	$request_id  = wp_remote_retrieve_header( $response, 'x-request-id' );
+	if ( ! is_string( $request_id ) || '' === $request_id ) {
+		$request_id = wp_remote_retrieve_header( $response, 'x-shopify-request-id' );
+	}
+	$identifiers = array(
+		'request_id' => $request_id,
+		'cf_ray'     => wp_remote_retrieve_header( $response, 'cf-ray' ),
+	);
+	foreach ( $identifiers as $key => $value ) {
+		if ( is_string( $value ) && preg_match( '/^[A-Za-z0-9._:-]{1,128}$/D', $value ) ) {
+			$diagnostics[ $key ] = $value;
+		}
+	}
+	$body = strtolower( substr( wp_remote_retrieve_body( $response ), 0, 4096 ) );
+	if ( false !== strpos( $body, 'local_rate_limited' ) ) {
+		$diagnostics['response_class'] = 'local_rate_limited';
+	} elseif ( false !== strpos( $body, 'captcha' ) || false !== strpos( $body, 'challenge-platform' ) || false !== strpos( $body, 'checking your browser' ) ) {
+		$diagnostics['response_class'] = 'challenge';
+	} elseif ( false !== strpos( $body, 'throttl' ) || false !== strpos( $body, 'too many requests' ) || false !== strpos( $body, 'rate limit' ) ) {
+		$diagnostics['response_class'] = 'throttled';
+	} else {
+		$diagnostics['response_class'] = 'unclassified';
+	}
+	return $diagnostics;
+}
+
 function lasery_xtool_pause_fetching( $response, $option = LASERY_XTOOL_OFFERS_PAUSE ) {
 	update_option( $option, time() + max( 5 * MINUTE_IN_SECONDS, lasery_xtool_retry_delay( $response ) ), false );
 }
@@ -674,7 +718,14 @@ function lasery_xtool_source_get( $url, $max_bytes, $deadline, $etag = '' ) {
 	$backoff = min( DAY_IN_SECONDS, 5 * MINUTE_IN_SECONDS * 2 ** ( $attempts - 1 ) );
 	$cooldown = max( $delay, $backoff );
 	update_option( LASERY_XTOOL_OFFERS_PAUSE, $now + $cooldown, false );
-	update_option( 'lasery_xtool_last_rate_limit', array( 'time' => $now, 'path' => $path, 'page' => $page, 'retry_after' => $delay, 'attempts' => $attempts ), false );
+	update_option(
+		'lasery_xtool_last_rate_limit',
+		array_merge(
+			array( 'time' => $now, 'path' => $path, 'page' => $page, 'retry_after' => $delay, 'attempts' => $attempts ),
+			lasery_xtool_rate_limit_diagnostics( $response )
+		),
+		false
+	);
 	return new WP_Error( 'paused' );
 }
 
