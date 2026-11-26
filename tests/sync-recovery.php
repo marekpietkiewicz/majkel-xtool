@@ -44,7 +44,7 @@ add_filter( 'lasery_xtool_pre_request', static function ( $pre, $url, $etag ) us
 		return new WP_Error( 'offline', 'Simulated network failure.' );
 	}
 	if ( $page === $mock['limited_page'] ) {
-		return $response( 429, '', array( 'retry-after' => '600' ) );
+		return $response( 429, 'local_rate_limited', array( 'retry-after' => '600', 'x-request-id' => 'request-123', 'cf-ray' => 'ray-456-ORD' ) );
 	}
 	$body = wp_json_encode( array( 'products' => array_slice( $mock['catalog'], ( $page - 1 ) * 250, 250 ) ) );
 	$tag  = '"' . md5( $body ) . '"';
@@ -88,6 +88,9 @@ $first = get_option( 'lasery_xtool_last_sync' );
 $check( 'paused' === $first['result'] && array( 1, 2 ) === $pages(), '429 stops the run at page two' );
 $rate_limit = get_option( 'lasery_xtool_last_rate_limit' );
 $check( '/products.json' === $rate_limit['path'] && 2 === $rate_limit['page'] && 600 === $rate_limit['retry_after'], 'the last rate limit records its endpoint, page and requested delay' );
+$check( 'local_rate_limited' === $rate_limit['response_class'] && 'request-123' === $rate_limit['request_id'] && 'ray-456-ORD' === $rate_limit['cf_ray'] && ! isset( $rate_limit['body'] ), '429 diagnostics retain the response class and safe provider IDs, not the body' );
+$unsafe_diagnostics = lasery_xtool_rate_limit_diagnostics( $response( 429, 'denied', array( 'x-request-id' => "request-123\r\nBcc: someone@example.com", 'cf-ray' => 'ray/unsafe' ) ) );
+$check( 'unclassified' === $unsafe_diagnostics['response_class'] && ! isset( $unsafe_diagnostics['request_id'], $unsafe_diagnostics['cf_ray'] ), 'invalid provider diagnostic headers are discarded' );
 $check( '70.00' === get_post_meta( $post_ids[0], '_lasery_source_variants', true )[0]['price'] && (int) get_post_meta( $post_ids[0], '_lasery_source_updated_at', true ) > time() - 60, 'a verified earlier page updates its offer despite the later 429' );
 $check( (int) get_post_meta( $post_ids[250], '_lasery_source_updated_at', true ) < time() - 300, 'an unvisited page is not falsely confirmed' );
 $check( 2 === (int) get_option( 'lasery_xtool_resume_page' ) && (int) get_option( 'lasery_xtool_retry_at' ) >= time() + 590, 'the interrupted page and bounded retry time are saved' );
